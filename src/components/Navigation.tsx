@@ -9,10 +9,10 @@ const Navigation = () => {
 
   const navItems = [
     { name: 'Home', path: '/' },
-    { name: 'Listings', path: '/listings' },
+    { name: 'Coliving Deals', path: '/coliving-deals' },
     { name: 'Blog', path: '/blog' },
     { name: 'About', path: '/about' },
-    { name: 'Contact', path: '/contact' },
+    { name: 'Exclusive Deals', path: '/exclusive-deals' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -43,9 +43,11 @@ const Navigation = () => {
                 {item.name}
               </Link>
             ))}
-            <button className="adventure-button">
-              Get Matched
-            </button>
+            <Link to="/exclusive-deals">
+              <button className="adventure-button">
+                Get Matched
+              </button>
+            </Link>
           </div>
 
           {/* Mobile menu button */}
@@ -77,9 +79,11 @@ const Navigation = () => {
                   {item.name}
                 </Link>
               ))}
-              <button className="adventure-button w-full mt-4">
-                Get Matched
-              </button>
+              <Link to="/exclusive-deals">
+                <button className="adventure-button w-full mt-4">
+                  Get Matched
+                </button>
+              </Link>
             </div>
           </div>
         )}
