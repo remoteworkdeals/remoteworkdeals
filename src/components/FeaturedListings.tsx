@@ -3,8 +3,11 @@ import { MapPin, Users, Wifi, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const FeaturedListings = () => {
+  const navigate = useNavigate();
+
   const listings = [
     {
       id: 1,
@@ -50,10 +53,15 @@ const FeaturedListings = () => {
     }
   ];
 
-  const handleGetCode = (listingName: string) => {
+  const handleGetCode = (listingName: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     const message = `Hi! I'm interested in getting the discount code for ${listingName}. Can you help me?`;
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
+  };
+
+  const handleCardClick = (listingId: number) => {
+    navigate(`/listing/${listingId}`);
   };
 
   return (
@@ -73,8 +81,9 @@ const FeaturedListings = () => {
           {listings.map((listing, index) => (
             <Card 
               key={listing.id} 
-              className="overflow-hidden card-shadow hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in"
+              className="overflow-hidden card-shadow hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in cursor-pointer"
               style={{ animationDelay: `${index * 0.1}s` }}
+              onClick={() => handleCardClick(listing.id)}
             >
               <div className="relative">
                 <img
@@ -134,7 +143,7 @@ const FeaturedListings = () => {
                 
                 <Button 
                   className="adventure-button w-full"
-                  onClick={() => handleGetCode(listing.name)}
+                  onClick={(e) => handleGetCode(listing.name, e)}
                 >
                   Get Discount Code
                 </Button>
@@ -144,7 +153,7 @@ const FeaturedListings = () => {
         </div>
         
         <div className="text-center mt-12">
-          <Button className="outline-button">
+          <Button className="outline-button" onClick={() => navigate('/listings')}>
             View All Listings
           </Button>
         </div>

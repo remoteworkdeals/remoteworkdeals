@@ -1,5 +1,5 @@
 
-import { Search, MapPin, Calendar } from 'lucide-react';
+import { Search, MapPin, Calendar, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -12,13 +12,13 @@ const Hero = () => {
           {/* Content */}
           <div className="animate-fade-in">
             <h1 className="text-5xl lg:text-6xl font-serif font-bold leading-tight mb-6">
-              Work Remotely.
+              Find Your Perfect
               <br />
-              <span className="text-adventure-orange">Live Adventurously.</span>
+              <span className="text-adventure-orange">Co-living Match.</span>
             </h1>
             <p className="text-xl lg:text-2xl mb-8 text-gray-100 leading-relaxed">
-              Discover exclusive co-living deals around the world. Join thousands of digital nomads 
-              saving up to 40% on premium co-living spaces.
+              Join our trusted community of digital nomads. Get personalized co-living 
+              recommendations, exclusive discounts up to 40%, and real reviews from fellow nomads.
             </p>
             
             {/* Search Bar */}
@@ -43,17 +43,18 @@ const Hero = () => {
                 </Select>
                 <Button className="adventure-button h-12 text-lg">
                   <Search className="mr-2" size={20} />
-                  Search Deals
+                  Get Matched
                 </Button>
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
               <Button className="adventure-button text-lg">
-                Browse All Listings
+                <Users className="mr-2" size={20} />
+                Join Our Community
               </Button>
               <Button variant="outline" className="outline-button text-lg bg-transparent border-white text-white hover:bg-white hover:text-forest-green">
-                How It Works
+                Browse All Listings
               </Button>
             </div>
           </div>

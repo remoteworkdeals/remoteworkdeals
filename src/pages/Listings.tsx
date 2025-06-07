@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { MapPin, Users, Wifi, Star, Filter } from 'lucide-react';
 
 const Listings = () => {
+  const navigate = useNavigate();
   const [selectedLocation, setSelectedLocation] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
 
@@ -71,10 +73,15 @@ const Listings = () => {
     }
   ];
 
-  const handleGetCode = (listingName: string) => {
+  const handleGetCode = (listingName: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     const message = `Hi! I'm interested in getting the discount code for ${listingName}. Can you help me?`;
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
+  };
+
+  const handleCardClick = (listingId: number) => {
+    navigate(`/listing/${listingId}`);
   };
 
   const filteredListings = listings.filter(listing => {
@@ -150,8 +157,9 @@ const Listings = () => {
             {filteredListings.map((listing, index) => (
               <Card 
                 key={listing.id} 
-                className="overflow-hidden card-shadow hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in"
+                className="overflow-hidden card-shadow hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in cursor-pointer"
                 style={{ animationDelay: `${index * 0.1}s` }}
+                onClick={() => handleCardClick(listing.id)}
               >
                 <div className="relative">
                   <img
@@ -211,7 +219,7 @@ const Listings = () => {
                   
                   <Button 
                     className="adventure-button w-full"
-                    onClick={() => handleGetCode(listing.name)}
+                    onClick={(e) => handleGetCode(listing.name, e)}
                   >
                     Get Discount Code
                   </Button>
