@@ -69,7 +69,7 @@ const FeaturedListings = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-serif font-bold text-forest-green mb-6">
-            Featured Deals
+            Featured Coliving Deals
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Hand-picked co-livings with the best discounts. These spots are popular 
@@ -153,8 +153,8 @@ const FeaturedListings = () => {
         </div>
         
         <div className="text-center mt-12">
-          <Button className="outline-button" onClick={() => navigate('/listings')}>
-            View All Listings
+          <Button className="outline-button" onClick={() => navigate('/coliving-deals')}>
+            View All Deals
           </Button>
         </div>
       </div>

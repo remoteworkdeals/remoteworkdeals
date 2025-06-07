@@ -5,11 +5,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, User, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Blog = () => {
+  const navigate = useNavigate();
+
   const blogPosts = [
     {
       id: 1,
+      slug: "digital-nomad-visas-2024",
       title: "The Ultimate Guide to Digital Nomad Visas in 2024",
       excerpt: "Everything you need to know about the latest digital nomad visa programs around the world.",
       category: "Guides",
@@ -21,6 +25,7 @@ const Blog = () => {
     },
     {
       id: 2,
+      slug: "coliving-vs-hotels",
       title: "Co-living vs Hotels: Why Nomads Are Making the Switch",
       excerpt: "Discover why co-living spaces are becoming the preferred choice for long-term travelers.",
       category: "Nomad Lifestyle",
@@ -32,6 +37,7 @@ const Blog = () => {
     },
     {
       id: 3,
+      slug: "bali-coliving-review",
       title: "Bali's Best Co-living Spaces: A Complete Review",
       excerpt: "We visited 12 co-living spaces in Bali. Here are our honest reviews and recommendations.",
       category: "Reviews",
@@ -40,10 +46,26 @@ const Blog = () => {
       date: "March 10, 2024",
       image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=600&q=80",
       featured: false
+    },
+    {
+      id: 4,
+      slug: "remote-work-productivity-tips",
+      title: "10 Productivity Hacks for Remote Workers in Co-livings",
+      excerpt: "Maximize your productivity while living and working in shared spaces around the world.",
+      category: "Guides",
+      author: "David Kim",
+      readTime: "6 min read",
+      date: "March 8, 2024",
+      image: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=600&q=80",
+      featured: false
     }
   ];
 
   const categories = ["All", "Guides", "Nomad Lifestyle", "Reviews", "Destination Spotlights"];
+
+  const handlePostClick = (slug: string) => {
+    navigate(`/blog/${slug}`);
+  };
 
   return (
     <div className="min-h-screen">
@@ -106,16 +128,19 @@ const Blog = () => {
                   </div>
                   <span>{post.date}</span>
                 </div>
-                <Button className="adventure-button">
+                <Button 
+                  className="adventure-button"
+                  onClick={() => handlePostClick(post.slug)}
+                >
                   Read Full Article
                   <ArrowRight size={20} className="ml-2" />
                 </Button>
               </div>
-              <div>
+              <div className="cursor-pointer" onClick={() => handlePostClick(post.slug)}>
                 <img
                   src={post.image}
                   alt={post.title}
-                  className="rounded-2xl shadow-lg"
+                  className="rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
                 />
               </div>
             </div>
@@ -134,8 +159,9 @@ const Blog = () => {
             {blogPosts.filter(post => !post.featured).map((post, index) => (
               <Card 
                 key={post.id} 
-                className="overflow-hidden card-shadow hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in"
+                className="overflow-hidden card-shadow hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in cursor-pointer"
                 style={{ animationDelay: `${index * 0.1}s` }}
+                onClick={() => handlePostClick(post.slug)}
               >
                 <div className="relative">
                   <img
