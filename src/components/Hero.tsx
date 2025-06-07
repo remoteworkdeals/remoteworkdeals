@@ -15,13 +15,12 @@ const Hero = () => {
           {/* Content */}
           <div className="animate-fade-in">
             <h1 className="text-5xl lg:text-6xl font-serif font-bold leading-tight mb-6">
-              The Global Platform for
+              Find Your Perfect
               <br />
-              <span className="text-adventure-orange">Coliving Deals & Community.</span>
+              <span className="text-adventure-orange">Co-living Match.</span>
             </h1>
             <p className="text-xl lg:text-2xl mb-8 text-gray-100 leading-relaxed">
-              Join 2,800+ nomads discovering trusted coliving spaces with exclusive discounts up to 60%. 
-              Get personalized recommendations from our community and access insider deals.
+              Join our trusted community of digital nomads. Get personalized co-living recommendations, exclusive discounts up to 60%, and real reviews from fellow nomads.
             </p>
             
             {/* Trust Indicators */}
