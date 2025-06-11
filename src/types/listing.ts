@@ -10,10 +10,15 @@ export interface Listing {
   original_price: number;
   discounted_price: number | null;
   discount_percentage: number | null;
+  discount_code_url: string | null;
   capacity: number | null;
   rooms: number | null;
   amenities: string[] | null;
   images: string[] | null;
+  featured_image: string | null;
+  is_seasonal: boolean | null;
+  seasonal_start_date: string | null;
+  seasonal_end_date: string | null;
   rating: number | null;
   review_count: number | null;
   created_by: string | null;

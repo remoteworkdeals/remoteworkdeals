@@ -1,68 +1,40 @@
 
-import { MapPin, Users, Wifi, Star } from 'lucide-react';
+import { MapPin, Users, Wifi, Star, ExternalLink } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { useListings } from '@/hooks/useListings';
 
 const FeaturedListings = () => {
   const navigate = useNavigate();
+  const { listings, loading } = useListings();
 
-  const listings = [
-    {
-      id: 1,
-      name: "Tropical Beach House",
-      location: "Canggu, Bali",
-      type: "Co-living",
-      originalPrice: 1200,
-      discountedPrice: 720,
-      discount: 40,
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80",
-      rating: 4.8,
-      reviews: 127,
-      capacity: 12,
-      amenities: ["High-speed WiFi", "Pool", "Coworking Space"]
-    },
-    {
-      id: 2,
-      name: "Mountain Retreat",
-      location: "Medellín, Colombia",
-      type: "Retreat",
-      originalPrice: 800,
-      discountedPrice: 560,
-      discount: 30,
-      image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=600&q=80",
-      rating: 4.9,
-      reviews: 89,
-      capacity: 8,
-      amenities: ["Mountain View", "Yoga Studio", "Organic Garden"]
-    },
-    {
-      id: 3,
-      name: "Urban Nomad Hub",
-      location: "Lisbon, Portugal",
-      type: "Co-living",
-      originalPrice: 950,
-      discountedPrice: 665,
-      discount: 30,
-      image: "https://images.unsplash.com/photo-1721322800607-8c38375eef04?auto=format&fit=crop&w=600&q=80",
-      rating: 4.7,
-      reviews: 203,
-      capacity: 15,
-      amenities: ["City Center", "Rooftop Terrace", "24/7 Access"]
-    }
-  ];
+  // Get first 3 listings with highest discount percentage for featured section
+  const featuredListings = listings
+    .filter(listing => listing.discount_percentage && listing.discount_percentage > 0)
+    .sort((a, b) => (b.discount_percentage || 0) - (a.discount_percentage || 0))
+    .slice(0, 3);
 
-  const handleGetCode = (listingName: string, e: React.MouseEvent) => {
+  const handleGetCode = (listing: any, e: React.MouseEvent) => {
     e.stopPropagation();
-    const message = `Hi! I'm interested in getting the discount code for ${listingName}. Can you help me?`;
-    const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    
+    if (listing.discount_code_url) {
+      window.open(listing.discount_code_url, '_blank');
+    } else {
+      const message = `Hi! I'm interested in getting the discount code for ${listing.title}. Can you help me?`;
+      const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    }
   };
 
   const handleCardClick = (listingId: number) => {
     navigate(`/listing/${listingId}`);
   };
+
+  if (loading || featuredListings.length === 0) {
+    return null; // Don't show section if loading or no featured listings
+  }
 
   return (
     <section className="py-20 bg-gray-50">
@@ -78,78 +50,97 @@ const FeaturedListings = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {listings.map((listing, index) => (
-            <Card 
-              key={listing.id} 
-              className="overflow-hidden card-shadow hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in cursor-pointer"
-              style={{ animationDelay: `${index * 0.1}s` }}
-              onClick={() => handleCardClick(listing.id)}
-            >
-              <div className="relative">
-                <img
-                  src={listing.image}
-                  alt={listing.name}
-                  className="w-full h-64 object-cover"
-                />
-                <Badge className="absolute top-4 left-4 bg-adventure-orange text-white">
-                  -{listing.discount}%
-                </Badge>
-                <Badge className="absolute top-4 right-4 bg-forest-green text-white">
-                  {listing.type}
-                </Badge>
-              </div>
-              
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="flex items-center text-yellow-500">
-                    <Star size={16} fill="currentColor" />
-                    <span className="ml-1 text-sm font-medium text-gray-700">
-                      {listing.rating} ({listing.reviews})
-                    </span>
-                  </div>
+          {featuredListings.map((listing, index) => {
+            const displayImage = listing.featured_image || 
+              (listing.images && listing.images.length > 0 ? listing.images[0] : null) ||
+              "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80";
+            
+            const discountedPrice = listing.discounted_price || listing.original_price;
+
+            return (
+              <Card 
+                key={listing.id} 
+                className="overflow-hidden card-shadow hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in cursor-pointer"
+                style={{ animationDelay: `${index * 0.1}s` }}
+                onClick={() => handleCardClick(listing.id)}
+              >
+                <div className="relative">
+                  <img
+                    src={displayImage}
+                    alt={listing.title}
+                    className="w-full h-64 object-cover"
+                  />
+                  <Badge className="absolute top-4 left-4 bg-adventure-orange text-white">
+                    -{listing.discount_percentage}%
+                  </Badge>
+                  <Badge className="absolute top-4 right-4 bg-forest-green text-white">
+                    {listing.type}
+                  </Badge>
                 </div>
                 
-                <h3 className="text-xl font-serif font-bold text-forest-green mb-2">
-                  {listing.name}
-                </h3>
-                
-                <div className="flex items-center text-gray-600 mb-4">
-                  <MapPin size={16} className="mr-1" />
-                  <span>{listing.location}</span>
-                </div>
-                
-                <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
-                  <div className="flex items-center">
-                    <Users size={16} className="mr-1" />
-                    <span>Up to {listing.capacity}</span>
+                <CardContent className="p-6">
+                  {listing.rating && listing.review_count && (
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center text-yellow-500">
+                        <Star size={16} fill="currentColor" />
+                        <span className="ml-1 text-sm font-medium text-gray-700">
+                          {listing.rating} ({listing.review_count})
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <h3 className="text-xl font-serif font-bold text-forest-green mb-2">
+                    {listing.title}
+                  </h3>
+                  
+                  <div className="flex items-center text-gray-600 mb-4">
+                    <MapPin size={16} className="mr-1" />
+                    <span>{listing.location}</span>
                   </div>
-                  <div className="flex items-center">
-                    <Wifi size={16} className="mr-1" />
-                    <span>High-speed WiFi</span>
+                  
+                  <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
+                    {listing.capacity && (
+                      <div className="flex items-center">
+                        <Users size={16} className="mr-1" />
+                        <span>Up to {listing.capacity}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center">
+                      <Wifi size={16} className="mr-1" />
+                      <span>High-speed WiFi</span>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <span className="text-2xl font-bold text-forest-green">
-                      ${listing.discountedPrice}
-                    </span>
-                    <span className="text-lg text-gray-500 line-through ml-2">
-                      ${listing.originalPrice}
-                    </span>
-                    <div className="text-sm text-gray-600">per month</div>
+                  
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <span className="text-2xl font-bold text-forest-green">
+                        €{discountedPrice}
+                      </span>
+                      <span className="text-lg text-gray-500 line-through ml-2">
+                        €{listing.original_price}
+                      </span>
+                      <div className="text-sm text-gray-600">per month</div>
+                    </div>
                   </div>
-                </div>
-                
-                <Button 
-                  className="adventure-button w-full"
-                  onClick={(e) => handleGetCode(listing.name, e)}
-                >
-                  Get Discount Code
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+                  
+                  <Button 
+                    className="adventure-button w-full flex items-center justify-center gap-2"
+                    onClick={(e) => handleGetCode(listing, e)}
+                  >
+                    {listing.discount_code_url ? (
+                      <>
+                        Get Discount Code
+                        <ExternalLink size={16} />
+                      </>
+                    ) : (
+                      'Get Discount Code'
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
         
         <div className="text-center mt-12">

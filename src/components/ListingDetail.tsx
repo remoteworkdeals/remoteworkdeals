@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { MapPin, Users, Wifi, Star, Heart, MessageCircle, ArrowLeft } from 'lucide-react';
+import { MapPin, Users, Wifi, Star, Heart, MessageCircle, ArrowLeft, ExternalLink, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -55,9 +55,13 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
   }
 
   const handleGetCode = () => {
-    const message = `Hi! I'm interested in getting the discount code for ${listing.title} in ${listing.location}. Can you help me?`;
-    const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    if (listing.discount_code_url) {
+      window.open(listing.discount_code_url, '_blank');
+    } else {
+      const message = `Hi! I'm interested in getting the discount code for ${listing.title} in ${listing.location}. Can you help me?`;
+      const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    }
   };
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
@@ -109,7 +113,16 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
     );
   };
 
-  const images = listing.images || [];
+  // Use featured image first, then fall back to images array
+  const displayImages = [];
+  if (listing.featured_image) {
+    displayImages.push(listing.featured_image);
+  }
+  if (listing.images) {
+    displayImages.push(...listing.images.filter(img => img !== listing.featured_image));
+  }
+  
+  const images = displayImages.length > 0 ? displayImages : [];
   const amenities = listing.amenities || [];
   const discountAmount = listing.original_price - (listing.discounted_price || listing.original_price);
 
@@ -141,6 +154,12 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
             <Badge className="bg-forest-green text-white">
               {listing.type}
             </Badge>
+            {listing.is_seasonal && (
+              <Badge className="bg-blue-500 text-white">
+                <Calendar size={14} className="mr-1" />
+                Seasonal
+              </Badge>
+            )}
           </div>
           
           <h1 className="text-4xl font-serif font-bold text-forest-green mb-4">
@@ -158,6 +177,18 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
               <span className="text-sm text-gray-600">({listing.review_count || 0} reviews)</span>
             </div>
           </div>
+
+          {listing.is_seasonal && listing.seasonal_start_date && listing.seasonal_end_date && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="flex items-center text-blue-700">
+                <Calendar size={16} className="mr-2" />
+                <span className="font-medium">Seasonal Availability:</span>
+              </div>
+              <p className="text-blue-600 mt-1">
+                {new Date(listing.seasonal_start_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} - {new Date(listing.seasonal_end_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
@@ -173,19 +204,21 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
                     className="w-full h-96 object-cover rounded-xl"
                   />
                 </div>
-                <div className="grid grid-cols-4 gap-2">
-                  {images.map((image, index) => (
-                    <img
-                      key={index}
-                      src={image}
-                      alt={`${listing.title} ${index + 1}`}
-                      className={`h-20 object-cover rounded-lg cursor-pointer ${
-                        selectedImage === index ? 'ring-2 ring-adventure-orange' : 'opacity-70 hover:opacity-100'
-                      }`}
-                      onClick={() => setSelectedImage(index)}
-                    />
-                  ))}
-                </div>
+                {images.length > 1 && (
+                  <div className="grid grid-cols-4 gap-2">
+                    {images.map((image, index) => (
+                      <img
+                        key={index}
+                        src={image}
+                        alt={`${listing.title} ${index + 1}`}
+                        className={`h-20 object-cover rounded-lg cursor-pointer ${
+                          selectedImage === index ? 'ring-2 ring-adventure-orange' : 'opacity-70 hover:opacity-100'
+                        }`}
+                        onClick={() => setSelectedImage(index)}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
@@ -268,15 +301,27 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
                 </div>
                 
                 <Button 
-                  className="adventure-button w-full mb-4 text-lg py-6"
+                  className="adventure-button w-full mb-4 text-lg py-6 flex items-center justify-center gap-2"
                   onClick={handleGetCode}
                 >
-                  <MessageCircle className="mr-2" size={20} />
-                  Get Discount Code
+                  {listing.discount_code_url ? (
+                    <>
+                      <ExternalLink size={20} />
+                      Get Discount Code
+                    </>
+                  ) : (
+                    <>
+                      <MessageCircle size={20} />
+                      Get Discount Code
+                    </>
+                  )}
                 </Button>
                 
                 <div className="text-xs text-gray-500 text-center">
-                  You'll receive your discount code via WhatsApp instantly
+                  {listing.discount_code_url 
+                    ? "Click to get your discount code" 
+                    : "You'll receive your discount code via WhatsApp instantly"
+                  }
                 </div>
               </CardContent>
             </Card>

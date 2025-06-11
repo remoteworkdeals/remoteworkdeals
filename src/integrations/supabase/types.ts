@@ -17,15 +17,20 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          discount_code_url: string | null
           discount_percentage: number | null
           discounted_price: number | null
+          featured_image: string | null
           id: number
           images: string[] | null
+          is_seasonal: boolean | null
           location: string
           original_price: number
           rating: number | null
           review_count: number | null
           rooms: number | null
+          seasonal_end_date: string | null
+          seasonal_start_date: string | null
           status: Database["public"]["Enums"]["listing_status"]
           title: string
           type: Database["public"]["Enums"]["listing_type"]
@@ -38,15 +43,20 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          discount_code_url?: string | null
           discount_percentage?: number | null
           discounted_price?: number | null
+          featured_image?: string | null
           id?: number
           images?: string[] | null
+          is_seasonal?: boolean | null
           location: string
           original_price: number
           rating?: number | null
           review_count?: number | null
           rooms?: number | null
+          seasonal_end_date?: string | null
+          seasonal_start_date?: string | null
           status?: Database["public"]["Enums"]["listing_status"]
           title: string
           type?: Database["public"]["Enums"]["listing_type"]
@@ -59,15 +69,20 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          discount_code_url?: string | null
           discount_percentage?: number | null
           discounted_price?: number | null
+          featured_image?: string | null
           id?: number
           images?: string[] | null
+          is_seasonal?: boolean | null
           location?: string
           original_price?: number
           rating?: number | null
           review_count?: number | null
           rooms?: number | null
+          seasonal_end_date?: string | null
+          seasonal_start_date?: string | null
           status?: Database["public"]["Enums"]["listing_status"]
           title?: string
           type?: Database["public"]["Enums"]["listing_type"]

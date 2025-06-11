@@ -7,26 +7,32 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MapPin, Users, Wifi, Star, Filter } from 'lucide-react';
+import DateRangePicker from '@/components/DateRangePicker';
+import { MapPin, Users, Wifi, Star, Filter, ExternalLink } from 'lucide-react';
 import { useListings } from '@/hooks/useListings';
+
+interface DateRange {
+  from?: Date;
+  to?: Date;
+}
 
 const ColivingDeals = () => {
   const navigate = useNavigate();
   const { listings, loading, error } = useListings();
   const [selectedLocation, setSelectedLocation] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
-  const [selectedMonth, setSelectedMonth] = useState('all');
+  const [selectedDates, setSelectedDates] = useState<DateRange | undefined>();
 
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-
-  const handleGetCode = (listingName: string, e: React.MouseEvent) => {
+  const handleGetCode = (listing: any, e: React.MouseEvent) => {
     e.stopPropagation();
-    const message = `Hi! I'm interested in getting the discount code for ${listingName}. Can you help me?`;
-    const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    
+    if (listing.discount_code_url) {
+      window.open(listing.discount_code_url, '_blank');
+    } else {
+      const message = `Hi! I'm interested in getting the discount code for ${listing.title}. Can you help me?`;
+      const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    }
   };
 
   const handleCardClick = (listingId: number) => {
@@ -36,7 +42,19 @@ const ColivingDeals = () => {
   const filteredListings = listings.filter(listing => {
     const matchesLocation = selectedLocation === 'all' || listing.country.toLowerCase().includes(selectedLocation.toLowerCase());
     const matchesType = selectedType === 'all' || listing.type.toLowerCase() === selectedType.toLowerCase();
-    return matchesLocation && matchesType;
+    
+    let matchesDates = true;
+    if (selectedDates?.from && listing.is_seasonal && listing.seasonal_start_date && listing.seasonal_end_date) {
+      const startDate = new Date(listing.seasonal_start_date);
+      const endDate = new Date(listing.seasonal_end_date);
+      const userStartDate = selectedDates.from;
+      const userEndDate = selectedDates.to || selectedDates.from;
+      
+      // Check if user dates overlap with seasonal dates
+      matchesDates = userStartDate <= endDate && userEndDate >= startDate;
+    }
+    
+    return matchesLocation && matchesType && matchesDates;
   });
 
   // Get unique countries for the location filter
@@ -120,17 +138,12 @@ const ColivingDeals = () => {
                 </SelectContent>
               </Select>
 
-              <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue placeholder="Travel Month" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Any Month</SelectItem>
-                  {months.map((month) => (
-                    <SelectItem key={month} value={month.toLowerCase()}>{month}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <DateRangePicker
+                value={selectedDates}
+                onChange={setSelectedDates}
+                placeholder="Travel Dates"
+                className="w-full sm:w-56"
+              />
             </div>
             
             <div className="text-sm text-gray-600">
@@ -150,9 +163,9 @@ const ColivingDeals = () => {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredListings.map((listing, index) => {
-                const displayImage = listing.images && listing.images.length > 0 
-                  ? listing.images[0] 
-                  : "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80";
+                const displayImage = listing.featured_image || 
+                  (listing.images && listing.images.length > 0 ? listing.images[0] : null) ||
+                  "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80";
                 
                 const discountedPrice = listing.discounted_price || listing.original_price;
                 const hasDiscount = listing.discount_percentage && listing.discount_percentage > 0;
@@ -170,11 +183,18 @@ const ColivingDeals = () => {
                         alt={listing.title}
                         className="w-full h-64 object-cover"
                       />
-                      {hasDiscount && (
-                        <Badge className="absolute top-4 left-4 bg-adventure-orange text-white">
-                          -{listing.discount_percentage}%
-                        </Badge>
-                      )}
+                      <div className="absolute top-4 left-4 flex gap-2">
+                        {hasDiscount && (
+                          <Badge className="bg-adventure-orange text-white">
+                            -{listing.discount_percentage}%
+                          </Badge>
+                        )}
+                        {listing.is_seasonal && (
+                          <Badge className="bg-blue-500 text-white">
+                            Seasonal
+                          </Badge>
+                        )}
+                      </div>
                       <Badge className="absolute top-4 right-4 bg-forest-green text-white">
                         {listing.type}
                       </Badge>
@@ -200,6 +220,12 @@ const ColivingDeals = () => {
                         <MapPin size={16} className="mr-1" />
                         <span>{listing.location}</span>
                       </div>
+
+                      {listing.is_seasonal && listing.seasonal_start_date && listing.seasonal_end_date && (
+                        <div className="text-sm text-blue-600 mb-3">
+                          Available: {new Date(listing.seasonal_start_date).toLocaleDateString()} - {new Date(listing.seasonal_end_date).toLocaleDateString()}
+                        </div>
+                      )}
                       
                       <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
                         {listing.capacity && (
@@ -229,10 +255,17 @@ const ColivingDeals = () => {
                       </div>
                       
                       <Button 
-                        className="adventure-button w-full"
-                        onClick={(e) => handleGetCode(listing.title, e)}
+                        className="adventure-button w-full flex items-center justify-center gap-2"
+                        onClick={(e) => handleGetCode(listing, e)}
                       >
-                        Get Discount Code
+                        {listing.discount_code_url ? (
+                          <>
+                            Get Discount Code
+                            <ExternalLink size={16} />
+                          </>
+                        ) : (
+                          'Get Discount Code'
+                        )}
                       </Button>
                     </CardContent>
                   </Card>
