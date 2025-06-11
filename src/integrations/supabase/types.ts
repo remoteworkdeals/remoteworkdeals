@@ -9,7 +9,149 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      listings: {
+        Row: {
+          amenities: string[] | null
+          capacity: number | null
+          country: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          discount_percentage: number | null
+          discounted_price: number | null
+          id: number
+          images: string[] | null
+          location: string
+          original_price: number
+          rating: number | null
+          review_count: number | null
+          rooms: number | null
+          status: Database["public"]["Enums"]["listing_status"]
+          title: string
+          type: Database["public"]["Enums"]["listing_type"]
+          updated_at: string
+        }
+        Insert: {
+          amenities?: string[] | null
+          capacity?: number | null
+          country: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_percentage?: number | null
+          discounted_price?: number | null
+          id?: number
+          images?: string[] | null
+          location: string
+          original_price: number
+          rating?: number | null
+          review_count?: number | null
+          rooms?: number | null
+          status?: Database["public"]["Enums"]["listing_status"]
+          title: string
+          type?: Database["public"]["Enums"]["listing_type"]
+          updated_at?: string
+        }
+        Update: {
+          amenities?: string[] | null
+          capacity?: number | null
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_percentage?: number | null
+          discounted_price?: number | null
+          id?: number
+          images?: string[] | null
+          location?: string
+          original_price?: number
+          rating?: number | null
+          review_count?: number | null
+          rooms?: number | null
+          status?: Database["public"]["Enums"]["listing_status"]
+          title?: string
+          type?: Database["public"]["Enums"]["listing_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          created_at: string
+          facilities_rating: number | null
+          id: string
+          listing_id: number
+          price_rating: number | null
+          review_text: string | null
+          reviewer_name: string | null
+          social_rating: number | null
+          surroundings_rating: number | null
+          user_id: string
+          work_rating: number | null
+        }
+        Insert: {
+          created_at?: string
+          facilities_rating?: number | null
+          id?: string
+          listing_id: number
+          price_rating?: number | null
+          review_text?: string | null
+          reviewer_name?: string | null
+          social_rating?: number | null
+          surroundings_rating?: number | null
+          user_id: string
+          work_rating?: number | null
+        }
+        Update: {
+          created_at?: string
+          facilities_rating?: number | null
+          id?: string
+          listing_id?: number
+          price_rating?: number | null
+          review_text?: string | null
+          reviewer_name?: string | null
+          social_rating?: number | null
+          surroundings_rating?: number | null
+          user_id?: string
+          work_rating?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +160,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      listing_status: "active" | "inactive" | "pending"
+      listing_type: "coliving" | "coworking" | "apartment" | "house"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +276,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      listing_status: ["active", "inactive", "pending"],
+      listing_type: ["coliving", "coworking", "apartment", "house"],
+    },
   },
 } as const

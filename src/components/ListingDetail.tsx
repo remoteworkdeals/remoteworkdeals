@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useNavigate } from 'react-router-dom';
+import { useListingData } from '@/hooks/useListingData';
 
 interface ListingDetailProps {
   listingId: number;
@@ -26,57 +27,54 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
     price: 5
   });
 
-  // Mock data - in real app this would come from API
-  const listing = {
-    id: listingId,
-    name: "Tropical Beach House",
-    location: "Canggu, Bali",
-    country: "Indonesia",
-    type: "Co-living",
-    originalPrice: 1200,
-    discountedPrice: 720,
-    discount: 40,
-    images: [
-      "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80",
-      "https://images.unsplash.com/photo-1721322800607-8c38375eef04?auto=format&fit=crop&w=800&q=80"
-    ],
-    rating: 4.8,
-    reviews: 127,
-    capacity: 12,
-    rooms: 6,
-    description: "Experience the ultimate digital nomad lifestyle in our beautiful beachfront co-living space. Located just 5 minutes from Canggu's famous surf breaks, this tropical paradise offers the perfect blend of work and play. Our community of like-minded professionals creates an inspiring environment for productivity and connection.",
-    amenities: ["High-speed WiFi (100+ Mbps)", "Infinity Pool", "Coworking Space", "Surfboard Storage", "Yoga Deck", "Communal Kitchen", "Laundry Service", "24/7 Security"],
-    ratings: {
-      social: 4.7,
-      work: 4.9,
-      surroundings: 4.8,
-      facilities: 4.6,
-      price: 4.5
-    }
-  };
+  const { listing, reviews, loading, error, averageRatings, submitReview } = useListingData(listingId);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-adventure-orange mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading listing...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !listing) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Listing Not Found</h2>
+          <p className="text-gray-600 mb-6">{error || 'The listing you\'re looking for doesn\'t exist.'}</p>
+          <Button onClick={() => navigate('/coliving-deals')} className="adventure-button">
+            Browse All Listings
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const handleGetCode = () => {
-    const message = `Hi! I'm interested in getting the discount code for ${listing.name} in ${listing.location}. Can you help me?`;
+    const message = `Hi! I'm interested in getting the discount code for ${listing.title} in ${listing.location}. Can you help me?`;
     const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
-  const handleReviewSubmit = (e: React.FormEvent) => {
+  const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Review submitted:', reviewData);
-    // Here you would send the review to your backend
-    alert('Thank you for your review!');
-    setReviewData({
-      name: '',
-      review: '',
-      social: 5,
-      work: 5,
-      surroundings: 5,
-      facilities: 5,
-      price: 5
-    });
+    const success = await submitReview(reviewData);
+    
+    if (success) {
+      setReviewData({
+        name: '',
+        review: '',
+        social: 5,
+        work: 5,
+        surroundings: 5,
+        facilities: 5,
+        price: 5
+      });
+    }
   };
 
   const renderStars = (rating: number) => {
@@ -111,6 +109,10 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
     );
   };
 
+  const images = listing.images || [];
+  const amenities = listing.amenities || [];
+  const discountAmount = listing.original_price - (listing.discounted_price || listing.original_price);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Back Button */}
@@ -131,16 +133,18 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
-            <Badge className="bg-adventure-orange text-white">
-              -{listing.discount}%
-            </Badge>
+            {listing.discount_percentage && (
+              <Badge className="bg-adventure-orange text-white">
+                -{listing.discount_percentage}%
+              </Badge>
+            )}
             <Badge className="bg-forest-green text-white">
               {listing.type}
             </Badge>
           </div>
           
           <h1 className="text-4xl font-serif font-bold text-forest-green mb-4">
-            {listing.name}
+            {listing.title}
           </h1>
           
           <div className="flex items-center justify-between mb-6">
@@ -150,8 +154,8 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
             </div>
             
             <div className="flex items-center gap-4">
-              {renderStars(listing.rating)}
-              <span className="text-sm text-gray-600">({listing.reviews} reviews)</span>
+              {renderStars(listing.rating || 0)}
+              <span className="text-sm text-gray-600">({listing.review_count || 0} reviews)</span>
             </div>
           </div>
         </div>
@@ -160,28 +164,30 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
           {/* Left Column - Images and Details */}
           <div className="lg:col-span-2">
             {/* Image Gallery */}
-            <div className="mb-8">
-              <div className="mb-4">
-                <img
-                  src={listing.images[selectedImage]}
-                  alt={listing.name}
-                  className="w-full h-96 object-cover rounded-xl"
-                />
-              </div>
-              <div className="grid grid-cols-4 gap-2">
-                {listing.images.map((image, index) => (
+            {images.length > 0 && (
+              <div className="mb-8">
+                <div className="mb-4">
                   <img
-                    key={index}
-                    src={image}
-                    alt={`${listing.name} ${index + 1}`}
-                    className={`h-20 object-cover rounded-lg cursor-pointer ${
-                      selectedImage === index ? 'ring-2 ring-adventure-orange' : 'opacity-70 hover:opacity-100'
-                    }`}
-                    onClick={() => setSelectedImage(index)}
+                    src={images[selectedImage]}
+                    alt={listing.title}
+                    className="w-full h-96 object-cover rounded-xl"
                   />
-                ))}
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {images.map((image, index) => (
+                    <img
+                      key={index}
+                      src={image}
+                      alt={`${listing.title} ${index + 1}`}
+                      className={`h-20 object-cover rounded-lg cursor-pointer ${
+                        selectedImage === index ? 'ring-2 ring-adventure-orange' : 'opacity-70 hover:opacity-100'
+                      }`}
+                      onClick={() => setSelectedImage(index)}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Description */}
             <div className="mb-8">
@@ -189,46 +195,52 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
               <p className="text-gray-600 leading-relaxed mb-6">{listing.description}</p>
               
               <div className="grid md:grid-cols-3 gap-4 mb-6">
-                <div className="flex items-center">
-                  <Users size={20} className="mr-2 text-adventure-orange" />
-                  <span>Up to {listing.capacity} nomads</span>
-                </div>
-                <div className="flex items-center">
-                  <Heart size={20} className="mr-2 text-adventure-orange" />
-                  <span>{listing.rooms} bedrooms</span>
-                </div>
+                {listing.capacity && (
+                  <div className="flex items-center">
+                    <Users size={20} className="mr-2 text-adventure-orange" />
+                    <span>Up to {listing.capacity} nomads</span>
+                  </div>
+                )}
+                {listing.rooms && (
+                  <div className="flex items-center">
+                    <Heart size={20} className="mr-2 text-adventure-orange" />
+                    <span>{listing.rooms} bedrooms</span>
+                  </div>
+                )}
                 <div className="flex items-center">
                   <Wifi size={20} className="mr-2 text-adventure-orange" />
-                  <span>100+ Mbps WiFi</span>
+                  <span>High-speed WiFi</span>
                 </div>
               </div>
             </div>
 
             {/* Amenities */}
-            <div className="mb-8">
-              <h3 className="text-2xl font-serif font-bold text-forest-green mb-4">What's included</h3>
-              <div className="grid md:grid-cols-2 gap-2">
-                {listing.amenities.map((amenity, index) => (
-                  <div key={index} className="flex items-center py-2">
-                    <div className="w-2 h-2 bg-adventure-orange rounded-full mr-3" />
-                    <span className="text-gray-600">{amenity}</span>
-                  </div>
-                ))}
+            {amenities.length > 0 && (
+              <div className="mb-8">
+                <h3 className="text-2xl font-serif font-bold text-forest-green mb-4">What's included</h3>
+                <div className="grid md:grid-cols-2 gap-2">
+                  {amenities.map((amenity, index) => (
+                    <div key={index} className="flex items-center py-2">
+                      <div className="w-2 h-2 bg-adventure-orange rounded-full mr-3" />
+                      <span className="text-gray-600">{amenity}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Ratings */}
             <div className="mb-8">
               <h3 className="text-2xl font-serif font-bold text-forest-green mb-6">Community Ratings</h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  {renderRatingBar('social', listing.ratings.social)}
-                  {renderRatingBar('work environment', listing.ratings.work)}
-                  {renderRatingBar('surroundings', listing.ratings.surroundings)}
+                  {renderRatingBar('social', averageRatings.social)}
+                  {renderRatingBar('work environment', averageRatings.work)}
+                  {renderRatingBar('surroundings', averageRatings.surroundings)}
                 </div>
                 <div>
-                  {renderRatingBar('facilities', listing.ratings.facilities)}
-                  {renderRatingBar('price', listing.ratings.price)}
+                  {renderRatingBar('facilities', averageRatings.facilities)}
+                  {renderRatingBar('price', averageRatings.price)}
                 </div>
               </div>
             </div>
@@ -240,15 +252,19 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
               <CardContent className="p-6">
                 <div className="text-center mb-6">
                   <div className="text-3xl font-bold text-forest-green">
-                    ${listing.discountedPrice}
-                    <span className="text-lg text-gray-500 line-through ml-2">
-                      ${listing.originalPrice}
-                    </span>
+                    ${listing.discounted_price || listing.original_price}
+                    {listing.discounted_price && (
+                      <span className="text-lg text-gray-500 line-through ml-2">
+                        ${listing.original_price}
+                      </span>
+                    )}
                   </div>
                   <div className="text-sm text-gray-600">per month</div>
-                  <div className="text-adventure-orange font-semibold mt-2">
-                    Save ${listing.originalPrice - listing.discountedPrice}!
-                  </div>
+                  {discountAmount > 0 && (
+                    <div className="text-adventure-orange font-semibold mt-2">
+                      Save ${discountAmount}!
+                    </div>
+                  )}
                 </div>
                 
                 <Button 
@@ -300,7 +316,7 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
                 <div>
                   <Label className="text-base font-semibold mb-4 block">Rate each category (1-5 stars)</Label>
                   <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
-                    {Object.keys(listing.ratings).map((category) => (
+                    {['social', 'work', 'surroundings', 'facilities', 'price'].map((category) => (
                       <div key={category} className="text-center">
                         <Label className="text-sm capitalize mb-2 block">{category}</Label>
                         <select
