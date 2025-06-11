@@ -8,83 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MapPin, Users, Wifi, Star, Filter } from 'lucide-react';
+import { useListings } from '@/hooks/useListings';
 
 const ColivingDeals = () => {
   const navigate = useNavigate();
+  const { listings, loading, error } = useListings();
   const [selectedLocation, setSelectedLocation] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
   const [selectedMonth, setSelectedMonth] = useState('all');
-
-  const listings = [
-    {
-      id: 1,
-      name: "Tropical Beach House",
-      location: "Canggu, Bali",
-      country: "Indonesia",
-      type: "Co-living",
-      fromPrice: 24,
-      priceType: "night",
-      discountType: "%",
-      discount: 40,
-      originalPrice: 40,
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80",
-      rating: 4.8,
-      reviews: 127,
-      capacity: 12,
-      minimumStay: "7 nights"
-    },
-    {
-      id: 2,
-      name: "Mountain Retreat",
-      location: "Medellín, Colombia",
-      country: "Colombia",
-      type: "Retreat",
-      fromPrice: 18,
-      priceType: "night",
-      discountType: "€",
-      discount: 200,
-      originalPrice: 25,
-      image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=600&q=80",
-      rating: 4.9,
-      reviews: 89,
-      capacity: 8,
-      minimumStay: "14 nights"
-    },
-    {
-      id: 3,
-      name: "Urban Nomad Hub",
-      location: "Lisbon, Portugal",
-      country: "Portugal",
-      type: "Co-living",
-      fromPrice: 32,
-      priceType: "night",
-      discountType: "%",
-      discount: 30,
-      originalPrice: 45,
-      image: "https://images.unsplash.com/photo-1721322800607-8c38375eef04?auto=format&fit=crop&w=600&q=80",
-      rating: 4.7,
-      reviews: 203,
-      capacity: 15,
-      minimumStay: "30 nights"
-    },
-    {
-      id: 4,
-      name: "Desert Workspace",
-      location: "Taghazout, Morocco",
-      country: "Morocco",
-      type: "Co-living",
-      fromPrice: 15,
-      priceType: "night",
-      discountType: "€",
-      discount: 150,
-      originalPrice: 20,
-      image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=600&q=80",
-      rating: 4.6,
-      reviews: 156,
-      capacity: 10,
-      minimumStay: "21 nights"
-    }
-  ];
 
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -107,6 +38,36 @@ const ColivingDeals = () => {
     const matchesType = selectedType === 'all' || listing.type.toLowerCase() === selectedType.toLowerCase();
     return matchesLocation && matchesType;
   });
+
+  // Get unique countries for the location filter
+  const uniqueCountries = Array.from(new Set(listings.map(listing => listing.country))).sort();
+
+  // Get unique types for the type filter
+  const uniqueTypes = Array.from(new Set(listings.map(listing => listing.type))).sort();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <Navigation />
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="text-lg">Loading listings...</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen">
+        <Navigation />
+        <div className="flex items-center justify-center min-h-[50vh]">
+          <div className="text-lg text-red-600">Error loading listings: {error}</div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -141,10 +102,9 @@ const ColivingDeals = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Locations</SelectItem>
-                  <SelectItem value="indonesia">Indonesia</SelectItem>
-                  <SelectItem value="colombia">Colombia</SelectItem>
-                  <SelectItem value="portugal">Portugal</SelectItem>
-                  <SelectItem value="morocco">Morocco</SelectItem>
+                  {uniqueCountries.map((country) => (
+                    <SelectItem key={country} value={country.toLowerCase()}>{country}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               
@@ -154,9 +114,9 @@ const ColivingDeals = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="co-living">Co-living</SelectItem>
-                  <SelectItem value="retreat">Retreat</SelectItem>
-                  <SelectItem value="event">Event</SelectItem>
+                  {uniqueTypes.map((type) => (
+                    <SelectItem key={type} value={type.toLowerCase()}>{type}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
 
@@ -183,78 +143,103 @@ const ColivingDeals = () => {
       {/* Listings Grid */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredListings.map((listing, index) => (
-              <Card 
-                key={listing.id} 
-                className="overflow-hidden card-shadow hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in cursor-pointer"
-                style={{ animationDelay: `${index * 0.1}s` }}
-                onClick={() => handleCardClick(listing.id)}
-              >
-                <div className="relative">
-                  <img
-                    src={listing.image}
-                    alt={listing.name}
-                    className="w-full h-64 object-cover"
-                  />
-                  <Badge className="absolute top-4 left-4 bg-adventure-orange text-white">
-                    {listing.discountType === '%' ? `-${listing.discount}%` : `-€${listing.discount}`}
-                  </Badge>
-                  <Badge className="absolute top-4 right-4 bg-forest-green text-white">
-                    {listing.type}
-                  </Badge>
-                </div>
+          {filteredListings.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-xl text-gray-600">No listings found matching your criteria.</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredListings.map((listing, index) => {
+                const displayImage = listing.images && listing.images.length > 0 
+                  ? listing.images[0] 
+                  : "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80";
                 
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="flex items-center text-yellow-500">
-                      <Star size={16} fill="currentColor" />
-                      <span className="ml-1 text-sm font-medium text-gray-700">
-                        {listing.rating} ({listing.reviews})
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <h3 className="text-xl font-serif font-bold text-forest-green mb-2">
-                    {listing.name}
-                  </h3>
-                  
-                  <div className="flex items-center text-gray-600 mb-4">
-                    <MapPin size={16} className="mr-1" />
-                    <span>{listing.location}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
-                    <div className="flex items-center">
-                      <Users size={16} className="mr-1" />
-                      <span>Up to {listing.capacity}</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Wifi size={16} className="mr-1" />
-                      <span>High-speed WiFi</span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <span className="text-2xl font-bold text-forest-green">
-                        From €{listing.fromPrice}
-                      </span>
-                      <span className="text-sm text-gray-600 ml-1">/{listing.priceType}</span>
-                      <div className="text-sm text-gray-600">Min. stay: {listing.minimumStay}</div>
-                    </div>
-                  </div>
-                  
-                  <Button 
-                    className="adventure-button w-full"
-                    onClick={(e) => handleGetCode(listing.name, e)}
+                const discountedPrice = listing.discounted_price || listing.original_price;
+                const hasDiscount = listing.discount_percentage && listing.discount_percentage > 0;
+
+                return (
+                  <Card 
+                    key={listing.id} 
+                    className="overflow-hidden card-shadow hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in cursor-pointer"
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                    onClick={() => handleCardClick(listing.id)}
                   >
-                    Get Discount Code
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                    <div className="relative">
+                      <img
+                        src={displayImage}
+                        alt={listing.title}
+                        className="w-full h-64 object-cover"
+                      />
+                      {hasDiscount && (
+                        <Badge className="absolute top-4 left-4 bg-adventure-orange text-white">
+                          -{listing.discount_percentage}%
+                        </Badge>
+                      )}
+                      <Badge className="absolute top-4 right-4 bg-forest-green text-white">
+                        {listing.type}
+                      </Badge>
+                    </div>
+                    
+                    <CardContent className="p-6">
+                      {listing.rating && listing.review_count && (
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="flex items-center text-yellow-500">
+                            <Star size={16} fill="currentColor" />
+                            <span className="ml-1 text-sm font-medium text-gray-700">
+                              {listing.rating} ({listing.review_count})
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <h3 className="text-xl font-serif font-bold text-forest-green mb-2">
+                        {listing.title}
+                      </h3>
+                      
+                      <div className="flex items-center text-gray-600 mb-4">
+                        <MapPin size={16} className="mr-1" />
+                        <span>{listing.location}</span>
+                      </div>
+                      
+                      <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
+                        {listing.capacity && (
+                          <div className="flex items-center">
+                            <Users size={16} className="mr-1" />
+                            <span>Up to {listing.capacity}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center">
+                          <Wifi size={16} className="mr-1" />
+                          <span>High-speed WiFi</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <span className="text-2xl font-bold text-forest-green">
+                            €{discountedPrice}
+                          </span>
+                          {hasDiscount && (
+                            <span className="text-lg text-gray-500 line-through ml-2">
+                              €{listing.original_price}
+                            </span>
+                          )}
+                          <div className="text-sm text-gray-600">per month</div>
+                        </div>
+                      </div>
+                      
+                      <Button 
+                        className="adventure-button w-full"
+                        onClick={(e) => handleGetCode(listing.title, e)}
+                      >
+                        Get Discount Code
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
