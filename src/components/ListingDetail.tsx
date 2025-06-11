@@ -285,17 +285,17 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
               <CardContent className="p-6">
                 <div className="text-center mb-6">
                   <div className="text-3xl font-bold text-forest-green">
-                    ${listing.discounted_price || listing.original_price}
+                    €{listing.discounted_price || listing.original_price}
                     {listing.discounted_price && (
                       <span className="text-lg text-gray-500 line-through ml-2">
-                        ${listing.original_price}
+                        €{listing.original_price}
                       </span>
                     )}
                   </div>
                   <div className="text-sm text-gray-600">per month</div>
                   {discountAmount > 0 && (
                     <div className="text-adventure-orange font-semibold mt-2">
-                      Save ${discountAmount}!
+                      Save €{discountAmount}!
                     </div>
                   )}
                 </div>
@@ -317,11 +317,16 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
                   )}
                 </Button>
                 
-                <div className="text-xs text-gray-500 text-center">
-                  {listing.discount_code_url 
-                    ? "Click to get your discount code" 
-                    : "You'll receive your discount code via WhatsApp instantly"
-                  }
+                <div className="text-sm text-gray-600 text-center bg-gray-50 p-3 rounded-lg">
+                  <p className="font-medium text-gray-700 mb-1">
+                    Receive your discount code directly in your WhatsApp inbox.
+                  </p>
+                  <p className="text-xs">
+                    {listing.discount_code_url 
+                      ? "Click to get your discount code instantly" 
+                      : "Fast response guaranteed within minutes"
+                    }
+                  </p>
                 </div>
               </CardContent>
             </Card>

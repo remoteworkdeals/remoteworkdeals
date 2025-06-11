@@ -30,6 +30,11 @@ const ColivingDeals = () => {
     }
   };
 
+  const handleMoreInfo = (listing: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/listing/${listing.id}`);
+  };
+
   const handleCardClick = (listingId: number) => {
     navigate(`/listing/${listingId}`);
   };
@@ -250,17 +255,10 @@ const ColivingDeals = () => {
                       </div>
                       
                       <Button 
-                        className="adventure-button w-full flex items-center justify-center gap-2"
-                        onClick={(e) => handleGetCode(listing, e)}
+                        className="adventure-button w-full"
+                        onClick={(e) => handleMoreInfo(listing, e)}
                       >
-                        {listing.discount_code_url ? (
-                          <>
-                            Get Discount Code
-                            <ExternalLink size={16} />
-                          </>
-                        ) : (
-                          'Get Discount Code'
-                        )}
+                        More Info
                       </Button>
                     </CardContent>
                   </Card>

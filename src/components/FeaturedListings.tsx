@@ -1,5 +1,5 @@
 
-import { MapPin, Users, Wifi, Star, ExternalLink } from 'lucide-react';
+import { MapPin, Users, Wifi, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,16 +16,9 @@ const FeaturedListings = () => {
     .sort((a, b) => (b.discount_percentage || 0) - (a.discount_percentage || 0))
     .slice(0, 3);
 
-  const handleGetCode = (listing: any, e: React.MouseEvent) => {
+  const handleMoreInfo = (listing: any, e: React.MouseEvent) => {
     e.stopPropagation();
-    
-    if (listing.discount_code_url) {
-      window.open(listing.discount_code_url, '_blank');
-    } else {
-      const message = `Hi! I'm interested in getting the discount code for ${listing.title}. Can you help me?`;
-      const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
-    }
+    navigate(`/listing/${listing.id}`);
   };
 
   const handleCardClick = (listingId: number) => {
@@ -56,6 +49,7 @@ const FeaturedListings = () => {
               "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80";
             
             const discountedPrice = listing.discounted_price || listing.original_price;
+            const hasDiscount = listing.discount_percentage && listing.discount_percentage > 0;
 
             return (
               <Card 
@@ -70,9 +64,18 @@ const FeaturedListings = () => {
                     alt={listing.title}
                     className="w-full h-64 object-cover"
                   />
-                  <Badge className="absolute top-4 left-4 bg-adventure-orange text-white">
-                    -{listing.discount_percentage}%
-                  </Badge>
+                  <div className="absolute top-4 left-4 flex gap-2">
+                    {hasDiscount && (
+                      <Badge className="bg-adventure-orange text-white">
+                        -{listing.discount_percentage}%
+                      </Badge>
+                    )}
+                    {listing.is_seasonal && (
+                      <Badge className="bg-blue-500 text-white">
+                        Seasonal
+                      </Badge>
+                    )}
+                  </div>
                   <Badge className="absolute top-4 right-4 bg-forest-green text-white">
                     {listing.type}
                   </Badge>
@@ -98,6 +101,12 @@ const FeaturedListings = () => {
                     <MapPin size={16} className="mr-1" />
                     <span>{listing.location}</span>
                   </div>
+
+                  {listing.is_seasonal && listing.seasonal_start_date && listing.seasonal_end_date && (
+                    <div className="text-sm text-blue-600 mb-3">
+                      Available: {new Date(listing.seasonal_start_date).toLocaleDateString()} - {new Date(listing.seasonal_end_date).toLocaleDateString()}
+                    </div>
+                  )}
                   
                   <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
                     {listing.capacity && (
@@ -117,25 +126,20 @@ const FeaturedListings = () => {
                       <span className="text-2xl font-bold text-forest-green">
                         €{discountedPrice}
                       </span>
-                      <span className="text-lg text-gray-500 line-through ml-2">
-                        €{listing.original_price}
-                      </span>
+                      {hasDiscount && (
+                        <span className="text-lg text-gray-500 line-through ml-2">
+                          €{listing.original_price}
+                        </span>
+                      )}
                       <div className="text-sm text-gray-600">per month</div>
                     </div>
                   </div>
                   
                   <Button 
-                    className="adventure-button w-full flex items-center justify-center gap-2"
-                    onClick={(e) => handleGetCode(listing, e)}
+                    className="adventure-button w-full"
+                    onClick={(e) => handleMoreInfo(listing, e)}
                   >
-                    {listing.discount_code_url ? (
-                      <>
-                        Get Discount Code
-                        <ExternalLink size={16} />
-                      </>
-                    ) : (
-                      'Get Discount Code'
-                    )}
+                    More Info
                   </Button>
                 </CardContent>
               </Card>
