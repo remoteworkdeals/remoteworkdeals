@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
@@ -10,11 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import DateRangePicker from '@/components/DateRangePicker';
 import { MapPin, Users, Wifi, Star, Filter, ExternalLink } from 'lucide-react';
 import { useListings } from '@/hooks/useListings';
-
-interface DateRange {
-  from?: Date;
-  to?: Date;
-}
+import type { DateRange } from 'react-day-picker';
 
 const ColivingDeals = () => {
   const navigate = useNavigate();

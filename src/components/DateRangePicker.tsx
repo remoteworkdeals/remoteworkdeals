@@ -6,11 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon } from 'lucide-react';
-
-interface DateRange {
-  from?: Date;
-  to?: Date;
-}
+import type { DateRange } from 'react-day-picker';
 
 interface DateRangePickerProps {
   value?: DateRange;
