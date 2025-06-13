@@ -22,22 +22,32 @@ export const useBlogPosts = () => {
   return useQuery({
     queryKey: ['blog-posts'],
     queryFn: async () => {
-      console.log('Fetching published blog posts...');
-      const { data, error } = await supabase
+      console.log('Fetching all blog posts from database...');
+      
+      // First, let's check what's actually in the database
+      const { data: allPosts, error: allPostsError } = await supabase
         .from('blog_posts')
         .select('*')
-        .eq('status', 'published')
         .order('created_at', { ascending: false });
       
-      if (error) {
-        console.error('Error fetching blog posts:', error);
-        throw error;
+      console.log('All posts in database:', allPosts);
+      console.log('Database query error:', allPostsError);
+      
+      if (allPostsError) {
+        console.error('Error fetching all blog posts:', allPostsError);
+        throw allPostsError;
       }
-      console.log('Successfully fetched blog posts:', data?.length || 0, 'posts');
-      return data as BlogPost[];
+      
+      // Now filter for published posts
+      const publishedPosts = allPosts?.filter(post => post.status === 'published') || [];
+      console.log('Published posts:', publishedPosts);
+      console.log('Total posts found:', allPosts?.length || 0);
+      console.log('Published posts found:', publishedPosts.length);
+      
+      return publishedPosts as BlogPost[];
     },
     staleTime: 0,
-    gcTime: 1000 * 60 * 5,
+    gcTime: 0,
     refetchOnWindowFocus: true,
     refetchOnMount: true
   });

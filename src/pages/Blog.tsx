@@ -21,6 +21,10 @@ const Blog = () => {
   const featuredPosts = blogPosts?.filter(post => post.featured) || [];
   const regularPosts = blogPosts?.filter(post => !post.featured) || [];
 
+  console.log('Blog page - Posts received:', blogPosts);
+  console.log('Blog page - Loading state:', isLoading);
+  console.log('Blog page - Error state:', error);
+
   if (isLoading) {
     return (
       <div className="min-h-screen">
@@ -41,6 +45,7 @@ const Blog = () => {
           <div className="text-center">
             <p className="text-lg text-red-600 mb-4">Error loading blog posts</p>
             <p className="text-gray-600">Please try refreshing the page</p>
+            <p className="text-sm text-gray-400 mt-2">Error: {error.message}</p>
           </div>
         </div>
         <Footer />
@@ -188,11 +193,12 @@ const Blog = () => {
             ))}
           </div>
 
-          {blogPosts?.length === 0 && (
+          {!blogPosts || blogPosts.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No blog posts found</p>
+              <p className="text-gray-500 text-lg mb-2">No published blog posts found</p>
+              <p className="text-gray-400 text-sm">Check the admin panel to make sure posts are marked as "published"</p>
             </div>
-          )}
+          ) : null}
         </div>
       </section>
 
