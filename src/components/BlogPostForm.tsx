@@ -1,8 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -10,6 +10,8 @@ import { ArrowLeft, Save, Eye } from 'lucide-react';
 import { BlogPost, useCreateBlogPost, useUpdateBlogPost } from '@/hooks/useBlogPosts';
 import { useToast } from '@/hooks/use-toast';
 import BlogImageUpload from '@/components/BlogImageUpload';
+import RichTextEditor from '@/components/RichTextEditor';
+import SEOFields from '@/components/SEOFields';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface BlogPostFormProps {
@@ -32,7 +34,8 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
     read_time: '',
     meta_title: '',
     meta_description: '',
-    tags: ''
+    focus_keyword: '',
+    canonical_url: ''
   });
 
   const { toast } = useToast();
@@ -56,7 +59,8 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
         read_time: post.read_time || '',
         meta_title: post.title,
         meta_description: post.excerpt || '',
-        tags: ''
+        focus_keyword: '',
+        canonical_url: ''
       });
     }
   }, [post]);
@@ -209,7 +213,7 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
               {post ? 'Edit Blog Post' : 'Create New Blog Post'}
             </h1>
             <p className="text-gray-600 mt-2 text-lg">
-              Fill out all fields for optimal SEO performance and reader engagement
+              Create SEO-optimized content with proper structure and metadata
             </p>
           </div>
           {post && (
@@ -244,7 +248,7 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
                   className="text-lg p-4"
                 />
                 <p className="text-sm text-gray-500">
-                  {formData.title.length}/60 characters (recommended for SEO)
+                  This will be your H1 heading on the page
                 </p>
               </div>
               
@@ -266,29 +270,32 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
 
             <div className="space-y-2">
               <Label htmlFor="excerpt" className="text-base font-semibold">Excerpt</Label>
-              <Textarea
+              <Input
                 id="excerpt"
                 value={formData.excerpt}
                 onChange={(e) => handleExcerptChange(e.target.value)}
-                rows={3}
-                placeholder="Brief, compelling description of your post (used for previews and meta description)"
+                placeholder="Brief, compelling description (used for previews)"
                 className="text-base p-4"
               />
               <p className="text-sm text-gray-500">
-                {formData.excerpt.length}/160 characters (recommended for meta description)
+                {formData.excerpt.length}/160 characters (also used as default meta description)
               </p>
             </div>
+          </CardContent>
+        </Card>
 
+        {/* Rich Text Content Editor */}
+        <Card className="shadow-lg border-0">
+          <CardHeader className="bg-gray-50">
+            <CardTitle className="text-xl text-forest-green">Content Editor</CardTitle>
+          </CardHeader>
+          <CardContent className="p-8">
             <div className="space-y-2">
-              <Label htmlFor="content" className="text-base font-semibold">Content *</Label>
-              <Textarea
-                id="content"
-                value={formData.content}
-                onChange={(e) => handleContentChange(e.target.value)}
-                rows={20}
-                placeholder="Write your engaging blog post content here..."
-                required
-                className="text-base p-4 leading-relaxed"
+              <Label className="text-base font-semibold">Content * (Markdown Supported)</Label>
+              <RichTextEditor
+                content={formData.content}
+                onChange={handleContentChange}
+                placeholder="Write your engaging blog post content here... Use ## for H2 headings, ### for H3 headings"
               />
               <p className="text-sm text-gray-500">
                 Word count: {formData.content.trim().split(/\s+/).filter(word => word.length > 0).length} | 
@@ -297,6 +304,21 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
             </div>
           </CardContent>
         </Card>
+
+        {/* SEO Optimization Fields */}
+        <SEOFields
+          metaTitle={formData.meta_title}
+          metaDescription={formData.meta_description}
+          focusKeyword={formData.focus_keyword}
+          canonicalUrl={formData.canonical_url}
+          onMetaTitleChange={(value) => setFormData(prev => ({ ...prev, meta_title: value }))}
+          onMetaDescriptionChange={(value) => setFormData(prev => ({ ...prev, meta_description: value }))}
+          onFocusKeywordChange={(value) => setFormData(prev => ({ ...prev, focus_keyword: value }))}
+          onCanonicalUrlChange={(value) => setFormData(prev => ({ ...prev, canonical_url: value }))}
+          title={formData.title}
+          content={formData.content}
+          slug={formData.slug}
+        />
 
         {/* Featured Image */}
         <Card className="shadow-lg border-0">
@@ -320,7 +342,7 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
             <CardTitle className="text-xl text-forest-green">Post Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 p-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="category" className="text-base font-semibold">Category *</Label>
                 <Select
@@ -350,18 +372,6 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
                   placeholder="Author name"
                   required
                   className="p-4"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="read_time" className="text-base font-semibold">Read Time</Label>
-                <Input
-                  id="read_time"
-                  value={formData.read_time}
-                  onChange={(e) => setFormData(prev => ({ ...prev, read_time: e.target.value }))}
-                  placeholder="Auto-calculated"
-                  disabled
-                  className="p-4 bg-gray-50"
                 />
               </div>
             </div>
