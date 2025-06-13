@@ -11,6 +11,7 @@ export interface BlogPost {
   category: string;
   author: string;
   featured_image: string | null;
+  featured_image_alt: string | null;
   featured: boolean;
   status: 'draft' | 'published';
   read_time: string | null;
@@ -92,6 +93,7 @@ export const useCreateBlogPost = () => {
         category: post.category,
         author: post.author.trim(),
         featured_image: post.featured_image?.trim() || null,
+        featured_image_alt: post.featured_image_alt?.trim() || null,
         featured: post.featured || false,
         status: post.status || 'published',
         read_time: post.read_time?.trim() || null,

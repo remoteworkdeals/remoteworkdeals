@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,10 +7,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Save, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Save, Eye } from 'lucide-react';
 import { BlogPost, useCreateBlogPost, useUpdateBlogPost } from '@/hooks/useBlogPosts';
 import { useToast } from '@/hooks/use-toast';
-import ImageUpload from '@/components/ImageUpload';
+import BlogImageUpload from '@/components/BlogImageUpload';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface BlogPostFormProps {
@@ -26,6 +27,7 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
     category: '',
     author: '',
     featured_image: '',
+    featured_image_alt: '',
     featured: false,
     status: 'published' as 'draft' | 'published', // Default to published for immediate visibility
     read_time: '',
@@ -49,6 +51,7 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
         category: post.category,
         author: post.author,
         featured_image: post.featured_image || '',
+        featured_image_alt: post.featured_image_alt || '',
         featured: post.featured,
         status: post.status,
         read_time: post.read_time || '',
@@ -100,6 +103,14 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
     }));
   };
 
+  const handleImageUpload = (url: string, alt: string) => {
+    setFormData(prev => ({
+      ...prev,
+      featured_image: url,
+      featured_image_alt: alt
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -135,6 +146,7 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
         category: formData.category,
         author: formData.author.trim(),
         featured_image: formData.featured_image.trim() || null,
+        featured_image_alt: formData.featured_image_alt.trim() || null,
         featured: formData.featured,
         status: formData.status,
         read_time: formData.read_time || estimateReadTime(formData.content)
@@ -144,11 +156,14 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
 
       if (post) {
         await updateMutation.mutateAsync({ id: post.id, ...blogPostData });
-        toast({ title: 'Blog post updated successfully!' });
+        toast({ title: 'Blog post updated successfully!', description: 'Your changes have been saved.' });
       } else {
         const result = await createMutation.mutateAsync(blogPostData);
         console.log('Created blog post result:', result);
-        toast({ title: 'Blog post created and published successfully!' });
+        toast({ 
+          title: 'Blog post created and published successfully!', 
+          description: 'Your new post is now live and visible to readers.' 
+        });
       }
       
       // Force immediate cache invalidation and refresh
@@ -168,39 +183,66 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
     }
   };
 
+  const handlePreview = () => {
+    if (formData.slug) {
+      window.open(`/blog/${formData.slug}`, '_blank');
+    } else {
+      toast({ 
+        title: 'Save first to preview', 
+        description: 'Please save the post before previewing',
+        variant: 'destructive' 
+      });
+    }
+  };
+
   const isLoading = createMutation.isPending || updateMutation.isPending;
 
   return (
-    <div className="max-w-5xl mx-auto p-8">
+    <div className="max-w-6xl mx-auto p-8">
       <div className="mb-8">
-        <Button variant="ghost" onClick={onClose} className="mb-4">
+        <Button variant="ghost" onClick={onClose} className="mb-4 hover:bg-gray-100">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Blog Management
         </Button>
-        <h1 className="text-3xl font-bold">
-          {post ? 'Edit Blog Post' : 'Create New Blog Post'}
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Fill out all fields for optimal SEO performance
-        </p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-4xl font-bold text-forest-green">
+              {post ? 'Edit Blog Post' : 'Create New Blog Post'}
+            </h1>
+            <p className="text-gray-600 mt-2 text-lg">
+              Fill out all fields for optimal SEO performance and reader engagement
+            </p>
+          </div>
+          {post && (
+            <Button 
+              variant="outline" 
+              onClick={handlePreview}
+              className="border-forest-green text-forest-green hover:bg-forest-green hover:text-white"
+            >
+              <Eye className="mr-2 h-4 w-4" />
+              Preview Post
+            </Button>
+          )}
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Basic Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
+        <Card className="shadow-lg border-0">
+          <CardHeader className="bg-gray-50">
+            <CardTitle className="text-xl text-forest-green">Basic Information</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="title">Title *</Label>
+                <Label htmlFor="title" className="text-base font-semibold">Title *</Label>
                 <Input
                   id="title"
                   value={formData.title}
                   onChange={(e) => handleTitleChange(e.target.value)}
-                  placeholder="Enter an engaging title"
+                  placeholder="Enter an engaging, SEO-friendly title"
                   required
+                  className="text-lg p-4"
                 />
                 <p className="text-sm text-gray-500">
                   {formData.title.length}/60 characters (recommended for SEO)
@@ -208,25 +250,30 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="slug">URL Slug *</Label>
+                <Label htmlFor="slug" className="text-base font-semibold">URL Slug *</Label>
                 <Input
                   id="slug"
                   value={formData.slug}
                   onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
                   placeholder="url-friendly-slug"
                   required
+                  className="p-4"
                 />
+                <p className="text-sm text-gray-500">
+                  Will be: /blog/{formData.slug}
+                </p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="excerpt">Excerpt</Label>
+              <Label htmlFor="excerpt" className="text-base font-semibold">Excerpt</Label>
               <Textarea
                 id="excerpt"
                 value={formData.excerpt}
                 onChange={(e) => handleExcerptChange(e.target.value)}
                 rows={3}
-                placeholder="Brief description of your post (used for previews and meta description)"
+                placeholder="Brief, compelling description of your post (used for previews and meta description)"
+                className="text-base p-4"
               />
               <p className="text-sm text-gray-500">
                 {formData.excerpt.length}/160 characters (recommended for meta description)
@@ -234,14 +281,15 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="content">Content *</Label>
+              <Label htmlFor="content" className="text-base font-semibold">Content *</Label>
               <Textarea
                 id="content"
                 value={formData.content}
                 onChange={(e) => handleContentChange(e.target.value)}
                 rows={20}
-                placeholder="Write your blog post content here..."
+                placeholder="Write your engaging blog post content here..."
                 required
+                className="text-base p-4 leading-relaxed"
               />
               <p className="text-sm text-gray-500">
                 Word count: {formData.content.trim().split(/\s+/).filter(word => word.length > 0).length} | 
@@ -251,68 +299,36 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
           </CardContent>
         </Card>
 
-        {/* SEO Optimization */}
-        <Card>
-          <CardHeader>
-            <CardTitle>SEO Optimization</CardTitle>
+        {/* Featured Image */}
+        <Card className="shadow-lg border-0">
+          <CardHeader className="bg-gray-50">
+            <CardTitle className="text-xl text-forest-green">Featured Image & Visual Content</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="meta_title">Meta Title</Label>
-              <Input
-                id="meta_title"
-                value={formData.meta_title}
-                onChange={(e) => setFormData(prev => ({ ...prev, meta_title: e.target.value }))}
-                placeholder="SEO optimized title for search engines"
-              />
-              <p className="text-sm text-gray-500">
-                {formData.meta_title.length}/60 characters (ideal length for Google)
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="meta_description">Meta Description</Label>
-              <Textarea
-                id="meta_description"
-                value={formData.meta_description}
-                onChange={(e) => setFormData(prev => ({ ...prev, meta_description: e.target.value }))}
-                rows={3}
-                placeholder="Description that appears in search engine results"
-              />
-              <p className="text-sm text-gray-500">
-                {formData.meta_description.length}/160 characters (optimal for search snippets)
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="tags">Tags</Label>
-              <Input
-                id="tags"
-                value={formData.tags}
-                onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
-                placeholder="tag1, tag2, tag3 (comma-separated)"
-              />
-              <p className="text-sm text-gray-500">
-                Add relevant tags to improve discoverability
-              </p>
-            </div>
+          <CardContent className="p-8">
+            <BlogImageUpload
+              onImageUploaded={handleImageUpload}
+              currentImage={formData.featured_image}
+              currentAlt={formData.featured_image_alt}
+              label="Featured Image"
+              className="w-full"
+            />
           </CardContent>
         </Card>
 
         {/* Post Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Post Details</CardTitle>
+        <Card className="shadow-lg border-0">
+          <CardHeader className="bg-gray-50">
+            <CardTitle className="text-xl text-forest-green">Post Details</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 p-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="category">Category *</Label>
+                <Label htmlFor="category" className="text-base font-semibold">Category *</Label>
                 <Select
                   value={formData.category}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="p-4">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -327,74 +343,74 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="author">Author *</Label>
+                <Label htmlFor="author" className="text-base font-semibold">Author *</Label>
                 <Input
                   id="author"
                   value={formData.author}
                   onChange={(e) => setFormData(prev => ({ ...prev, author: e.target.value }))}
                   placeholder="Author name"
                   required
+                  className="p-4"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="read_time">Read Time</Label>
+                <Label htmlFor="read_time" className="text-base font-semibold">Read Time</Label>
                 <Input
                   id="read_time"
                   value={formData.read_time}
                   onChange={(e) => setFormData(prev => ({ ...prev, read_time: e.target.value }))}
                   placeholder="Auto-calculated"
                   disabled
+                  className="p-4 bg-gray-50"
                 />
               </div>
             </div>
-
-            <ImageUpload
-              onImageUploaded={(url) => setFormData(prev => ({ ...prev, featured_image: url }))}
-              currentImage={formData.featured_image}
-              label="Featured Image"
-              className="w-full"
-            />
           </CardContent>
         </Card>
 
         {/* Publishing Options */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Publishing Options</CardTitle>
+        <Card className="shadow-lg border-0">
+          <CardHeader className="bg-gray-50">
+            <CardTitle className="text-xl text-forest-green">Publishing Options</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-8">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-6">
-                <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-8">
+                <div className="flex items-center space-x-3">
                   <Switch
                     id="featured"
                     checked={formData.featured}
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, featured: checked }))}
                   />
-                  <Label htmlFor="featured">Featured Post</Label>
+                  <Label htmlFor="featured" className="text-base font-semibold">Featured Post</Label>
+                  <span className="text-sm text-gray-500">(Will appear prominently on blog page)</span>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
+                  <Label htmlFor="status" className="text-base font-semibold">Status</Label>
                   <Select
                     value={formData.status}
                     onValueChange={(value: 'draft' | 'published') => setFormData(prev => ({ ...prev, status: value }))}
                   >
-                    <SelectTrigger className="w-32">
+                    <SelectTrigger className="w-40 p-3">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="draft">📝 Draft</SelectItem>
+                      <SelectItem value="published">🌐 Published</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
-              <Button type="submit" disabled={isLoading} className="adventure-button">
-                <Save className="mr-2 h-4 w-4" />
-                {isLoading ? 'Saving...' : (post ? 'Update Post' : 'Create Post')}
+              <Button 
+                type="submit" 
+                disabled={isLoading} 
+                className="bg-adventure-orange hover:bg-adventure-orange/90 text-white px-8 py-4 text-lg font-semibold shadow-lg"
+              >
+                <Save className="mr-2 h-5 w-5" />
+                {isLoading ? 'Saving...' : (post ? 'Update Post' : 'Create & Publish Post')}
               </Button>
             </div>
           </CardContent>
