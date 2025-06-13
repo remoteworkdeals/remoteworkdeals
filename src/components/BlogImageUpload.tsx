@@ -29,14 +29,14 @@ const BlogImageUpload = ({
   const { toast } = useToast();
 
   const compressImage = (file: File, maxWidth: number = 1200, quality: number = 0.8): Promise<File> => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       const img = document.createElement('img');
       
       if (!ctx) {
-        console.error('Could not get canvas context');
-        resolve(file); // Fallback to original file
+        console.log('Canvas context not available, using original file');
+        resolve(file);
         return;
       }
       
@@ -44,8 +44,8 @@ const BlogImageUpload = ({
         try {
           // Calculate new dimensions
           const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
-          const newWidth = img.width * ratio;
-          const newHeight = img.height * ratio;
+          const newWidth = Math.round(img.width * ratio);
+          const newHeight = Math.round(img.height * ratio);
           
           canvas.width = newWidth;
           canvas.height = newHeight;
@@ -59,21 +59,22 @@ const BlogImageUpload = ({
                 type: 'image/webp',
                 lastModified: Date.now()
               });
+              console.log(`Image compressed from ${file.size} to ${compressedFile.size} bytes`);
               resolve(compressedFile);
             } else {
-              console.error('Failed to compress image');
+              console.log('Compression failed, using original file');
               resolve(file);
             }
           }, 'image/webp', quality);
         } catch (error) {
-          console.error('Error during image compression:', error);
-          resolve(file); // Fallback to original file
+          console.log('Error during compression, using original file:', error);
+          resolve(file);
         }
       };
       
       img.onerror = () => {
-        console.error('Error loading image for compression');
-        resolve(file); // Fallback to original file
+        console.log('Error loading image, using original file');
+        resolve(file);
       };
       
       img.src = URL.createObjectURL(file);
@@ -83,12 +84,14 @@ const BlogImageUpload = ({
   const uploadImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       setUploading(true);
+      console.log('Starting image upload process...');
 
       if (!event.target.files || event.target.files.length === 0) {
         throw new Error('You must select an image to upload.');
       }
 
       const file = event.target.files[0];
+      console.log('Selected file:', file.name, 'Size:', file.size, 'Type:', file.type);
       
       // Validate file type
       if (!file.type.startsWith('image/')) {
@@ -100,11 +103,9 @@ const BlogImageUpload = ({
         throw new Error('Image size should be less than 10MB.');
       }
 
-      console.log('Starting image upload process for file:', file.name);
-
       // Compress the image
       const compressedFile = await compressImage(file);
-      console.log('Image compressed. Original size:', file.size, 'Compressed size:', compressedFile.size);
+      console.log('Image compression completed');
       
       // Generate clean filename
       const fileExt = 'webp';
@@ -113,14 +114,28 @@ const BlogImageUpload = ({
         .replace(/[^a-zA-Z0-9]/g, '-')
         .toLowerCase();
       const fileName = `${cleanName}-${Date.now()}.${fileExt}`;
-      const filePath = fileName;
+      
+      console.log('Attempting to upload to blog-images bucket with filename:', fileName);
 
-      console.log('Uploading to Supabase storage with filename:', fileName);
+      // First, let's check if the bucket exists and create it if it doesn't
+      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+      console.log('Available buckets:', buckets);
+      
+      if (bucketsError) {
+        console.error('Error listing buckets:', bucketsError);
+        throw new Error('Unable to access storage. Please check your permissions.');
+      }
+
+      const blogImagesBucket = buckets?.find(bucket => bucket.name === 'blog-images');
+      if (!blogImagesBucket) {
+        console.error('blog-images bucket not found. Available buckets:', buckets?.map(b => b.name));
+        throw new Error('Blog images storage bucket not found. Please contact administrator.');
+      }
 
       // Upload to Supabase storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('blog-images')
-        .upload(filePath, compressedFile, {
+        .upload(fileName, compressedFile, {
           cacheControl: '3600',
           upsert: false,
           contentType: 'image/webp'
@@ -136,9 +151,19 @@ const BlogImageUpload = ({
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('blog-images')
-        .getPublicUrl(filePath);
+        .getPublicUrl(fileName);
 
       console.log('Public URL generated:', publicUrl);
+
+      // Verify the URL is accessible
+      try {
+        const response = await fetch(publicUrl, { method: 'HEAD' });
+        if (!response.ok) {
+          console.warn('Image URL may not be accessible:', response.status);
+        }
+      } catch (fetchError) {
+        console.warn('Could not verify image URL accessibility:', fetchError);
+      }
 
       // Create preview
       setPreview(publicUrl);
