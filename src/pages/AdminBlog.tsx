@@ -1,18 +1,21 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, LogOut } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { BlogPost, useDeleteBlogPost } from '@/hooks/useBlogPosts';
 import BlogPostForm from '@/components/BlogPostForm';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const AdminBlog = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const { toast } = useToast();
+  const { user, signOut } = useAuth();
   const deleteMutation = useDeleteBlogPost();
 
   const { data: posts, isLoading, refetch } = useQuery({
@@ -57,6 +60,16 @@ const AdminBlog = () => {
     refetch(); // Refetch when form closes to ensure data is fresh
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({ title: 'Logged out successfully' });
+    } catch (error) {
+      console.error('Error logging out:', error);
+      toast({ title: 'Error logging out', variant: 'destructive' });
+    }
+  };
+
   if (isLoading) {
     return <div className="p-8">Loading...</div>;
   }
@@ -76,11 +89,22 @@ const AdminBlog = () => {
         <div>
           <h1 className="text-3xl font-bold">Blog Management</h1>
           <p className="text-gray-600 mt-2">Create and manage your SEO-optimized blog posts</p>
+          {user && (
+            <p className="text-sm text-gray-500 mt-1">
+              Logged in as: {user.email}
+            </p>
+          )}
         </div>
-        <Button onClick={() => setShowForm(true)} className="adventure-button">
-          <Plus className="mr-2 h-4 w-4" />
-          New Post
-        </Button>
+        <div className="flex gap-3">
+          <Button onClick={() => setShowForm(true)} className="adventure-button">
+            <Plus className="mr-2 h-4 w-4" />
+            New Post
+          </Button>
+          <Button onClick={handleLogout} variant="outline">
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6">
