@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Shield } from 'lucide-react';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -70,7 +70,13 @@ const Auth = () => {
       
       if (error) {
         console.error('Signup error:', error);
-        if (error.message.includes('User already registered')) {
+        if (error.message.includes('not approved')) {
+          toast({
+            title: 'Access Restricted',
+            description: 'This is an invite-only admin system. Please contact an administrator to get invited.',
+            variant: 'destructive',
+          });
+        } else if (error.message.includes('User already registered')) {
           toast({
             title: 'Account exists',
             description: 'An account with this email already exists. Please try logging in instead.',
@@ -106,9 +112,12 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Blog Admin Access</CardTitle>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Shield className="h-6 w-6 text-forest-green" />
+            <CardTitle className="text-2xl font-bold">Admin Access</CardTitle>
+          </div>
           <CardDescription>
-            Sign in to manage your blog content
+            Secure blog administration - Invite only
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -150,6 +159,11 @@ const Auth = () => {
             </TabsContent>
             
             <TabsContent value="signup">
+              <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <p className="text-sm text-amber-800">
+                  <strong>Invite Only:</strong> You can only create an account if your email has been pre-approved by an administrator.
+                </p>
+              </div>
               <form onSubmit={handleSignup} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-name">Full Name</Label>
@@ -166,7 +180,7 @@ const Auth = () => {
                   <Input
                     id="signup-email"
                     type="email"
-                    placeholder="Enter your email"
+                    placeholder="Enter your approved email"
                     value={signupForm.email}
                     onChange={(e) => setSignupForm({ ...signupForm, email: e.target.value })}
                     required

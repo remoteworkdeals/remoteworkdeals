@@ -3,11 +3,13 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Eye, LogOut } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, Edit, Trash2, Eye, LogOut, Settings } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { BlogPost, useDeleteBlogPost } from '@/hooks/useBlogPosts';
 import BlogPostForm from '@/components/BlogPostForm';
+import AdminManagement from '@/components/AdminManagement';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -15,7 +17,7 @@ const AdminBlog = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const { toast } = useToast();
-  const { user, signOut } = useAuth();
+  const { user, userRole, signOut } = useAuth();
   const deleteMutation = useDeleteBlogPost();
 
   const { data: posts, isLoading, refetch } = useQuery({
@@ -46,7 +48,7 @@ const AdminBlog = () => {
       try {
         await deleteMutation.mutateAsync(id);
         toast({ title: 'Blog post deleted successfully' });
-        refetch(); // Manually refetch to ensure UI updates
+        refetch();
       } catch (error) {
         console.error('Error deleting blog post:', error);
         toast({ title: 'Error deleting blog post', variant: 'destructive' });
@@ -57,7 +59,7 @@ const AdminBlog = () => {
   const handleFormClose = () => {
     setShowForm(false);
     setEditingPost(null);
-    refetch(); // Refetch when form closes to ensure data is fresh
+    refetch();
   };
 
   const handleLogout = async () => {
@@ -87,81 +89,103 @@ const AdminBlog = () => {
     <div className="max-w-6xl mx-auto p-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Blog Management</h1>
-          <p className="text-gray-600 mt-2">Create and manage your SEO-optimized blog posts</p>
+          <h1 className="text-3xl font-bold">Blog Administration</h1>
+          <p className="text-gray-600 mt-2">Manage your SEO-optimized blog posts and administrators</p>
           {user && (
-            <p className="text-sm text-gray-500 mt-1">
-              Logged in as: {user.email}
-            </p>
+            <div className="flex items-center gap-2 mt-2">
+              <p className="text-sm text-gray-500">
+                Logged in as: {user.email}
+              </p>
+              <Badge variant="default">{userRole}</Badge>
+            </div>
           )}
         </div>
-        <div className="flex gap-3">
-          <Button onClick={() => setShowForm(true)} className="adventure-button">
-            <Plus className="mr-2 h-4 w-4" />
-            New Post
-          </Button>
-          <Button onClick={handleLogout} variant="outline">
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </Button>
-        </div>
+        <Button onClick={handleLogout} variant="outline">
+          <LogOut className="mr-2 h-4 w-4" />
+          Logout
+        </Button>
       </div>
 
-      <div className="grid gap-6">
-        {posts?.map((post) => (
-          <Card key={post.id}>
-            <CardHeader>
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <CardTitle className="text-xl mb-2">{post.title}</CardTitle>
-                  <div className="flex gap-2 mb-2">
-                    <Badge variant={post.status === 'published' ? 'default' : 'secondary'}>
-                      {post.status}
-                    </Badge>
-                    <Badge variant="outline">{post.category}</Badge>
-                    {post.featured && <Badge variant="destructive">Featured</Badge>}
+      <Tabs defaultValue="posts" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="posts">Blog Posts</TabsTrigger>
+          <TabsTrigger value="admins">Admin Management</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="posts" className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">Blog Posts</h2>
+            <Button onClick={() => setShowForm(true)} className="adventure-button">
+              <Plus className="mr-2 h-4 w-4" />
+              New Post
+            </Button>
+          </div>
+
+          <div className="grid gap-6">
+            {posts?.map((post) => (
+              <Card key={post.id}>
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <CardTitle className="text-xl mb-2">{post.title}</CardTitle>
+                      <div className="flex gap-2 mb-2">
+                        <Badge variant={post.status === 'published' ? 'default' : 'secondary'}>
+                          {post.status}
+                        </Badge>
+                        <Badge variant="outline">{post.category}</Badge>
+                        {post.featured && <Badge variant="destructive">Featured</Badge>}
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        By {post.author} • {new Date(post.created_at).toLocaleDateString()} • {post.read_time || 'No read time'}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(post)}>
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        onClick={() => handleDelete(post.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <p className="text-sm text-gray-600">
-                    By {post.author} • {new Date(post.created_at).toLocaleDateString()} • {post.read_time || 'No read time'}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => handleEdit(post)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="destructive" 
-                    size="sm" 
-                    onClick={() => handleDelete(post.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600">{post.excerpt || 'No excerpt available'}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">{post.excerpt || 'No excerpt available'}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
 
-      {posts?.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500 mb-4">No blog posts yet</p>
-          <Button onClick={() => setShowForm(true)} className="adventure-button">
-            <Plus className="mr-2 h-4 w-4" />
-            Create your first post
-          </Button>
-        </div>
-      )}
+          {posts?.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-500 mb-4">No blog posts yet</p>
+              <Button onClick={() => setShowForm(true)} className="adventure-button">
+                <Plus className="mr-2 h-4 w-4" />
+                Create your first post
+              </Button>
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="admins" className="space-y-6">
+          <div className="flex items-center gap-2 mb-6">
+            <Settings className="h-5 w-5" />
+            <h2 className="text-xl font-semibold">Administrator Management</h2>
+          </div>
+          <AdminManagement />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
