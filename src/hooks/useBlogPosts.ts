@@ -69,7 +69,7 @@ export const useCreateBlogPost = () => {
     mutationFn: async (post: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>) => {
       console.log('Creating blog post:', post);
       
-      // Create the blog post without authentication requirement for now
+      // Create the blog post
       const { data, error } = await supabase
         .from('blog_posts')
         .insert([{
@@ -80,8 +80,11 @@ export const useCreateBlogPost = () => {
         .single();
       
       if (error) {
-        console.error('Error creating blog post:', error);
-        throw error;
+        console.error('Detailed error creating blog post:', error);
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.details);
+        throw new Error(`Failed to create blog post: ${error.message}`);
       }
       
       console.log('Created blog post:', data);
@@ -113,7 +116,7 @@ export const useUpdateBlogPost = () => {
       
       if (error) {
         console.error('Error updating blog post:', error);
-        throw error;
+        throw new Error(`Failed to update blog post: ${error.message}`);
       }
       
       console.log('Updated blog post:', data);
@@ -140,7 +143,7 @@ export const useDeleteBlogPost = () => {
       
       if (error) {
         console.error('Error deleting blog post:', error);
-        throw error;
+        throw new Error(`Failed to delete blog post: ${error.message}`);
       }
       
       console.log('Deleted blog post:', id);
