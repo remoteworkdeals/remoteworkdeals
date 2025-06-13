@@ -29,34 +29,51 @@ const BlogImageUpload = ({
   const { toast } = useToast();
 
   const compressImage = (file: File, maxWidth: number = 1200, quality: number = 0.8): Promise<File> => {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d')!;
+      const ctx = canvas.getContext('2d');
       const img = document.createElement('img');
       
+      if (!ctx) {
+        console.error('Could not get canvas context');
+        resolve(file); // Fallback to original file
+        return;
+      }
+      
       img.onload = () => {
-        // Calculate new dimensions
-        const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
-        const newWidth = img.width * ratio;
-        const newHeight = img.height * ratio;
-        
-        canvas.width = newWidth;
-        canvas.height = newHeight;
-        
-        // Draw and compress
-        ctx.drawImage(img, 0, 0, newWidth, newHeight);
-        
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const compressedFile = new File([blob], file.name, {
-              type: 'image/webp',
-              lastModified: Date.now()
-            });
-            resolve(compressedFile);
-          } else {
-            resolve(file);
-          }
-        }, 'image/webp', quality);
+        try {
+          // Calculate new dimensions
+          const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
+          const newWidth = img.width * ratio;
+          const newHeight = img.height * ratio;
+          
+          canvas.width = newWidth;
+          canvas.height = newHeight;
+          
+          // Draw and compress
+          ctx.drawImage(img, 0, 0, newWidth, newHeight);
+          
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, '.webp'), {
+                type: 'image/webp',
+                lastModified: Date.now()
+              });
+              resolve(compressedFile);
+            } else {
+              console.error('Failed to compress image');
+              resolve(file);
+            }
+          }, 'image/webp', quality);
+        } catch (error) {
+          console.error('Error during image compression:', error);
+          resolve(file); // Fallback to original file
+        }
+      };
+      
+      img.onerror = () => {
+        console.error('Error loading image for compression');
+        resolve(file); // Fallback to original file
       };
       
       img.src = URL.createObjectURL(file);
@@ -83,64 +100,74 @@ const BlogImageUpload = ({
         throw new Error('Image size should be less than 10MB.');
       }
 
+      console.log('Starting image upload process for file:', file.name);
+
       // Compress the image
       const compressedFile = await compressImage(file);
+      console.log('Image compressed. Original size:', file.size, 'Compressed size:', compressedFile.size);
       
-      const fileExt = 'webp'; // Always use webp for optimization
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      // Generate clean filename
+      const fileExt = 'webp';
+      const cleanName = file.name
+        .replace(/\.[^/.]+$/, '')
+        .replace(/[^a-zA-Z0-9]/g, '-')
+        .toLowerCase();
+      const fileName = `${cleanName}-${Date.now()}.${fileExt}`;
       const filePath = fileName;
 
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPreview(e.target?.result as string);
-        setShowAltInput(true);
-      };
-      reader.readAsDataURL(compressedFile);
+      console.log('Uploading to Supabase storage with filename:', fileName);
 
-      console.log('Uploading compressed image to blog-images bucket:', fileName);
-
-      const { error: uploadError } = await supabase.storage
+      // Upload to Supabase storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('blog-images')
         .upload(filePath, compressedFile, {
           cacheControl: '3600',
-          upsert: false
+          upsert: false,
+          contentType: 'image/webp'
         });
 
       if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw uploadError;
+        console.error('Supabase upload error:', uploadError);
+        throw new Error(`Upload failed: ${uploadError.message}`);
       }
 
+      console.log('Upload successful:', uploadData);
+
+      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('blog-images')
         .getPublicUrl(filePath);
 
-      console.log('Image uploaded successfully, public URL:', publicUrl);
+      console.log('Public URL generated:', publicUrl);
+
+      // Create preview
+      setPreview(publicUrl);
+      setShowAltInput(true);
 
       // Auto-generate alt text suggestion based on filename
-      const suggestedAlt = file.name
-        .replace(/\.[^/.]+$/, '')
-        .replace(/[-_]/g, ' ')
+      const suggestedAlt = cleanName
+        .replace(/-/g, ' ')
         .replace(/\b\w/g, l => l.toUpperCase());
       
       setAltText(suggestedAlt);
       
       toast({
         title: "Success",
-        description: "Image uploaded and compressed successfully! Please add alt text for accessibility.",
+        description: "Image uploaded successfully! Please add alt text for accessibility.",
       });
 
-      // Don't call onImageUploaded yet - wait for alt text
-      setPreview(publicUrl);
+      // Clear the input
+      event.target.value = '';
+
     } catch (error) {
       console.error('Error uploading image:', error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to upload image",
+        description: error instanceof Error ? error.message : "Failed to upload image. Please try again.",
         variant: "destructive",
       });
       setPreview(null);
+      setShowAltInput(false);
     } finally {
       setUploading(false);
     }
@@ -167,6 +194,10 @@ const BlogImageUpload = ({
     setAltText('');
     setShowAltInput(false);
     onImageUploaded('', '');
+    toast({
+      title: "Image removed",
+      description: "Featured image has been removed.",
+    });
   };
 
   return (
@@ -200,7 +231,7 @@ const BlogImageUpload = ({
           {showAltInput && (
             <div className="space-y-2">
               <Label htmlFor="alt-text" className="text-sm font-medium">
-                Alt Text (for accessibility and SEO)
+                Alt Text (for accessibility and SEO) *
               </Label>
               <Input
                 id="alt-text"
@@ -208,21 +239,20 @@ const BlogImageUpload = ({
                 onChange={(e) => setAltText(e.target.value)}
                 placeholder="Describe the image content..."
                 className="w-full"
+                required
               />
               <p className="text-xs text-gray-500">
                 Describe what's in the image for screen readers and better SEO
               </p>
-              {preview && preview !== currentImage && (
-                <Button 
-                  type="button"
-                  onClick={saveImageWithAlt}
-                  className="w-full"
-                  variant="outline"
-                >
-                  <Edit size={16} className="mr-2" />
-                  Save Image with Alt Text
-                </Button>
-              )}
+              <Button 
+                type="button"
+                onClick={saveImageWithAlt}
+                className="w-full bg-green-600 hover:bg-green-700"
+                disabled={!altText.trim()}
+              >
+                <Edit size={16} className="mr-2" />
+                Save Image with Alt Text
+              </Button>
             </div>
           )}
         </div>
@@ -230,7 +260,7 @@ const BlogImageUpload = ({
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
           <Image className="mx-auto h-12 w-12 text-gray-400 mb-4" />
           <p className="text-gray-600 mb-2 font-medium">Click to upload a featured image</p>
-          <p className="text-sm text-gray-500">PNG, JPG, WebP up to 10MB (will be automatically compressed)</p>
+          <p className="text-sm text-gray-500">PNG, JPG, WebP up to 10MB (will be automatically compressed to WebP)</p>
         </div>
       )}
 
@@ -240,12 +270,12 @@ const BlogImageUpload = ({
         accept="image/*"
         onChange={uploadImage}
         disabled={uploading}
-        className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-adventure-orange file:text-white hover:file:bg-adventure-orange/80"
+        className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
       />
 
       {uploading && (
         <div className="flex items-center justify-center py-4">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-adventure-orange mr-2"></div>
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
           <span className="text-sm text-gray-600">Uploading and compressing image...</span>
         </div>
       )}
