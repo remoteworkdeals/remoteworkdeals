@@ -11,6 +11,7 @@ import About from "./pages/About";
 import ExclusiveDeals from "./pages/ExclusiveDeals";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import AdminBlog from "./pages/AdminBlog";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/exclusive-deals" element={<ExclusiveDeals />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/admin/blog" element={<AdminBlog />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

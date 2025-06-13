@@ -6,66 +6,44 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, User, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useBlogPosts } from '@/hooks/useBlogPosts';
 
 const Blog = () => {
   const navigate = useNavigate();
-
-  const blogPosts = [
-    {
-      id: 1,
-      slug: "digital-nomad-visas-2024",
-      title: "The Ultimate Guide to Digital Nomad Visas in 2024",
-      excerpt: "Everything you need to know about the latest digital nomad visa programs around the world.",
-      category: "Guides",
-      author: "Sarah Chen",
-      readTime: "8 min read",
-      date: "March 15, 2024",
-      image: "https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=600&q=80",
-      featured: true
-    },
-    {
-      id: 2,
-      slug: "coliving-vs-hotels",
-      title: "Co-living vs Hotels: Why Nomads Are Making the Switch",
-      excerpt: "Discover why co-living spaces are becoming the preferred choice for long-term travelers.",
-      category: "Nomad Lifestyle",
-      author: "Mike Rodriguez",
-      readTime: "5 min read",
-      date: "March 12, 2024",
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80",
-      featured: false
-    },
-    {
-      id: 3,
-      slug: "bali-coliving-review",
-      title: "Bali's Best Co-living Spaces: A Complete Review",
-      excerpt: "We visited 12 co-living spaces in Bali. Here are our honest reviews and recommendations.",
-      category: "Reviews",
-      author: "Emma Thompson",
-      readTime: "12 min read",
-      date: "March 10, 2024",
-      image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=600&q=80",
-      featured: false
-    },
-    {
-      id: 4,
-      slug: "remote-work-productivity-tips",
-      title: "10 Productivity Hacks for Remote Workers in Co-livings",
-      excerpt: "Maximize your productivity while living and working in shared spaces around the world.",
-      category: "Guides",
-      author: "David Kim",
-      readTime: "6 min read",
-      date: "March 8, 2024",
-      image: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=600&q=80",
-      featured: false
-    }
-  ];
+  const { data: blogPosts, isLoading, error } = useBlogPosts();
 
   const categories = ["All", "Guides", "Nomad Lifestyle", "Reviews", "Destination Spotlights"];
 
   const handlePostClick = (slug: string) => {
     navigate(`/blog/${slug}`);
   };
+
+  const featuredPosts = blogPosts?.filter(post => post.featured) || [];
+  const regularPosts = blogPosts?.filter(post => !post.featured) || [];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen">
+        <Navigation />
+        <div className="flex items-center justify-center py-20">
+          <p className="text-lg">Loading blog posts...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen">
+        <Navigation />
+        <div className="flex items-center justify-center py-20">
+          <p className="text-lg text-red-600">Error loading blog posts</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -101,8 +79,8 @@ const Blog = () => {
         </div>
       </section>
 
-      {/* Featured Post */}
-      {blogPosts.filter(post => post.featured).map((post) => (
+      {/* Featured Posts */}
+      {featuredPosts.map((post) => (
         <section key={post.id} className="py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <Badge className="bg-adventure-orange text-white mb-4">Featured</Badge>
@@ -124,9 +102,9 @@ const Blog = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock size={16} />
-                    <span>{post.readTime}</span>
+                    <span>{post.read_time}</span>
                   </div>
-                  <span>{post.date}</span>
+                  <span>{new Date(post.created_at).toLocaleDateString()}</span>
                 </div>
                 <Button 
                   className="adventure-button"
@@ -137,11 +115,13 @@ const Blog = () => {
                 </Button>
               </div>
               <div className="cursor-pointer" onClick={() => handlePostClick(post.slug)}>
-                <img
-                  src={post.image}
-                  alt={post.title}
-                  className="rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
-                />
+                {post.featured_image && (
+                  <img
+                    src={post.featured_image}
+                    alt={post.title}
+                    className="rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -156,7 +136,7 @@ const Blog = () => {
           </h2>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {blogPosts.filter(post => !post.featured).map((post, index) => (
+            {regularPosts.map((post, index) => (
               <Card 
                 key={post.id} 
                 className="overflow-hidden card-shadow hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in cursor-pointer"
@@ -164,11 +144,13 @@ const Blog = () => {
                 onClick={() => handlePostClick(post.slug)}
               >
                 <div className="relative">
-                  <img
-                    src={post.image}
-                    alt={post.title}
-                    className="w-full h-48 object-cover"
-                  />
+                  {post.featured_image && (
+                    <img
+                      src={post.featured_image}
+                      alt={post.title}
+                      className="w-full h-48 object-cover"
+                    />
+                  )}
                   <Badge className="absolute top-4 left-4 bg-forest-green text-white">
                     {post.category}
                   </Badge>
@@ -190,7 +172,7 @@ const Blog = () => {
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock size={14} />
-                      <span>{post.readTime}</span>
+                      <span>{post.read_time}</span>
                     </div>
                   </div>
                   
@@ -202,6 +184,12 @@ const Blog = () => {
               </Card>
             ))}
           </div>
+
+          {blogPosts?.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">No blog posts found</p>
+            </div>
+          )}
         </div>
       </section>
 
