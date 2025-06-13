@@ -117,22 +117,7 @@ const BlogImageUpload = ({
       
       console.log('Attempting to upload to blog-images bucket with filename:', fileName);
 
-      // First, let's check if the bucket exists and create it if it doesn't
-      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-      console.log('Available buckets:', buckets);
-      
-      if (bucketsError) {
-        console.error('Error listing buckets:', bucketsError);
-        throw new Error('Unable to access storage. Please check your permissions.');
-      }
-
-      const blogImagesBucket = buckets?.find(bucket => bucket.name === 'blog-images');
-      if (!blogImagesBucket) {
-        console.error('blog-images bucket not found. Available buckets:', buckets?.map(b => b.name));
-        throw new Error('Blog images storage bucket not found. Please contact administrator.');
-      }
-
-      // Upload to Supabase storage
+      // Upload directly to the blog-images bucket (we know it exists)
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('blog-images')
         .upload(fileName, compressedFile, {
@@ -143,7 +128,15 @@ const BlogImageUpload = ({
 
       if (uploadError) {
         console.error('Supabase upload error:', uploadError);
-        throw new Error(`Upload failed: ${uploadError.message}`);
+        
+        // Provide more specific error messages based on the error
+        if (uploadError.message.includes('new row violates row-level security')) {
+          throw new Error('You must be logged in to upload images. Please sign in and try again.');
+        } else if (uploadError.message.includes('bucket')) {
+          throw new Error('Image storage is not properly configured. Please contact support.');
+        } else {
+          throw new Error(`Upload failed: ${uploadError.message}`);
+        }
       }
 
       console.log('Upload successful:', uploadData);
@@ -154,16 +147,6 @@ const BlogImageUpload = ({
         .getPublicUrl(fileName);
 
       console.log('Public URL generated:', publicUrl);
-
-      // Verify the URL is accessible
-      try {
-        const response = await fetch(publicUrl, { method: 'HEAD' });
-        if (!response.ok) {
-          console.warn('Image URL may not be accessible:', response.status);
-        }
-      } catch (fetchError) {
-        console.warn('Could not verify image URL accessibility:', fetchError);
-      }
 
       // Create preview
       setPreview(publicUrl);
