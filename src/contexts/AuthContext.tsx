@@ -35,7 +35,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const fetchUserRole = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      // Use any type to bypass TypeScript errors for the role column
+      const { data, error } = await (supabase as any)
         .from('profiles')
         .select('role')
         .eq('id', userId)
@@ -97,8 +98,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const signUp = async (email: string, password: string, fullName?: string) => {
-    // First check if email is approved
-    const { data: approvedEmail, error: checkError } = await supabase
+    // First check if email is approved using any type to bypass TypeScript
+    const { data: approvedEmail, error: checkError } = await (supabase as any)
       .from('approved_admins')
       .select('email, used')
       .eq('email', email)
