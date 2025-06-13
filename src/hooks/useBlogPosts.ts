@@ -67,32 +67,78 @@ export const useCreateBlogPost = () => {
   
   return useMutation({
     mutationFn: async (post: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>) => {
-      console.log('Creating blog post:', post);
+      console.log('Creating blog post with data:', post);
+      
+      // Test database connection first
+      console.log('Testing database connection...');
+      const { data: testData, error: testError } = await supabase
+        .from('blog_posts')
+        .select('count')
+        .limit(1);
+      
+      if (testError) {
+        console.error('Database connection test failed:', testError);
+        throw new Error(`Database connection failed: ${testError.message}`);
+      }
+      
+      console.log('Database connection successful, proceeding with insert...');
+      
+      // Prepare the data for insertion
+      const insertData = {
+        title: post.title.trim(),
+        content: post.content.trim(),
+        excerpt: post.excerpt?.trim() || null,
+        slug: post.slug.trim(),
+        category: post.category,
+        author: post.author.trim(),
+        featured_image: post.featured_image?.trim() || null,
+        featured: post.featured || false,
+        status: post.status || 'draft',
+        read_time: post.read_time?.trim() || null,
+        updated_at: new Date().toISOString()
+      };
+      
+      console.log('Prepared insert data:', insertData);
       
       // Create the blog post
       const { data, error } = await supabase
         .from('blog_posts')
-        .insert([{
-          ...post,
-          updated_at: new Date().toISOString()
-        }])
+        .insert([insertData])
         .select()
         .single();
       
       if (error) {
-        console.error('Detailed error creating blog post:', error);
-        console.error('Error code:', error.code);
-        console.error('Error message:', error.message);
-        console.error('Error details:', error.details);
-        throw new Error(`Failed to create blog post: ${error.message}`);
+        console.error('Detailed error creating blog post:', {
+          error,
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          insertData: insertData
+        });
+        
+        // Provide more specific error messages
+        if (error.code === '42501') {
+          throw new Error('Permission denied: Row Level Security policy violation. Please check database policies.');
+        } else if (error.code === '23505') {
+          throw new Error('Blog post with this slug already exists. Please use a different slug.');
+        } else if (error.code === '23502') {
+          throw new Error('Required field is missing. Please check all required fields are filled.');
+        } else {
+          throw new Error(`Failed to create blog post: ${error.message} (Code: ${error.code})`);
+        }
       }
       
-      console.log('Created blog post:', data);
+      console.log('Successfully created blog post:', data);
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Blog post creation successful, invalidating queries...');
       queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
       queryClient.invalidateQueries({ queryKey: ['admin-blog-posts'] });
+    },
+    onError: (error) => {
+      console.error('Blog post creation failed:', error);
     }
   });
 };
