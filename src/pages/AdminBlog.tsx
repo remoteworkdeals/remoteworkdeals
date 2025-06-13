@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +15,7 @@ const AdminBlog = () => {
   const { toast } = useToast();
   const deleteMutation = useDeleteBlogPost();
 
-  const { data: posts, isLoading } = useQuery({
+  const { data: posts, isLoading, refetch } = useQuery({
     queryKey: ['admin-blog-posts'],
     queryFn: async () => {
       console.log('Fetching all blog posts for admin...');
@@ -44,6 +43,7 @@ const AdminBlog = () => {
       try {
         await deleteMutation.mutateAsync(id);
         toast({ title: 'Blog post deleted successfully' });
+        refetch(); // Manually refetch to ensure UI updates
       } catch (error) {
         console.error('Error deleting blog post:', error);
         toast({ title: 'Error deleting blog post', variant: 'destructive' });
@@ -54,6 +54,7 @@ const AdminBlog = () => {
   const handleFormClose = () => {
     setShowForm(false);
     setEditingPost(null);
+    refetch(); // Refetch when form closes to ensure data is fresh
   };
 
   if (isLoading) {

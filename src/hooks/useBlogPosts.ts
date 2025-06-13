@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -22,19 +21,23 @@ export const useBlogPosts = () => {
   return useQuery({
     queryKey: ['blog-posts'],
     queryFn: async () => {
-      console.log('Fetching published blog posts...');
+      console.log('Fetching all blog posts...');
       const { data, error } = await supabase
         .from('blog_posts')
         .select('*')
-        .eq('status', 'published')
         .order('created_at', { ascending: false });
       
       if (error) {
         console.error('Error fetching blog posts:', error);
         throw error;
       }
-      console.log('Fetched blog posts:', data);
-      return data as BlogPost[];
+      console.log('Fetched all blog posts:', data);
+      
+      // Filter published posts on the client side for now
+      const publishedPosts = data.filter(post => post.status === 'published');
+      console.log('Published posts:', publishedPosts);
+      
+      return publishedPosts as BlogPost[];
     }
   });
 };

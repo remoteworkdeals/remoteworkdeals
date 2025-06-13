@@ -11,6 +11,7 @@ import { ArrowLeft, Save, Image as ImageIcon } from 'lucide-react';
 import { BlogPost, useCreateBlogPost, useUpdateBlogPost } from '@/hooks/useBlogPosts';
 import { useToast } from '@/hooks/use-toast';
 import ImageUpload from '@/components/ImageUpload';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface BlogPostFormProps {
   post?: BlogPost | null;
@@ -27,7 +28,7 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
     author: '',
     featured_image: '',
     featured: false,
-    status: 'draft' as 'draft' | 'published',
+    status: 'published' as 'draft' | 'published', // Default to published for immediate visibility
     read_time: '',
     meta_title: '',
     meta_description: '',
@@ -35,6 +36,7 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
   });
 
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const createMutation = useCreateBlogPost();
   const updateMutation = useUpdateBlogPost();
 
@@ -144,6 +146,12 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
         await createMutation.mutateAsync(blogPostData);
         toast({ title: 'Blog post created successfully!' });
       }
+      
+      // Force refresh all blog post queries to ensure immediate visibility
+      await queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
+      await queryClient.invalidateQueries({ queryKey: ['admin-blog-posts'] });
+      await queryClient.refetchQueries({ queryKey: ['blog-posts'] });
+      
       onClose();
     } catch (error) {
       console.error('Error saving blog post:', error);
