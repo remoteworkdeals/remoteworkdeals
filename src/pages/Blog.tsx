@@ -7,34 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Clock, User, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useBlogPosts } from '@/hooks/useBlogPosts';
-import { useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 
 const Blog = () => {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { data: blogPosts, isLoading, error, refetch } = useBlogPosts();
-
-  // Add automatic refresh every 10 seconds when on the blog page
-  useEffect(() => {
-    const interval = setInterval(() => {
-      console.log('Auto-refreshing blog posts...');
-      refetch();
-    }, 10000); // Refresh every 10 seconds
-
-    return () => clearInterval(interval);
-  }, [refetch]);
-
-  // Listen for focus events to refresh when user comes back to tab
-  useEffect(() => {
-    const handleFocus = () => {
-      console.log('Window focused, refreshing blog posts...');
-      refetch();
-    };
-
-    window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
-  }, [refetch]);
+  const { data: blogPosts, isLoading, error } = useBlogPosts();
 
   const categories = ["All", "Guides", "Nomad Lifestyle", "Reviews", "Destination Spotlights"];
 
@@ -64,7 +40,7 @@ const Blog = () => {
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
             <p className="text-lg text-red-600 mb-4">Error loading blog posts</p>
-            <Button onClick={() => refetch()}>Retry</Button>
+            <p className="text-gray-600">Please try refreshing the page</p>
           </div>
         </div>
         <Footer />
@@ -86,15 +62,6 @@ const Blog = () => {
             Stories, guides, and insights from the world of remote work and digital nomadism. 
             Real experiences from real nomads.
           </p>
-          <div className="mt-4">
-            <Button 
-              variant="outline" 
-              onClick={() => refetch()}
-              className="text-white border-white hover:bg-white hover:text-forest-green"
-            >
-              Refresh Posts
-            </Button>
-          </div>
         </div>
       </section>
 
@@ -114,13 +81,6 @@ const Blog = () => {
           </div>
         </div>
       </section>
-
-      {/* Debug Info */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-        <p className="text-sm text-gray-500">
-          Total posts: {blogPosts?.length || 0} | Featured: {featuredPosts.length} | Regular: {regularPosts.length}
-        </p>
-      </div>
 
       {/* Featured Posts */}
       {featuredPosts.map((post) => (
@@ -230,8 +190,7 @@ const Blog = () => {
 
           {blogPosts?.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg mb-4">No blog posts found</p>
-              <Button onClick={() => refetch()}>Refresh</Button>
+              <p className="text-gray-500 text-lg">No blog posts found</p>
             </div>
           )}
         </div>

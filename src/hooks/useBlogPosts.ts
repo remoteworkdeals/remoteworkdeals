@@ -22,22 +22,24 @@ export const useBlogPosts = () => {
   return useQuery({
     queryKey: ['blog-posts'],
     queryFn: async () => {
-      console.log('Fetching published blog posts for public view...');
+      console.log('Fetching published blog posts...');
       const { data, error } = await supabase
         .from('blog_posts')
         .select('*')
-        .eq('status', 'published') // Only fetch published posts for public view
+        .eq('status', 'published')
         .order('created_at', { ascending: false });
       
       if (error) {
-        console.error('Error fetching published blog posts:', error);
+        console.error('Error fetching blog posts:', error);
         throw error;
       }
-      console.log('Fetched published blog posts:', data);
+      console.log('Successfully fetched blog posts:', data?.length || 0, 'posts');
       return data as BlogPost[];
     },
-    staleTime: 0, // Always consider data stale to ensure fresh fetches
-    gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
+    staleTime: 0,
+    gcTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true
   });
 };
 
@@ -71,20 +73,6 @@ export const useCreateBlogPost = () => {
     mutationFn: async (post: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>) => {
       console.log('Creating blog post with data:', post);
       
-      // Test database connection first
-      console.log('Testing database connection...');
-      const { data: testData, error: testError } = await supabase
-        .from('blog_posts')
-        .select('count')
-        .limit(1);
-      
-      if (testError) {
-        console.error('Database connection test failed:', testError);
-        throw new Error(`Database connection failed: ${testError.message}`);
-      }
-      
-      console.log('Database connection successful, proceeding with insert...');
-      
       // Prepare the data for insertion
       const insertData = {
         title: post.title.trim(),
@@ -95,7 +83,7 @@ export const useCreateBlogPost = () => {
         author: post.author.trim(),
         featured_image: post.featured_image?.trim() || null,
         featured: post.featured || false,
-        status: post.status || 'published', // Ensure default is published
+        status: post.status || 'published',
         read_time: post.read_time?.trim() || null,
         updated_at: new Date().toISOString()
       };
@@ -110,38 +98,21 @@ export const useCreateBlogPost = () => {
         .single();
       
       if (error) {
-        console.error('Detailed error creating blog post:', {
-          error,
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          insertData: insertData
-        });
-        
-        // Provide more specific error messages
-        if (error.code === '42501') {
-          throw new Error('Permission denied: Row Level Security policy violation. Please check database policies.');
-        } else if (error.code === '23505') {
-          throw new Error('Blog post with this slug already exists. Please use a different slug.');
-        } else if (error.code === '23502') {
-          throw new Error('Required field is missing. Please check all required fields are filled.');
-        } else {
-          throw new Error(`Failed to create blog post: ${error.message} (Code: ${error.code})`);
-        }
+        console.error('Error creating blog post:', error);
+        throw new Error(`Failed to create blog post: ${error.message}`);
       }
       
       console.log('Successfully created blog post:', data);
       return data;
     },
-    onSuccess: (data) => {
-      console.log('Blog post creation successful, invalidating all queries...');
-      // Invalidate both admin and public queries
+    onSuccess: () => {
+      console.log('Blog post created successfully, invalidating queries...');
+      // Invalidate and refetch all blog queries immediately
       queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
       queryClient.invalidateQueries({ queryKey: ['admin-blog-posts'] });
       
-      // Also remove any cached data to force fresh fetch
-      queryClient.removeQueries({ queryKey: ['blog-posts'] });
+      // Force immediate refetch
+      queryClient.refetchQueries({ queryKey: ['blog-posts'] });
     },
     onError: (error) => {
       console.error('Blog post creation failed:', error);
@@ -177,6 +148,7 @@ export const useUpdateBlogPost = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
       queryClient.invalidateQueries({ queryKey: ['admin-blog-posts'] });
+      queryClient.refetchQueries({ queryKey: ['blog-posts'] });
     }
   });
 };
@@ -203,6 +175,7 @@ export const useDeleteBlogPost = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
       queryClient.invalidateQueries({ queryKey: ['admin-blog-posts'] });
+      queryClient.refetchQueries({ queryKey: ['blog-posts'] });
     }
   });
 };

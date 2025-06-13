@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -137,7 +136,7 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
         author: formData.author.trim(),
         featured_image: formData.featured_image.trim() || null,
         featured: formData.featured,
-        status: formData.status, // Explicitly use the form status
+        status: formData.status,
         read_time: formData.read_time || estimateReadTime(formData.content)
       };
 
@@ -149,22 +148,14 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
       } else {
         const result = await createMutation.mutateAsync(blogPostData);
         console.log('Created blog post result:', result);
-        toast({ title: 'Blog post created successfully!' });
+        toast({ title: 'Blog post created and published successfully!' });
       }
       
-      // Comprehensive cache invalidation with proper timing
-      console.log('Invalidating all blog queries...');
-      
-      // First invalidate all queries
+      // Force immediate cache invalidation and refresh
+      console.log('Forcing immediate cache refresh...');
       await queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
       await queryClient.invalidateQueries({ queryKey: ['admin-blog-posts'] });
-      
-      // Then force refetch with a small delay to ensure database consistency
-      setTimeout(async () => {
-        await queryClient.refetchQueries({ queryKey: ['blog-posts'] });
-        await queryClient.refetchQueries({ queryKey: ['admin-blog-posts'] });
-        console.log('Forced refetch completed');
-      }, 500);
+      await queryClient.refetchQueries({ queryKey: ['blog-posts'] });
       
       onClose();
     } catch (error) {
