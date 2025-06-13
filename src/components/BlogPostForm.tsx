@@ -125,6 +125,8 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
       return;
     }
 
+    console.log('Submitting blog post with status:', formData.status);
+
     try {
       const blogPostData = {
         title: formData.title.trim(),
@@ -135,22 +137,34 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
         author: formData.author.trim(),
         featured_image: formData.featured_image.trim() || null,
         featured: formData.featured,
-        status: formData.status,
+        status: formData.status, // Explicitly use the form status
         read_time: formData.read_time || estimateReadTime(formData.content)
       };
+
+      console.log('Blog post data being submitted:', blogPostData);
 
       if (post) {
         await updateMutation.mutateAsync({ id: post.id, ...blogPostData });
         toast({ title: 'Blog post updated successfully!' });
       } else {
-        await createMutation.mutateAsync(blogPostData);
+        const result = await createMutation.mutateAsync(blogPostData);
+        console.log('Created blog post result:', result);
         toast({ title: 'Blog post created successfully!' });
       }
       
-      // Force refresh all blog post queries to ensure immediate visibility
+      // Comprehensive cache invalidation with proper timing
+      console.log('Invalidating all blog queries...');
+      
+      // First invalidate all queries
       await queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
       await queryClient.invalidateQueries({ queryKey: ['admin-blog-posts'] });
-      await queryClient.refetchQueries({ queryKey: ['blog-posts'] });
+      
+      // Then force refetch with a small delay to ensure database consistency
+      setTimeout(async () => {
+        await queryClient.refetchQueries({ queryKey: ['blog-posts'] });
+        await queryClient.refetchQueries({ queryKey: ['admin-blog-posts'] });
+        console.log('Forced refetch completed');
+      }, 500);
       
       onClose();
     } catch (error) {

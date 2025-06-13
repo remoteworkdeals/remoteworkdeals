@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -21,24 +22,22 @@ export const useBlogPosts = () => {
   return useQuery({
     queryKey: ['blog-posts'],
     queryFn: async () => {
-      console.log('Fetching all blog posts...');
+      console.log('Fetching published blog posts for public view...');
       const { data, error } = await supabase
         .from('blog_posts')
         .select('*')
+        .eq('status', 'published') // Only fetch published posts for public view
         .order('created_at', { ascending: false });
       
       if (error) {
-        console.error('Error fetching blog posts:', error);
+        console.error('Error fetching published blog posts:', error);
         throw error;
       }
-      console.log('Fetched all blog posts:', data);
-      
-      // Filter published posts on the client side for now
-      const publishedPosts = data.filter(post => post.status === 'published');
-      console.log('Published posts:', publishedPosts);
-      
-      return publishedPosts as BlogPost[];
-    }
+      console.log('Fetched published blog posts:', data);
+      return data as BlogPost[];
+    },
+    staleTime: 0, // Always consider data stale to ensure fresh fetches
+    gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
   });
 };
 
@@ -96,7 +95,7 @@ export const useCreateBlogPost = () => {
         author: post.author.trim(),
         featured_image: post.featured_image?.trim() || null,
         featured: post.featured || false,
-        status: post.status || 'draft',
+        status: post.status || 'published', // Ensure default is published
         read_time: post.read_time?.trim() || null,
         updated_at: new Date().toISOString()
       };
@@ -136,9 +135,13 @@ export const useCreateBlogPost = () => {
       return data;
     },
     onSuccess: (data) => {
-      console.log('Blog post creation successful, invalidating queries...');
+      console.log('Blog post creation successful, invalidating all queries...');
+      // Invalidate both admin and public queries
       queryClient.invalidateQueries({ queryKey: ['blog-posts'] });
       queryClient.invalidateQueries({ queryKey: ['admin-blog-posts'] });
+      
+      // Also remove any cached data to force fresh fetch
+      queryClient.removeQueries({ queryKey: ['blog-posts'] });
     },
     onError: (error) => {
       console.error('Blog post creation failed:', error);
