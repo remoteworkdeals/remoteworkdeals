@@ -19,12 +19,17 @@ const AdminBlog = () => {
   const { data: posts, isLoading } = useQuery({
     queryKey: ['admin-blog-posts'],
     queryFn: async () => {
+      console.log('Fetching all blog posts for admin...');
       const { data, error } = await supabase
         .from('blog_posts')
         .select('*')
         .order('created_at', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching admin blog posts:', error);
+        throw error;
+      }
+      console.log('Fetched admin blog posts:', data);
       return data as BlogPost[];
     }
   });
@@ -40,6 +45,7 @@ const AdminBlog = () => {
         await deleteMutation.mutateAsync(id);
         toast({ title: 'Blog post deleted successfully' });
       } catch (error) {
+        console.error('Error deleting blog post:', error);
         toast({ title: 'Error deleting blog post', variant: 'destructive' });
       }
     }
@@ -66,8 +72,11 @@ const AdminBlog = () => {
   return (
     <div className="max-w-6xl mx-auto p-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Blog Management</h1>
-        <Button onClick={() => setShowForm(true)}>
+        <div>
+          <h1 className="text-3xl font-bold">Blog Management</h1>
+          <p className="text-gray-600 mt-2">Create and manage your SEO-optimized blog posts</p>
+        </div>
+        <Button onClick={() => setShowForm(true)} className="adventure-button">
           <Plus className="mr-2 h-4 w-4" />
           New Post
         </Button>
@@ -88,7 +97,7 @@ const AdminBlog = () => {
                     {post.featured && <Badge variant="destructive">Featured</Badge>}
                   </div>
                   <p className="text-sm text-gray-600">
-                    By {post.author} • {new Date(post.created_at).toLocaleDateString()}
+                    By {post.author} • {new Date(post.created_at).toLocaleDateString()} • {post.read_time || 'No read time'}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -113,7 +122,7 @@ const AdminBlog = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600">{post.excerpt}</p>
+              <p className="text-gray-600">{post.excerpt || 'No excerpt available'}</p>
             </CardContent>
           </Card>
         ))}
@@ -122,7 +131,7 @@ const AdminBlog = () => {
       {posts?.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500 mb-4">No blog posts yet</p>
-          <Button onClick={() => setShowForm(true)}>
+          <Button onClick={() => setShowForm(true)} className="adventure-button">
             <Plus className="mr-2 h-4 w-4" />
             Create your first post
           </Button>

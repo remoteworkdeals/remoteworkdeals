@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Clock, User, Calendar } from 'lucide-react';
 import { useBlogPost } from '@/hooks/useBlogPosts';
+import { Helmet } from 'react-helmet-async';
 
 const BlogPost = () => {
   const { slug } = useParams();
@@ -44,6 +45,20 @@ const BlogPost = () => {
 
   return (
     <div className="min-h-screen">
+      <Helmet>
+        <title>{blogPost.title} | Nomad Blog</title>
+        <meta name="description" content={blogPost.excerpt || blogPost.content.substring(0, 160)} />
+        <meta property="og:title" content={blogPost.title} />
+        <meta property="og:description" content={blogPost.excerpt || blogPost.content.substring(0, 160)} />
+        <meta property="og:type" content="article" />
+        {blogPost.featured_image && <meta property="og:image" content={blogPost.featured_image} />}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={blogPost.title} />
+        <meta name="twitter:description" content={blogPost.excerpt || blogPost.content.substring(0, 160)} />
+        {blogPost.featured_image && <meta name="twitter:image" content={blogPost.featured_image} />}
+        <link rel="canonical" href={`${window.location.origin}/blog/${blogPost.slug}`} />
+      </Helmet>
+
       <Navigation />
       
       {/* Back Button */}
