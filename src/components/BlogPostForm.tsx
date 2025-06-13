@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,7 +28,7 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
     featured_image: '',
     featured_image_alt: '',
     featured: false,
-    status: 'published' as 'draft' | 'published', // Default to published for immediate visibility
+    status: 'published' as 'draft' | 'published',
     read_time: '',
     meta_title: '',
     meta_description: '',

@@ -28,6 +28,41 @@ const BlogImageUpload = ({
   const [showAltInput, setShowAltInput] = useState(!!currentAlt);
   const { toast } = useToast();
 
+  const compressImage = (file: File, maxWidth: number = 1200, quality: number = 0.8): Promise<File> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d')!;
+      const img = new Image();
+      
+      img.onload = () => {
+        // Calculate new dimensions
+        const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
+        const newWidth = img.width * ratio;
+        const newHeight = img.height * ratio;
+        
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+        
+        // Draw and compress
+        ctx.drawImage(img, 0, 0, newWidth, newHeight);
+        
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const compressedFile = new File([blob], file.name, {
+              type: 'image/webp',
+              lastModified: Date.now()
+            });
+            resolve(compressedFile);
+          } else {
+            resolve(file);
+          }
+        }, 'image/webp', quality);
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const uploadImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       setUploading(true);
@@ -43,12 +78,15 @@ const BlogImageUpload = ({
         throw new Error('Please select a valid image file.');
       }
       
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error('Image size should be less than 5MB.');
+      // Validate file size (max 10MB before compression)
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error('Image size should be less than 10MB.');
       }
 
-      const fileExt = file.name.split('.').pop();
+      // Compress the image
+      const compressedFile = await compressImage(file);
+      
+      const fileExt = 'webp'; // Always use webp for optimization
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = fileName;
 
@@ -58,19 +96,27 @@ const BlogImageUpload = ({
         setPreview(e.target?.result as string);
         setShowAltInput(true);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(compressedFile);
+
+      console.log('Uploading compressed image to blog-images bucket:', fileName);
 
       const { error: uploadError } = await supabase.storage
         .from('blog-images')
-        .upload(filePath, file);
+        .upload(filePath, compressedFile, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
       if (uploadError) {
+        console.error('Upload error:', uploadError);
         throw uploadError;
       }
 
       const { data: { publicUrl } } = supabase.storage
         .from('blog-images')
         .getPublicUrl(filePath);
+
+      console.log('Image uploaded successfully, public URL:', publicUrl);
 
       // Auto-generate alt text suggestion based on filename
       const suggestedAlt = file.name
@@ -82,7 +128,7 @@ const BlogImageUpload = ({
       
       toast({
         title: "Success",
-        description: "Image uploaded successfully! Please add alt text for accessibility.",
+        description: "Image uploaded and compressed successfully! Please add alt text for accessibility.",
       });
 
       // Don't call onImageUploaded yet - wait for alt text
@@ -184,7 +230,7 @@ const BlogImageUpload = ({
         <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
           <Image className="mx-auto h-12 w-12 text-gray-400 mb-4" />
           <p className="text-gray-600 mb-2 font-medium">Click to upload a featured image</p>
-          <p className="text-sm text-gray-500">PNG, JPG, WebP up to 5MB</p>
+          <p className="text-sm text-gray-500">PNG, JPG, WebP up to 10MB (will be automatically compressed)</p>
         </div>
       )}
 
@@ -200,7 +246,7 @@ const BlogImageUpload = ({
       {uploading && (
         <div className="flex items-center justify-center py-4">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-adventure-orange mr-2"></div>
-          <span className="text-sm text-gray-600">Uploading to blog storage...</span>
+          <span className="text-sm text-gray-600">Uploading and compressing image...</span>
         </div>
       )}
     </div>

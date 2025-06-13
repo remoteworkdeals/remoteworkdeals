@@ -110,14 +110,6 @@ const Blog = () => {
             Stories, guides, and insights from the world of remote work and digital nomadism. 
             Real experiences from real nomads.
           </p>
-          <div className="flex items-center justify-center gap-4 text-sm">
-            <span className="bg-white/20 px-4 py-2 rounded-full">
-              {blogPosts?.length || 0} Articles
-            </span>
-            <span className="bg-white/20 px-4 py-2 rounded-full">
-              Weekly Updates
-            </span>
-          </div>
         </div>
       </section>
 
@@ -137,11 +129,6 @@ const Blog = () => {
                 onClick={() => setSelectedCategory(category)}
               >
                 {category}
-                {category !== "All" && (
-                  <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">
-                    {blogPosts?.filter(post => post.category === category).length || 0}
-                  </span>
-                )}
               </Button>
             ))}
           </div>
