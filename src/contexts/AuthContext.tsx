@@ -55,43 +55,47 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  // Separate effect for role fetching to avoid auth callback deadlocks
+  useEffect(() => {
+    if (user?.id && !userRole) {
+      console.log('Fetching role for authenticated user:', user.id);
+      // Use setTimeout to defer the role fetching and avoid blocking
+      setTimeout(async () => {
+        const role = await fetchUserRole(user.id);
+        setUserRole(role);
+        console.log('User role set to:', role);
+      }, 0);
+    } else if (!user) {
+      setUserRole(null);
+    }
+  }, [user?.id, userRole]);
+
   useEffect(() => {
     console.log('Setting up auth state listener...');
     
-    // Set up auth state listener
+    // Set up auth state listener - NO async operations here to prevent deadlocks
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (session?.user) {
-          console.log('User logged in, fetching role...');
-          const role = await fetchUserRole(session.user.id);
-          setUserRole(role);
-          console.log('User role set to:', role);
-        } else {
+        // Always set loading to false after auth state changes
+        setLoading(false);
+        
+        // Clear role when user logs out
+        if (!session?.user) {
           console.log('No user, clearing role');
           setUserRole(null);
         }
-        
-        setLoading(false);
       }
     );
 
     // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Initial session check:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        console.log('Initial user found, fetching role...');
-        const role = await fetchUserRole(session.user.id);
-        setUserRole(role);
-        console.log('Initial user role set to:', role);
-      }
-      
       setLoading(false);
     });
 
