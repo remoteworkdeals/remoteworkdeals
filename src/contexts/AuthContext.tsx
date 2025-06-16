@@ -113,23 +113,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const signUp = async (email: string, password: string, fullName?: string) => {
     console.log('Attempting to sign up:', email);
     
-    // First check if email is approved
-    const { data: approvedEmail, error: checkError } = await supabase
-      .from('approved_admins')
-      .select('email, used')
-      .eq('email', email)
-      .eq('used', false)
-      .single();
-
-    if (checkError || !approvedEmail) {
-      console.log('Email not approved for admin access');
-      return { 
-        error: { 
-          message: 'This email is not approved for admin access. Please contact an administrator to get invited.' 
-        } 
-      };
-    }
-
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
