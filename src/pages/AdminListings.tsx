@@ -144,7 +144,7 @@ const AdminListings = () => {
                       {listing.status}
                     </Badge>
                     <Badge variant="outline">{listing.type}</Badge>
-                    {listing.discounted_price && (
+                    {listing.discounted_price && listing.discount_percentage && (
                       <Badge variant="destructive">
                         {listing.discount_percentage}% OFF
                       </Badge>
@@ -158,7 +158,9 @@ const AdminListings = () => {
                       </span>
                     )}
                     {listing.capacity && <span>{listing.capacity} capacity</span>}
-                    {listing.rating && <span>★ {listing.rating}</span>}
+                    {listing.rating && listing.rating > 0 && (
+                      <span>★ {listing.rating} ({listing.review_count} reviews)</span>
+                    )}
                   </div>
                 </div>
                 <div className="flex gap-2">

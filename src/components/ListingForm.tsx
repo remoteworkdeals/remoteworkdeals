@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Listing } from '@/types/listing';
 import { useAuth } from '@/contexts/AuthContext';
+import ImageUpload from '@/components/ImageUpload';
 
 interface ListingFormProps {
   listing?: Listing | null;
@@ -25,6 +26,14 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [averageRatings, setAverageRatings] = useState({
+    social: 0,
+    work: 0,
+    surroundings: 0,
+    facilities: 0,
+    price: 0,
+    overall: 0
+  });
   
   // Form state
   const [formData, setFormData] = useState({
@@ -35,6 +44,8 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
     type: 'coliving' as 'coliving' | 'coworking' | 'apartment' | 'house',
     status: 'active' as 'active' | 'inactive' | 'pending',
     original_price: 0,
+    discount_type: 'percentage' as 'percentage' | 'fixed',
+    discount_value: null as number | null,
     discounted_price: null as number | null,
     discount_percentage: null as number | null,
     capacity: null as number | null,
@@ -42,7 +53,6 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
     featured_image: '',
     images: [] as string[],
     amenities: [] as string[],
-    rating: null as number | null,
     review_count: 0,
     discount_code_url: '',
     is_seasonal: false,
@@ -50,7 +60,6 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
     seasonal_end_date: ''
   });
 
-  const [newImage, setNewImage] = useState('');
   const [newAmenity, setNewAmenity] = useState('');
 
   useEffect(() => {
@@ -63,6 +72,8 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
         type: listing.type || 'coliving',
         status: listing.status || 'active',
         original_price: listing.original_price || 0,
+        discount_type: listing.discount_percentage ? 'percentage' : 'fixed',
+        discount_value: listing.discount_percentage || (listing.original_price - (listing.discounted_price || listing.original_price)),
         discounted_price: listing.discounted_price,
         discount_percentage: listing.discount_percentage,
         capacity: listing.capacity,
@@ -70,35 +81,67 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
         featured_image: listing.featured_image || '',
         images: listing.images || [],
         amenities: listing.amenities || [],
-        rating: listing.rating,
         review_count: listing.review_count || 0,
         discount_code_url: listing.discount_code_url || '',
         is_seasonal: listing.is_seasonal || false,
         seasonal_start_date: listing.seasonal_start_date || '',
         seasonal_end_date: listing.seasonal_end_date || ''
       });
+      
+      // Fetch ratings for existing listing
+      if (listing.id) {
+        fetchListingRatings(listing.id);
+      }
     }
   }, [listing]);
 
-  const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  const fetchListingRatings = async (listingId: number) => {
+    try {
+      const { data: reviews, error } = await supabase
+        .from('reviews')
+        .select('social_rating, work_rating, surroundings_rating, facilities_rating, price_rating')
+        .eq('listing_id', listingId);
 
-  const addImage = () => {
-    if (newImage.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        images: [...prev.images, newImage.trim()]
-      }));
-      setNewImage('');
+      if (error) {
+        console.error('Error fetching reviews:', error);
+        return;
+      }
+
+      if (reviews && reviews.length > 0) {
+        const validReviews = reviews.filter(review => 
+          review.social_rating && review.work_rating && 
+          review.surroundings_rating && review.facilities_rating && 
+          review.price_rating
+        );
+
+        if (validReviews.length > 0) {
+          const social = validReviews.reduce((sum, r) => sum + r.social_rating, 0) / validReviews.length;
+          const work = validReviews.reduce((sum, r) => sum + r.work_rating, 0) / validReviews.length;
+          const surroundings = validReviews.reduce((sum, r) => sum + r.surroundings_rating, 0) / validReviews.length;
+          const facilities = validReviews.reduce((sum, r) => sum + r.facilities_rating, 0) / validReviews.length;
+          const price = validReviews.reduce((sum, r) => sum + r.price_rating, 0) / validReviews.length;
+          const overall = (social + work + surroundings + facilities + price) / 5;
+
+          setAverageRatings({
+            social: Math.round(social * 10) / 10,
+            work: Math.round(work * 10) / 10,
+            surroundings: Math.round(surroundings * 10) / 10,
+            facilities: Math.round(facilities * 10) / 10,
+            price: Math.round(price * 10) / 10,
+            overall: Math.round(overall * 10) / 10
+          });
+
+          // Update review count in form data
+          setFormData(prev => ({ ...prev, review_count: validReviews.length }));
+        }
+      }
+    } catch (error) {
+      console.error('Error calculating ratings:', error);
     }
   };
 
-  const removeImage = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index)
-    }));
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const addAmenity = () => {
@@ -119,10 +162,42 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
   };
 
   const calculateDiscountPrice = () => {
-    if (formData.discount_percentage && formData.original_price) {
-      const discounted = formData.original_price - (formData.original_price * formData.discount_percentage / 100);
-      setFormData(prev => ({ ...prev, discounted_price: Math.round(discounted) }));
+    if (formData.discount_value && formData.original_price) {
+      if (formData.discount_type === 'percentage') {
+        const discounted = formData.original_price - (formData.original_price * formData.discount_value / 100);
+        setFormData(prev => ({ 
+          ...prev, 
+          discounted_price: Math.round(discounted),
+          discount_percentage: formData.discount_value
+        }));
+      } else {
+        const discounted = formData.original_price - formData.discount_value;
+        const percentage = (formData.discount_value / formData.original_price) * 100;
+        setFormData(prev => ({ 
+          ...prev, 
+          discounted_price: Math.max(0, Math.round(discounted)),
+          discount_percentage: Math.round(percentage)
+        }));
+      }
     }
+  };
+
+  const handleImageUploaded = (url: string, isGallery = false) => {
+    if (isGallery) {
+      setFormData(prev => ({
+        ...prev,
+        images: [...prev.images, url]
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, featured_image: url }));
+    }
+  };
+
+  const removeGalleryImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -132,15 +207,19 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
     try {
       const submissionData = {
         ...formData,
+        rating: averageRatings.overall,
         created_by: user?.id,
         updated_at: new Date().toISOString()
       };
+
+      // Remove discount_type and discount_value from submission as they're not in the database
+      const { discount_type, discount_value, ...dbData } = submissionData;
 
       if (listing) {
         // Update existing listing
         const { error } = await supabase
           .from('listings')
-          .update(submissionData)
+          .update(dbData)
           .eq('id', listing.id);
 
         if (error) throw error;
@@ -149,7 +228,7 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
         // Create new listing
         const { error } = await supabase
           .from('listings')
-          .insert([submissionData]);
+          .insert([dbData]);
 
         if (error) throw error;
         toast({ title: 'Listing created successfully!' });
@@ -277,7 +356,7 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
               </CardContent>
             </Card>
 
-            {/* Pricing */}
+            {/* Pricing & Discounts */}
             <Card>
               <CardHeader>
                 <CardTitle>Pricing & Discounts</CardTitle>
@@ -296,25 +375,40 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
                 </div>
 
                 <div>
-                  <Label htmlFor="discount_percentage">Discount Percentage (%)</Label>
+                  <Label htmlFor="discount_type">Discount Type</Label>
+                  <Select value={formData.discount_type} onValueChange={(value) => handleInputChange('discount_type', value)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="percentage">Percentage (%)</SelectItem>
+                      <SelectItem value="fixed">Fixed Amount (€)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="discount_value">
+                    {formData.discount_type === 'percentage' ? 'Discount value in %' : 'Discount value in €'}
+                  </Label>
                   <Input
-                    id="discount_percentage"
+                    id="discount_value"
                     type="number"
-                    value={formData.discount_percentage || ''}
+                    value={formData.discount_value || ''}
                     onChange={(e) => {
                       const value = parseInt(e.target.value) || null;
-                      handleInputChange('discount_percentage', value);
+                      handleInputChange('discount_value', value);
                     }}
                     onBlur={calculateDiscountPrice}
-                    placeholder="40"
+                    placeholder={formData.discount_type === 'percentage' ? '40' : '480'}
                     min="0"
-                    max="100"
+                    max={formData.discount_type === 'percentage' ? '100' : formData.original_price}
                   />
                 </div>
 
                 {formData.discounted_price && (
                   <div>
-                    <Label htmlFor="discounted_price">Discounted Price (€)</Label>
+                    <Label htmlFor="discounted_price">Final Discounted Price (€)</Label>
                     <Input
                       id="discounted_price"
                       type="number"
@@ -366,34 +460,52 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
                     />
                   </div>
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="rating">Rating (0-5)</Label>
-                    <Input
-                      id="rating"
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      max="5"
-                      value={formData.rating || ''}
-                      onChange={(e) => handleInputChange('rating', parseFloat(e.target.value) || null)}
-                      placeholder="4.8"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="review_count">Review Count</Label>
-                    <Input
-                      id="review_count"
-                      type="number"
-                      value={formData.review_count}
-                      onChange={(e) => handleInputChange('review_count', parseInt(e.target.value) || 0)}
-                      placeholder="127"
-                    />
-                  </div>
-                </div>
               </CardContent>
             </Card>
+
+            {/* Ratings Display */}
+            {listing && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Ratings (Calculated from Reviews)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm">Social:</span>
+                        <span className="font-medium">{averageRatings.social}/5</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm">Work/WiFi:</span>
+                        <span className="font-medium">{averageRatings.work}/5</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm">Surroundings:</span>
+                        <span className="font-medium">{averageRatings.surroundings}/5</span>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-sm">Facilities:</span>
+                        <span className="font-medium">{averageRatings.facilities}/5</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-sm">Price:</span>
+                        <span className="font-medium">{averageRatings.price}/5</span>
+                      </div>
+                      <div className="flex justify-between border-t pt-2">
+                        <span className="font-medium">Overall:</span>
+                        <span className="font-bold">{averageRatings.overall}/5</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Based on {formData.review_count} review{formData.review_count !== 1 ? 's' : ''}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Images */}
             <Card>
@@ -401,43 +513,41 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
                 <CardTitle>Images</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="featured_image">Featured Image URL</Label>
-                  <Input
-                    id="featured_image"
-                    value={formData.featured_image}
-                    onChange={(e) => handleInputChange('featured_image', e.target.value)}
-                    placeholder="https://images.unsplash.com/..."
-                  />
-                </div>
+                <ImageUpload
+                  onImageUploaded={(url) => handleImageUploaded(url, false)}
+                  currentImage={formData.featured_image}
+                  label="Featured Image"
+                />
+
+                <Separator />
 
                 <div>
                   <Label>Gallery Images</Label>
-                  <div className="flex gap-2 mb-2">
-                    <Input
-                      value={newImage}
-                      onChange={(e) => setNewImage(e.target.value)}
-                      placeholder="Image URL"
+                  <div className="space-y-4">
+                    <ImageUpload
+                      onImageUploaded={(url) => handleImageUploaded(url, true)}
+                      label="Add Gallery Image"
                     />
-                    <Button type="button" onClick={addImage}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="space-y-2">
-                    {formData.images.map((image, index) => (
-                      <div key={index} className="flex items-center gap-2 p-2 border rounded">
-                        <img src={image} alt="" className="w-12 h-12 object-cover rounded" />
-                        <span className="flex-1 text-sm truncate">{image}</span>
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => removeImage(index)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                    
+                    {formData.images.length > 0 && (
+                      <div className="space-y-2">
+                        <Label>Current Gallery Images</Label>
+                        {formData.images.map((image, index) => (
+                          <div key={index} className="flex items-center gap-2 p-2 border rounded">
+                            <img src={image} alt="" className="w-12 h-12 object-cover rounded" />
+                            <span className="flex-1 text-sm truncate">{image}</span>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => removeGalleryImage(index)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
               </CardContent>
@@ -575,10 +685,10 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
                       )}
                     </div>
                     
-                    {formData.rating && (
+                    {averageRatings.overall > 0 && (
                       <div className="flex items-center gap-1">
                         <span className="text-yellow-500">★</span>
-                        <span>{formData.rating}</span>
+                        <span>{averageRatings.overall}</span>
                         {formData.review_count > 0 && (
                           <span className="text-sm text-gray-500">({formData.review_count} reviews)</span>
                         )}
