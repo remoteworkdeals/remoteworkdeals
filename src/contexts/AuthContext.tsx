@@ -35,8 +35,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const fetchUserRole = async (userId: string) => {
     try {
-      // Use any type to bypass TypeScript errors for the role column
-      const { data, error } = await (supabase as any)
+      console.log('Fetching user role for:', userId);
+      const { data, error } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', userId)
@@ -44,17 +44,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       if (error) {
         console.error('Error fetching user role:', error);
-        return null;
+        return 'user'; // Default fallback
       }
       
+      console.log('User role fetched:', data?.role);
       return data?.role || 'user';
     } catch (error) {
       console.error('Error fetching user role:', error);
-      return null;
+      return 'user'; // Default fallback
     }
   };
 
   useEffect(() => {
+    console.log('Setting up auth state listener...');
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -63,9 +66,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          console.log('User logged in, fetching role...');
           const role = await fetchUserRole(session.user.id);
           setUserRole(role);
+          console.log('User role set to:', role);
         } else {
+          console.log('No user, clearing role');
           setUserRole(null);
         }
         
@@ -75,21 +81,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     // Get initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
+        console.log('Initial user found, fetching role...');
         const role = await fetchUserRole(session.user.id);
         setUserRole(role);
+        console.log('Initial user role set to:', role);
       }
       
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('Cleaning up auth subscription');
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    console.log('Attempting to sign in:', email);
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -98,8 +111,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const signUp = async (email: string, password: string, fullName?: string) => {
-    // First check if email is approved using any type to bypass TypeScript
-    const { data: approvedEmail, error: checkError } = await (supabase as any)
+    console.log('Attempting to sign up:', email);
+    
+    // First check if email is approved
+    const { data: approvedEmail, error: checkError } = await supabase
       .from('approved_admins')
       .select('email, used')
       .eq('email', email)
@@ -107,6 +122,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       .single();
 
     if (checkError || !approvedEmail) {
+      console.log('Email not approved for admin access');
       return { 
         error: { 
           message: 'This email is not approved for admin access. Please contact an administrator to get invited.' 
@@ -130,6 +146,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const signOut = async () => {
+    console.log('Signing out...');
     await supabase.auth.signOut();
   };
 
