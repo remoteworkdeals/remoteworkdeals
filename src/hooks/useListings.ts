@@ -1,53 +1,22 @@
 
-import { useState, useEffect } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Listing } from '@/types/listing';
-import { useToast } from '@/hooks/use-toast';
 
-export const useListings = () => {
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
+export const useDeleteListing = () => {
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const fetchListings = async () => {
-      try {
-        setLoading(true);
-        
-        const { data, error } = await supabase
-          .from('listings')
-          .select('*')
-          .eq('status', 'active')
-          .order('created_at', { ascending: false });
-
-        if (error) {
-          console.error('Error fetching listings:', error);
-          setError('Failed to load listings');
-          toast({
-            title: "Error",
-            description: "Failed to load listings",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        setListings(data || []);
-      } catch (err) {
-        console.error('Unexpected error:', err);
-        setError('An unexpected error occurred');
-        toast({
-          title: "Error",
-          description: "An unexpected error occurred while loading listings",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchListings();
-  }, [toast]);
-
-  return { listings, loading, error };
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const { error } = await supabase
+        .from('listings')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-listings'] });
+      queryClient.invalidateQueries({ queryKey: ['listings'] });
+    }
+  });
 };

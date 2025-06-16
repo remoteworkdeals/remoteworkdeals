@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,6 +14,7 @@ import ExclusiveDeals from "./pages/ExclusiveDeals";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import AdminBlog from "./pages/AdminBlog";
+import AdminListings from "./pages/AdminListings";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -40,6 +40,11 @@ const App = () => (
               <Route path="/admin/blog" element={
                 <ProtectedRoute>
                   <AdminBlog />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/listings" element={
+                <ProtectedRoute>
+                  <AdminListings />
                 </ProtectedRoute>
               } />
               <Route path="*" element={<NotFound />} />

@@ -1,10 +1,9 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Trash2, Eye, LogOut, Settings } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, LogOut, Settings, Home, Building } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { BlogPost, useDeleteBlogPost } from '@/hooks/useBlogPosts';
@@ -12,12 +11,14 @@ import BlogPostForm from '@/components/BlogPostForm';
 import AdminManagement from '@/components/AdminManagement';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const AdminBlog = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const { toast } = useToast();
   const { user, userRole, signOut } = useAuth();
+  const navigate = useNavigate();
   const deleteMutation = useDeleteBlogPost();
 
   const { data: posts, isLoading, refetch } = useQuery({
@@ -100,10 +101,20 @@ const AdminBlog = () => {
             </div>
           )}
         </div>
-        <Button onClick={handleLogout} variant="outline">
-          <LogOut className="mr-2 h-4 w-4" />
-          Logout
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => navigate('/admin/listings')}>
+            <Building className="mr-2 h-4 w-4" />
+            Manage Listings
+          </Button>
+          <Button variant="outline" onClick={() => window.open('/', '_blank')}>
+            <Home className="mr-2 h-4 w-4" />
+            View Website
+          </Button>
+          <Button onClick={handleLogout} variant="outline">
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="posts" className="w-full">
