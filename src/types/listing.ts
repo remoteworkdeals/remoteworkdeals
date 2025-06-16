@@ -37,5 +37,10 @@ export interface Review {
   surroundings_rating: number | null;
   facilities_rating: number | null;
   price_rating: number | null;
+  social_notes: string | null;
+  work_notes: string | null;
+  surroundings_notes: string | null;
+  facilities_notes: string | null;
+  price_notes: string | null;
   created_at: string;
 }

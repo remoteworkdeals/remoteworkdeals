@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Listing, Review } from '@/types/listing';
 import { useToast } from '@/hooks/use-toast';
+import { ReviewSubmissionData } from '@/components/ReviewForm';
 
 export const useListingData = (listingId: number) => {
   const [listing, setListing] = useState<Listing | null>(null);
@@ -98,15 +99,7 @@ export const useListingData = (listingId: number) => {
     };
   };
 
-  const submitReview = async (reviewData: {
-    name: string;
-    review: string;
-    social: number;
-    work: number;
-    surroundings: number;
-    facilities: number;
-    price: number;
-  }) => {
+  const submitReview = async (reviewData: ReviewSubmissionData) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -130,7 +123,12 @@ export const useListingData = (listingId: number) => {
           work_rating: reviewData.work,
           surroundings_rating: reviewData.surroundings,
           facilities_rating: reviewData.facilities,
-          price_rating: reviewData.price
+          price_rating: reviewData.price,
+          social_notes: reviewData.socialNotes || null,
+          work_notes: reviewData.workNotes || null,
+          surroundings_notes: reviewData.surroundingsNotes || null,
+          facilities_notes: reviewData.facilitiesNotes || null,
+          price_notes: reviewData.priceNotes || null
         });
 
       if (error) {

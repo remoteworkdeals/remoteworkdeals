@@ -174,41 +174,56 @@ export type Database = {
       reviews: {
         Row: {
           created_at: string
+          facilities_notes: string | null
           facilities_rating: number | null
           id: string
           listing_id: number
+          price_notes: string | null
           price_rating: number | null
           review_text: string | null
           reviewer_name: string | null
+          social_notes: string | null
           social_rating: number | null
+          surroundings_notes: string | null
           surroundings_rating: number | null
           user_id: string
+          work_notes: string | null
           work_rating: number | null
         }
         Insert: {
           created_at?: string
+          facilities_notes?: string | null
           facilities_rating?: number | null
           id?: string
           listing_id: number
+          price_notes?: string | null
           price_rating?: number | null
           review_text?: string | null
           reviewer_name?: string | null
+          social_notes?: string | null
           social_rating?: number | null
+          surroundings_notes?: string | null
           surroundings_rating?: number | null
           user_id: string
+          work_notes?: string | null
           work_rating?: number | null
         }
         Update: {
           created_at?: string
+          facilities_notes?: string | null
           facilities_rating?: number | null
           id?: string
           listing_id?: number
+          price_notes?: string | null
           price_rating?: number | null
           review_text?: string | null
           reviewer_name?: string | null
+          social_notes?: string | null
           social_rating?: number | null
+          surroundings_notes?: string | null
           surroundings_rating?: number | null
           user_id?: string
+          work_notes?: string | null
           work_rating?: number | null
         }
         Relationships: [

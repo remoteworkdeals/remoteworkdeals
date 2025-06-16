@@ -3,12 +3,11 @@ import { useState } from 'react';
 import { MapPin, Users, Wifi, Star, Heart, MessageCircle, ArrowLeft, ExternalLink, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { useListingData } from '@/hooks/useListingData';
+import ReviewsSection from './ReviewsSection';
+import ReviewForm from './ReviewForm';
 
 interface ListingDetailProps {
   listingId: number;
@@ -17,15 +16,6 @@ interface ListingDetailProps {
 const ListingDetail = ({ listingId }: ListingDetailProps) => {
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(0);
-  const [reviewData, setReviewData] = useState({
-    name: '',
-    review: '',
-    social: 5,
-    work: 5,
-    surroundings: 5,
-    facilities: 5,
-    price: 5
-  });
 
   const { listing, reviews, loading, error, averageRatings, submitReview } = useListingData(listingId);
 
@@ -61,23 +51,6 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
       const message = `Hi! I'm interested in getting the discount code for ${listing.title} in ${listing.location}. Can you help me?`;
       const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
-    }
-  };
-
-  const handleReviewSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const success = await submitReview(reviewData);
-    
-    if (success) {
-      setReviewData({
-        name: '',
-        review: '',
-        social: 5,
-        work: 5,
-        surroundings: 5,
-        facilities: 5,
-        price: 5
-      });
     }
   };
 
@@ -174,7 +147,7 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
             
             <div className="flex items-center gap-4">
               {renderStars(listing.rating || 0)}
-              <span className="text-sm text-gray-600">({listing.review_count || 0} reviews)</span>
+              <span className="text-sm text-gray-600">({reviews.length} reviews)</span>
             </div>
           </div>
 
@@ -333,65 +306,10 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
           </div>
         </div>
 
-        {/* Review Section */}
-        <div className="mt-16">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl font-serif text-forest-green">Leave a Review</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleReviewSubmit} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <Label htmlFor="name">Your Name (optional)</Label>
-                    <Input
-                      id="name"
-                      value={reviewData.name}
-                      onChange={(e) => setReviewData({...reviewData, name: e.target.value})}
-                      placeholder="Anonymous nomad"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label>Overall Experience</Label>
-                    <Textarea
-                      value={reviewData.review}
-                      onChange={(e) => setReviewData({...reviewData, review: e.target.value})}
-                      placeholder="Share your experience with fellow nomads..."
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <Label className="text-base font-semibold mb-4 block">Rate each category (1-5 stars)</Label>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
-                    {['social', 'work', 'surroundings', 'facilities', 'price'].map((category) => (
-                      <div key={category} className="text-center">
-                        <Label className="text-sm capitalize mb-2 block">{category}</Label>
-                        <select
-                          value={reviewData[category as keyof typeof reviewData]}
-                          onChange={(e) => setReviewData({
-                            ...reviewData,
-                            [category]: parseInt(e.target.value)
-                          })}
-                          className="w-full p-2 border rounded-md"
-                        >
-                          {[1,2,3,4,5].map(num => (
-                            <option key={num} value={num}>{num} star{num > 1 ? 's' : ''}</option>
-                          ))}
-                        </select>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                <Button type="submit" className="adventure-button">
-                  Submit Review
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+        {/* Reviews Section */}
+        <div className="mt-16 space-y-8">
+          <ReviewsSection reviews={reviews} />
+          <ReviewForm onSubmit={submitReview} />
         </div>
       </div>
     </div>
