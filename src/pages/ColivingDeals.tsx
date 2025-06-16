@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
@@ -58,10 +59,10 @@ const ColivingDeals = () => {
   });
 
   // Get unique countries for the location filter
-  const uniqueCountries = Array.from(new Set(listings.map(listing => listing.country))).sort();
+  const uniqueCountries: string[] = Array.from(new Set(listings.map(listing => listing.country))).sort();
 
   // Get unique types for the type filter
-  const uniqueTypes = Array.from(new Set(listings.map(listing => listing.type))).sort();
+  const uniqueTypes: string[] = Array.from(new Set(listings.map(listing => listing.type))).sort();
 
   if (loading) {
     return (
@@ -120,7 +121,7 @@ const ColivingDeals = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Locations</SelectItem>
-                  {uniqueCountries.map((country) => (
+                  {uniqueCountries.map((country: string) => (
                     <SelectItem key={country} value={country.toLowerCase()}>{country}</SelectItem>
                   ))}
                 </SelectContent>
@@ -132,7 +133,7 @@ const ColivingDeals = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  {uniqueTypes.map((type) => (
+                  {uniqueTypes.map((type: string) => (
                     <SelectItem key={type} value={type.toLowerCase()}>{type}</SelectItem>
                   ))}
                 </SelectContent>

@@ -1,6 +1,34 @@
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { Listing } from '@/types/listing';
+
+export const useListings = () => {
+  const { data: listings = [], isLoading: loading, error } = useQuery({
+    queryKey: ['listings'],
+    queryFn: async () => {
+      console.log('Fetching listings...');
+      const { data, error } = await supabase
+        .from('listings')
+        .select('*')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        console.error('Error fetching listings:', error);
+        throw error;
+      }
+      console.log('Fetched listings:', data);
+      return data as Listing[];
+    }
+  });
+
+  return { 
+    listings, 
+    loading, 
+    error: error?.message 
+  };
+};
 
 export const useDeleteListing = () => {
   const queryClient = useQueryClient();
