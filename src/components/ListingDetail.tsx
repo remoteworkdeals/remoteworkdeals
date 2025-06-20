@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { MapPin, Users, Wifi, Star, Heart, MessageCircle, ArrowLeft, ExternalLink, Calendar } from 'lucide-react';
+import { MapPin, Users, Wifi, Star, Heart, MessageCircle, ArrowLeft, ExternalLink, Calendar, Globe, Instagram } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -8,6 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import { useListingData } from '@/hooks/useListingData';
 import ReviewsSection from './ReviewsSection';
 import ReviewForm from './ReviewForm';
+import LinkedBlogPosts from './LinkedBlogPosts';
+import CommunityPromotion from './CommunityPromotion';
 
 interface ListingDetailProps {
   listingId: number;
@@ -146,10 +148,44 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
             </div>
             
             <div className="flex items-center gap-4">
-              {renderStars(listing.rating || 0)}
-              <span className="text-sm text-gray-600">({reviews.length} reviews)</span>
+              {listing.rating && listing.rating > 0 ? (
+                <>
+                  {renderStars(listing.rating)}
+                  <span className="text-sm text-gray-600">({listing.review_count || 0} reviews)</span>
+                </>
+              ) : (
+                <span className="text-sm text-gray-600">No reviews yet</span>
+              )}
             </div>
           </div>
+
+          {/* Social Links */}
+          {(listing.website_url || listing.instagram_url) && (
+            <div className="flex items-center gap-4 mb-6">
+              {listing.website_url && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open(listing.website_url!, '_blank')}
+                  className="flex items-center gap-2"
+                >
+                  <Globe size={16} />
+                  Visit Website
+                </Button>
+              )}
+              {listing.instagram_url && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open(listing.instagram_url!, '_blank')}
+                  className="flex items-center gap-2"
+                >
+                  <Instagram size={16} />
+                  Instagram
+                </Button>
+              )}
+            </div>
+          )}
 
           {listing.is_seasonal && listing.seasonal_start_date && listing.seasonal_end_date && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
@@ -178,13 +214,13 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
                   />
                 </div>
                 {images.length > 1 && (
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-4 gap-2 max-h-32 overflow-y-auto">
                     {images.map((image, index) => (
                       <img
                         key={index}
                         src={image}
                         alt={`${listing.title} ${index + 1}`}
-                        className={`h-20 object-cover rounded-lg cursor-pointer ${
+                        className={`h-20 object-cover rounded-lg cursor-pointer transition-all ${
                           selectedImage === index ? 'ring-2 ring-adventure-orange' : 'opacity-70 hover:opacity-100'
                         }`}
                         onClick={() => setSelectedImage(index)}
@@ -240,11 +276,12 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
               <h3 className="text-2xl font-serif font-bold text-forest-green mb-6">Community Ratings</h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
+                  {averageRatings.overall > 0 && renderRatingBar('overall experience', averageRatings.overall)}
                   {renderRatingBar('social', averageRatings.social)}
                   {renderRatingBar('work environment', averageRatings.work)}
-                  {renderRatingBar('surroundings', averageRatings.surroundings)}
                 </div>
                 <div>
+                  {renderRatingBar('surroundings', averageRatings.surroundings)}
                   {renderRatingBar('facilities', averageRatings.facilities)}
                   {renderRatingBar('price', averageRatings.price)}
                 </div>
@@ -306,10 +343,20 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
           </div>
         </div>
 
+        {/* Linked Blog Posts */}
+        <div className="mt-16">
+          <LinkedBlogPosts listingId={listingId} />
+        </div>
+
         {/* Reviews Section */}
         <div className="mt-16 space-y-8">
           <ReviewsSection reviews={reviews} />
           <ReviewForm onSubmit={submitReview} />
+        </div>
+
+        {/* Community Promotion */}
+        <div className="mt-16">
+          <CommunityPromotion />
         </div>
       </div>
     </div>

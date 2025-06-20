@@ -21,6 +21,8 @@ export interface Listing {
   seasonal_end_date: string | null;
   rating: number | null;
   review_count: number | null;
+  website_url: string | null;
+  instagram_url: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -32,6 +34,7 @@ export interface Review {
   user_id: string;
   reviewer_name: string | null;
   review_text: string | null;
+  overall_rating: number | null;
   social_rating: number | null;
   work_rating: number | null;
   surroundings_rating: number | null;
@@ -43,4 +46,22 @@ export interface Review {
   facilities_notes: string | null;
   price_notes: string | null;
   created_at: string;
+}
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  content: string;
+  featured_image: string | null;
+  featured_image_alt: string | null;
+  author: string;
+  category: string;
+  status: string | null;
+  featured: boolean | null;
+  read_time: string | null;
+  linked_listings: number[] | null;
+  created_at: string;
+  updated_at: string;
 }

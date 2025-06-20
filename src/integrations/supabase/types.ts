@@ -20,6 +20,7 @@ export type Database = {
           featured_image: string | null
           featured_image_alt: string | null
           id: string
+          linked_listings: number[] | null
           read_time: string | null
           slug: string
           status: string | null
@@ -36,6 +37,7 @@ export type Database = {
           featured_image?: string | null
           featured_image_alt?: string | null
           id?: string
+          linked_listings?: number[] | null
           read_time?: string | null
           slug: string
           status?: string | null
@@ -52,6 +54,7 @@ export type Database = {
           featured_image?: string | null
           featured_image_alt?: string | null
           id?: string
+          linked_listings?: number[] | null
           read_time?: string | null
           slug?: string
           status?: string | null
@@ -74,6 +77,7 @@ export type Database = {
           featured_image: string | null
           id: number
           images: string[] | null
+          instagram_url: string | null
           is_seasonal: boolean | null
           location: string
           original_price: number
@@ -86,6 +90,7 @@ export type Database = {
           title: string
           type: Database["public"]["Enums"]["listing_type"]
           updated_at: string
+          website_url: string | null
         }
         Insert: {
           amenities?: string[] | null
@@ -100,6 +105,7 @@ export type Database = {
           featured_image?: string | null
           id?: number
           images?: string[] | null
+          instagram_url?: string | null
           is_seasonal?: boolean | null
           location: string
           original_price: number
@@ -112,6 +118,7 @@ export type Database = {
           title: string
           type?: Database["public"]["Enums"]["listing_type"]
           updated_at?: string
+          website_url?: string | null
         }
         Update: {
           amenities?: string[] | null
@@ -126,6 +133,7 @@ export type Database = {
           featured_image?: string | null
           id?: number
           images?: string[] | null
+          instagram_url?: string | null
           is_seasonal?: boolean | null
           location?: string
           original_price?: number
@@ -138,6 +146,7 @@ export type Database = {
           title?: string
           type?: Database["public"]["Enums"]["listing_type"]
           updated_at?: string
+          website_url?: string | null
         }
         Relationships: []
       }
@@ -178,6 +187,7 @@ export type Database = {
           facilities_rating: number | null
           id: string
           listing_id: number
+          overall_rating: number | null
           price_notes: string | null
           price_rating: number | null
           review_text: string | null
@@ -196,6 +206,7 @@ export type Database = {
           facilities_rating?: number | null
           id?: string
           listing_id: number
+          overall_rating?: number | null
           price_notes?: string | null
           price_rating?: number | null
           review_text?: string | null
@@ -214,6 +225,7 @@ export type Database = {
           facilities_rating?: number | null
           id?: string
           listing_id?: number
+          overall_rating?: number | null
           price_notes?: string | null
           price_rating?: number | null
           review_text?: string | null

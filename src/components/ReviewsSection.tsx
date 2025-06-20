@@ -87,6 +87,12 @@ const ReviewsSection = ({ reviews }: ReviewsSectionProps) => {
                   </h4>
                   <p className="text-sm text-gray-500">{formatDate(review.created_at)}</p>
                 </div>
+                {review.overall_rating && (
+                  <div className="text-right">
+                    <div className="text-xs font-medium text-gray-600 mb-1">Overall Experience</div>
+                    {renderStars(review.overall_rating)}
+                  </div>
+                )}
               </div>
 
               {review.review_text && (

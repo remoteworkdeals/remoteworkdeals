@@ -13,6 +13,7 @@ interface ReviewFormProps {
 export interface ReviewSubmissionData {
   name: string;
   review: string;
+  overall: number;
   social: number;
   work: number;
   surroundings: number;
@@ -29,6 +30,7 @@ const ReviewForm = ({ onSubmit }: ReviewFormProps) => {
   const [reviewData, setReviewData] = useState<ReviewSubmissionData>({
     name: '',
     review: '',
+    overall: 5,
     social: 5,
     work: 5,
     surroundings: 5,
@@ -49,6 +51,7 @@ const ReviewForm = ({ onSubmit }: ReviewFormProps) => {
       setReviewData({
         name: '',
         review: '',
+        overall: 5,
         social: 5,
         work: 5,
         surroundings: 5,
@@ -97,6 +100,29 @@ const ReviewForm = ({ onSubmit }: ReviewFormProps) => {
                 placeholder="Share your overall experience with fellow nomads..."
                 className="mt-1"
               />
+            </div>
+          </div>
+
+          {/* Overall Experience Rating - Mandatory */}
+          <div className="border rounded-lg p-4 bg-blue-50">
+            <Label className="text-base font-semibold mb-4 block text-blue-900">
+              Overall Experience Rating (Required) *
+            </Label>
+            <div className="flex items-center gap-4">
+              <Label className="text-sm font-medium">Rate your overall experience:</Label>
+              <select
+                value={reviewData.overall}
+                onChange={(e) => setReviewData({
+                  ...reviewData,
+                  overall: parseInt(e.target.value)
+                })}
+                className="p-2 border rounded-md bg-white"
+                required
+              >
+                {[1,2,3,4,5].map(num => (
+                  <option key={num} value={num}>{num} star{num > 1 ? 's' : ''}</option>
+                ))}
+              </select>
             </div>
           </div>
           
