@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,9 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Save, Eye } from 'lucide-react';
 import { BlogPost, useCreateBlogPost, useUpdateBlogPost } from '@/hooks/useBlogPosts';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import BlogImageUpload from '@/components/BlogImageUpload';
 import RichTextEditor from '@/components/RichTextEditor';
 import SEOFields from '@/components/SEOFields';
@@ -32,16 +33,35 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
     featured: false,
     status: 'published' as 'draft' | 'published',
     read_time: '',
+    linked_listings: [] as number[],
     meta_title: '',
     meta_description: '',
     focus_keyword: '',
     canonical_url: ''
   });
 
+  const [availableListings, setAvailableListings] = useState<Array<{id: number, title: string}>>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const createMutation = useCreateBlogPost();
   const updateMutation = useUpdateBlogPost();
+
+  useEffect(() => {
+    // Fetch available listings for linking
+    const fetchListings = async () => {
+      const { data, error } = await supabase
+        .from('listings')
+        .select('id, title')
+        .eq('status', 'active')
+        .order('title');
+      
+      if (!error && data) {
+        setAvailableListings(data);
+      }
+    };
+    
+    fetchListings();
+  }, []);
 
   useEffect(() => {
     if (post) {
@@ -57,6 +77,7 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
         featured: post.featured,
         status: post.status,
         read_time: post.read_time || '',
+        linked_listings: post.linked_listings || [],
         meta_title: post.title,
         meta_description: post.excerpt || '',
         focus_keyword: '',
@@ -114,6 +135,15 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
     }));
   };
 
+  const handleListingToggle = (listingId: number, checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      linked_listings: checked 
+        ? [...prev.linked_listings, listingId]
+        : prev.linked_listings.filter(id => id !== listingId)
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -152,7 +182,8 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
         featured_image_alt: formData.featured_image_alt.trim() || null,
         featured: formData.featured,
         status: formData.status,
-        read_time: formData.read_time || estimateReadTime(formData.content)
+        read_time: formData.read_time || estimateReadTime(formData.content),
+        linked_listings: formData.linked_listings.length > 0 ? formData.linked_listings : null
       };
 
       console.log('Blog post data being submitted:', blogPostData);
@@ -236,6 +267,7 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
             <CardTitle className="text-xl text-forest-green">Basic Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 p-8">
+            {/* ... keep existing code (title, slug, excerpt fields) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="title" className="text-base font-semibold">Title *</Label>
@@ -301,6 +333,55 @@ const BlogPostForm = ({ post, onClose }: BlogPostFormProps) => {
                 Word count: {formData.content.trim().split(/\s+/).filter(word => word.length > 0).length} | 
                 Estimated read time: {formData.read_time}
               </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Linked Colivings */}
+        <Card className="shadow-lg border-0">
+          <CardHeader className="bg-gray-50">
+            <CardTitle className="text-xl text-forest-green">Link to Colivings</CardTitle>
+          </CardHeader>
+          <CardContent className="p-8">
+            <div className="space-y-4">
+              <Label className="text-base font-semibold">
+                Select colivings to link to this blog post (optional)
+              </Label>
+              <p className="text-sm text-gray-500">
+                Linked colivings will show this blog post in their "Read more about this Coliving" section
+              </p>
+              
+              {availableListings.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-64 overflow-y-auto border rounded-lg p-4">
+                  {availableListings.map((listing) => (
+                    <div key={listing.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`listing-${listing.id}`}
+                        checked={formData.linked_listings.includes(listing.id)}
+                        onCheckedChange={(checked) => handleListingToggle(listing.id, checked as boolean)}
+                      />
+                      <Label 
+                        htmlFor={`listing-${listing.id}`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                        {listing.title}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 italic">
+                  No active colivings available to link. Create some listings first.
+                </p>
+              )}
+              
+              {formData.linked_listings.length > 0 && (
+                <div className="mt-4 p-3 bg-green-50 rounded-lg">
+                  <p className="text-sm font-medium text-green-800">
+                    This blog post will appear on {formData.linked_listings.length} coliving page{formData.linked_listings.length > 1 ? 's' : ''}
+                  </p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

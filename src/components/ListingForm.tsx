@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Plus, Trash2, Eye, Save } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Eye, Save, ExternalLink, Instagram } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Listing } from '@/types/listing';
@@ -55,6 +54,8 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
     amenities: [] as string[],
     review_count: 0,
     discount_code_url: '',
+    website_url: '',
+    instagram_url: '',
     is_seasonal: false,
     seasonal_start_date: '',
     seasonal_end_date: ''
@@ -83,6 +84,8 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
         amenities: listing.amenities || [],
         review_count: listing.review_count || 0,
         discount_code_url: listing.discount_code_url || '',
+        website_url: listing.website_url || '',
+        instagram_url: listing.instagram_url || '',
         is_seasonal: listing.is_seasonal || false,
         seasonal_start_date: listing.seasonal_start_date || '',
         seasonal_end_date: listing.seasonal_end_date || ''
@@ -131,7 +134,6 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
             overall: Math.round(overall * 10) / 10
           });
 
-          // Update review count in form data
           setFormData(prev => ({ ...prev, review_count: validReviews.length }));
         }
       }
@@ -352,6 +354,41 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Social Links & Website */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ExternalLink className="h-5 w-5" />
+                  Social Links & Website
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="website_url">Website URL</Label>
+                  <Input
+                    id="website_url"
+                    type="url"
+                    value={formData.website_url}
+                    onChange={(e) => handleInputChange('website_url', e.target.value)}
+                    placeholder="https://example.com"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="instagram_url" className="flex items-center gap-2">
+                    <Instagram className="h-4 w-4" />
+                    Instagram URL
+                  </Label>
+                  <Input
+                    id="instagram_url"
+                    type="url"
+                    value={formData.instagram_url}
+                    onChange={(e) => handleInputChange('instagram_url', e.target.value)}
+                    placeholder="https://instagram.com/username"
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -698,6 +735,23 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
 
                   {formData.description && (
                     <p className="text-gray-700 text-sm">{formData.description}</p>
+                  )}
+
+                  {(formData.website_url || formData.instagram_url) && (
+                    <div className="flex gap-2">
+                      {formData.website_url && (
+                        <Badge variant="outline" className="flex items-center gap-1">
+                          <ExternalLink className="h-3 w-3" />
+                          Website
+                        </Badge>
+                      )}
+                      {formData.instagram_url && (
+                        <Badge variant="outline" className="flex items-center gap-1">
+                          <Instagram className="h-3 w-3" />
+                          Instagram
+                        </Badge>
+                      )}
+                    </div>
                   )}
 
                   {formData.amenities.length > 0 && (

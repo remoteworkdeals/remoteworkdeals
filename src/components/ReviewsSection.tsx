@@ -14,6 +14,8 @@ const ReviewsSection = ({ reviews }: ReviewsSectionProps) => {
   const [showAll, setShowAll] = useState(false);
   const [expandedReviews, setExpandedReviews] = useState<Set<string>>(new Set());
 
+  console.log('ReviewsSection received reviews:', reviews);
+
   const displayedReviews = showAll ? reviews : reviews.slice(0, 3);
 
   const renderStars = (rating: number | null) => {
@@ -50,7 +52,9 @@ const ReviewsSection = ({ reviews }: ReviewsSectionProps) => {
     });
   };
 
-  if (reviews.length === 0) {
+  console.log('Reviews length check:', reviews.length);
+
+  if (!reviews || reviews.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -74,6 +78,7 @@ const ReviewsSection = ({ reviews }: ReviewsSectionProps) => {
       </CardHeader>
       <CardContent className="space-y-6">
         {displayedReviews.map((review) => {
+          console.log('Rendering review:', review);
           const isExpanded = expandedReviews.has(review.id);
           const hasNotes = review.social_notes || review.work_notes || review.surroundings_notes || 
                           review.facilities_notes || review.price_notes;
