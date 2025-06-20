@@ -151,10 +151,20 @@ const AdminListings = () => {
                     )}
                   </div>
                   <div className="flex gap-4 text-sm text-gray-600">
-                    <span>€{listing.original_price}</span>
-                    {listing.discounted_price && (
-                      <span className="text-green-600 font-medium">
-                        Now €{listing.discounted_price}
+                    <span>
+                      Starting from €{listing.original_price}
+                      {listing.discounted_price && (
+                        <span className="text-green-600 font-medium ml-2">
+                          Now €{listing.discounted_price}
+                        </span>
+                      )}
+                      <span className="text-xs text-gray-500 ml-1">
+                        / {listing.pricing_unit}
+                      </span>
+                    </span>
+                    {listing.minimum_stay && (
+                      <span>
+                        Min stay: {listing.minimum_stay} {listing.minimum_stay_unit}
                       </span>
                     )}
                     {listing.capacity && <span>{listing.capacity} capacity</span>}

@@ -33,7 +33,7 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
     price: 0,
     overall: 0
   });
-  
+
   // Form state
   const [formData, setFormData] = useState({
     title: '',
@@ -43,10 +43,13 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
     type: 'coliving' as 'coliving' | 'coworking' | 'apartment' | 'house',
     status: 'active' as 'active' | 'inactive' | 'pending',
     original_price: 0,
+    pricing_unit: 'month' as 'night' | 'month',
     discount_type: 'percentage' as 'percentage' | 'fixed',
     discount_value: null as number | null,
     discounted_price: null as number | null,
     discount_percentage: null as number | null,
+    minimum_stay: null as number | null,
+    minimum_stay_unit: 'nights' as 'nights' | 'weeks' | 'months',
     capacity: null as number | null,
     rooms: null as number | null,
     featured_image: '',
@@ -73,10 +76,13 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
         type: listing.type || 'coliving',
         status: listing.status || 'active',
         original_price: listing.original_price || 0,
+        pricing_unit: listing.pricing_unit || 'month',
         discount_type: listing.discount_percentage ? 'percentage' : 'fixed',
         discount_value: listing.discount_percentage || (listing.original_price - (listing.discounted_price || listing.original_price)),
         discounted_price: listing.discounted_price,
         discount_percentage: listing.discount_percentage,
+        minimum_stay: listing.minimum_stay,
+        minimum_stay_unit: listing.minimum_stay_unit || 'nights',
         capacity: listing.capacity,
         rooms: listing.rooms,
         featured_image: listing.featured_image || '',
@@ -399,16 +405,30 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
                 <CardTitle>Pricing & Discounts</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="original_price">Original Price (€) *</Label>
-                  <Input
-                    id="original_price"
-                    type="number"
-                    value={formData.original_price}
-                    onChange={(e) => handleInputChange('original_price', parseInt(e.target.value) || 0)}
-                    placeholder="1200"
-                    required
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="original_price">Starting Price (€) *</Label>
+                    <Input
+                      id="original_price"
+                      type="number"
+                      value={formData.original_price}
+                      onChange={(e) => handleInputChange('original_price', parseInt(e.target.value) || 0)}
+                      placeholder="1200"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="pricing_unit">Pricing Unit *</Label>
+                    <Select value={formData.pricing_unit} onValueChange={(value) => handleInputChange('pricing_unit', value)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="night">Per Night</SelectItem>
+                        <SelectItem value="month">Per Month</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div>
@@ -495,6 +515,32 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
                       onChange={(e) => handleInputChange('rooms', parseInt(e.target.value) || null)}
                       placeholder="6"
                     />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="minimum_stay">Minimum Stay</Label>
+                    <Input
+                      id="minimum_stay"
+                      type="number"
+                      value={formData.minimum_stay || ''}
+                      onChange={(e) => handleInputChange('minimum_stay', parseInt(e.target.value) || null)}
+                      placeholder="7"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="minimum_stay_unit">Minimum Stay Unit</Label>
+                    <Select value={formData.minimum_stay_unit} onValueChange={(value) => handleInputChange('minimum_stay_unit', value)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="nights">Nights</SelectItem>
+                        <SelectItem value="weeks">Weeks</SelectItem>
+                        <SelectItem value="months">Months</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </CardContent>
@@ -714,12 +760,21 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
                     <div className="flex items-center gap-2">
                       {formData.discounted_price ? (
                         <>
-                          <span className="text-lg font-bold text-green-600">€{formData.discounted_price}</span>
-                          <span className="text-sm text-gray-500 line-through">€{formData.original_price}</span>
+                          <span className="text-lg font-bold text-green-600">
+                            Starting from €{formData.discounted_price}
+                          </span>
+                          <span className="text-sm text-gray-500 line-through">
+                            €{formData.original_price}
+                          </span>
                         </>
                       ) : (
-                        <span className="text-lg font-bold">€{formData.original_price}</span>
+                        <span className="text-lg font-bold">
+                          Starting from €{formData.original_price}
+                        </span>
                       )}
+                      <span className="text-sm text-gray-600">
+                        / {formData.pricing_unit}
+                      </span>
                     </div>
                     
                     {averageRatings.overall > 0 && (

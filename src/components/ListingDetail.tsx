@@ -298,14 +298,21 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
               <CardContent className="p-6">
                 <div className="text-center mb-6">
                   <div className="text-3xl font-bold text-forest-green">
-                    €{listing.discounted_price || listing.original_price}
+                    Starting from €{listing.discounted_price || listing.original_price}
                     {listing.discounted_price && (
                       <span className="text-lg text-gray-500 line-through ml-2">
                         €{listing.original_price}
                       </span>
                     )}
                   </div>
-                  <div className="text-sm text-gray-600">per month</div>
+                  <div className="text-sm text-gray-600">
+                    per {listing.pricing_unit}
+                  </div>
+                  {listing.minimum_stay && (
+                    <div className="text-sm text-gray-600 mt-1">
+                      Minimum stay: {listing.minimum_stay} {listing.minimum_stay_unit}
+                    </div>
+                  )}
                   {discountAmount > 0 && (
                     <div className="text-adventure-orange font-semibold mt-2">
                       Save €{discountAmount}!

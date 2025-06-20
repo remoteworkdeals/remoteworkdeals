@@ -8,9 +8,12 @@ export interface Listing {
   type: 'coliving' | 'coworking' | 'apartment' | 'house';
   status: 'active' | 'inactive' | 'pending';
   original_price: number;
+  pricing_unit: 'night' | 'month';
   discounted_price: number | null;
   discount_percentage: number | null;
   discount_code_url: string | null;
+  minimum_stay: number | null;
+  minimum_stay_unit: 'nights' | 'weeks' | 'months';
   capacity: number | null;
   rooms: number | null;
   amenities: string[] | null;
