@@ -132,9 +132,7 @@ export const useListingData = (listingId: number) => {
     const result = {
       overall: overallRatings.length > 0 ? overallRatings.reduce((sum, r) => sum + r, 0) / overallRatings.length : 0,
       social: validReviews.length > 0 ? validReviews.reduce((sum, r) => sum + (r.social_rating || 0), 0) / validReviews.length : 0,
-      work: validReviews.length > 0 ? validReviews.reduce((sum, r) => sum + (r.work_rating || 0), 0) / validRevi
-
-ews.length : 0,
+      work: validReviews.length > 0 ? validReviews.reduce((sum, r) => sum + (r.work_rating || 0), 0) / validReviews.length : 0,
       surroundings: validReviews.length > 0 ? validReviews.reduce((sum, r) => sum + (r.surroundings_rating || 0), 0) / validReviews.length : 0,
       facilities: validReviews.length > 0 ? validReviews.reduce((sum, r) => sum + (r.facilities_rating || 0), 0) / validReviews.length : 0,
       price: validReviews.length > 0 ? validReviews.reduce((sum, r) => sum + (r.price_rating || 0), 0) / validReviews.length : 0
