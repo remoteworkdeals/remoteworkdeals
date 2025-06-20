@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Listing, Review } from '@/types/listing';
@@ -30,7 +29,15 @@ export const useListingData = (listingId: number) => {
           return;
         }
 
-        setListing(listingData);
+        // Transform the data to match the Listing type, providing defaults for new fields
+        const transformedListing: Listing = {
+          ...listingData,
+          pricing_unit: listingData.pricing_unit || 'night',
+          minimum_stay: listingData.minimum_stay || null,
+          minimum_stay_unit: listingData.minimum_stay_unit || 'nights'
+        };
+
+        setListing(transformedListing);
 
         // Fetch reviews for this listing
         const { data: reviewsData, error: reviewsError } = await supabase
