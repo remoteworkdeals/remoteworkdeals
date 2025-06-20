@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -15,6 +14,7 @@ export interface BlogPost {
   featured: boolean;
   status: 'draft' | 'published';
   read_time: string | null;
+  linked_listings: number[] | null;
   created_at: string;
   updated_at: string;
 }
@@ -97,6 +97,7 @@ export const useCreateBlogPost = () => {
         featured: post.featured || false,
         status: post.status || 'published',
         read_time: post.read_time?.trim() || null,
+        linked_listings: post.linked_listings,
         updated_at: new Date().toISOString()
       };
       
