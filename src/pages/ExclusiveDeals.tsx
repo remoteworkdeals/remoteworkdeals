@@ -1,4 +1,3 @@
-
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -17,9 +16,10 @@ const ExclusiveDeals = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Form submitted:', formData);
-    // Here you would send the data to your backend
     alert('Welcome to the community! You\'ll receive exclusive deals soon.');
     setFormData({ email: '', phone: '' });
+    // Redirect to WhatsApp group
+    window.open('https://chat.whatsapp.com/Bnb3F4ycBPcLsYRl2BxNtM', '_blank');
   };
 
   const benefits = [
@@ -152,7 +152,6 @@ const ExclusiveDeals = () => {
                       value={formData.phone}
                       onChange={(e) => setFormData({...formData, phone: e.target.value})}
                       placeholder="+1 234 567 8900"
-                      required
                       className="mt-2 h-12"
                     />
                   </div>

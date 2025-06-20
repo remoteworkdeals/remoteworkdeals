@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { MapPin, Users, Wifi, Star, Heart, MessageCircle, ArrowLeft, ExternalLink, Calendar, Globe, Instagram } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -54,6 +53,10 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
       const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
     }
+  };
+
+  const handleLearnMore = () => {
+    window.open('https://chat.whatsapp.com/Bnb3F4ycBPcLsYRl2BxNtM', '_blank');
   };
 
   const renderStars = (rating: number) => {
