@@ -6,25 +6,86 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MessageCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 const CommunityPromotion = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
+    
+    if (!email) {
       toast({
-        title: "Thanks for joining!",
-        description: "We'll be in touch with exclusive deals soon.",
+        title: "Email Required",
+        description: "Please enter your email address to join the community.",
+        variant: "destructive"
       });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      console.log('Attempting to save community member:', { email, phone });
+      
+      // Save to Supabase
+      const { data, error } = await supabase
+        .from('community_members')
+        .insert([
+          {
+            email: email,
+            phone: phone || null,
+            source: 'community_promotion'
+          }
+        ]);
+
+      if (error) {
+        console.error('Supabase error:', error);
+        
+        // Handle duplicate email error specifically
+        if (error.code === '23505') {
+          toast({
+            title: "Already Registered",
+            description: "This email is already part of our community! Redirecting you to WhatsApp.",
+          });
+        } else {
+          toast({
+            title: "Error Joining Community",
+            description: "There was an issue saving your information. Please try again.",
+            variant: "destructive"
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      } else {
+        console.log('Successfully saved community member:', data);
+        toast({
+          title: "Thanks for joining!",
+          description: "We'll be in touch with exclusive deals soon.",
+        });
+      }
+
+      // Clear form
       setEmail('');
       setPhone('');
-      // Redirect to WhatsApp group
-      window.open('https://chat.whatsapp.com/Bnb3F4ycBPcLsYRl2BxNtM', '_blank');
+
+      // Redirect to WhatsApp group after a short delay
+      setTimeout(() => {
+        window.open('https://chat.whatsapp.com/Bnb3F4ycBPcLsYRl2BxNtM', '_blank');
+      }, 1500);
+
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      toast({
+        title: "Unexpected Error",
+        description: "Something went wrong. Please try again or contact support.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -51,6 +112,7 @@ const CommunityPromotion = () => {
                 placeholder="your@email.com"
                 required
                 className="mt-2 h-12"
+                disabled={isSubmitting}
               />
             </div>
             
@@ -63,14 +125,19 @@ const CommunityPromotion = () => {
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+1 234 567 8900"
                 className="mt-2 h-12"
+                disabled={isSubmitting}
               />
             </div>
           </div>
           
           <div className="text-center">
-            <Button type="submit" className="adventure-button text-lg px-8 py-4 max-w-xs w-full sm:w-auto">
+            <Button 
+              type="submit" 
+              className="adventure-button text-lg px-8 py-4 max-w-xs w-full sm:w-auto"
+              disabled={isSubmitting}
+            >
               <MessageCircle className="mr-2" size={20} />
-              Join the Community (Free)
+              {isSubmitting ? 'Joining...' : 'Join the Community (Free)'}
             </Button>
             <p className="text-sm text-gray-500 mt-4">
               By joining, you agree to receive exclusive deals and community updates. 

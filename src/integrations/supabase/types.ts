@@ -63,6 +63,33 @@ export type Database = {
         }
         Relationships: []
       }
+      community_members: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          phone: string | null
+          source: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          phone?: string | null
+          source?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          phone?: string | null
+          source?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       listings: {
         Row: {
           amenities: string[] | null
