@@ -2,7 +2,7 @@
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { MapPin, Users, Globe, Heart } from 'lucide-react';
+import { MapPin, Users, Globe, Heart, CheckCircle } from 'lucide-react';
 
 const About = () => {
   return (
@@ -61,7 +61,7 @@ const About = () => {
             </div>
             
             <div className="relative">
-              <img src="https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=600&q=80" alt="Founder working remotely" className="rounded-2xl shadow-2xl" />
+              <img src="/lovable-uploads/09c233c7-f24f-46fe-9d9e-f782252f3953.png" alt="Founder working remotely" className="rounded-2xl shadow-2xl" />
               <div className="absolute -bottom-6 -right-6 bg-adventure-orange text-white p-6 rounded-xl shadow-lg">
                 <div className="text-sm font-medium text-center">Let's find your perfect Coliving match together</div>
               </div>
@@ -71,29 +71,73 @@ const About = () => {
       </section>
 
       {/* What Makes This Platform Different Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+      <section className="py-20 bg-gradient-to-br from-desert-beige to-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-serif font-bold text-forest-green mb-6">
               What Makes This Platform Different
             </h2>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               This isn't just a list of discounts. It's a curated space, built around honest recommendations and real experiences.
             </p>
           </div>
 
-          <div className="space-y-6 text-lg text-gray-700">
-            <p>Every listing includes real reviews from real nomads</p>
-            <p>We're upfront about who a place is for — and who it's not for</p>
-            <p>We highlight the details that really matter:</p>
-            <p className="ml-4">Is there a true community? What's the vibe? What kind of people stay there?</p>
-            <p>I believe that finding the right co-living isn't about luck — it's about access to the right information.</p>
-            <p>And I want to make that accessible for everyone living the remote lifestyle.</p>
-            <p>So whether you're planning your first remote trip or looking for your next community, I hope Remote Work Deals helps you find a place where you feel like you truly belong.</p>
-            
-            <div className="text-right mt-8 pt-8 border-t border-gray-300">
-              <p className="font-serif text-2xl text-forest-green">— Joëlle</p>
-              <p className="text-gray-600">Founder of Remote Work Deals</p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+              <div className="bg-forest-green rounded-full w-16 h-16 flex items-center justify-center mb-6">
+                <CheckCircle size={28} className="text-white" />
+              </div>
+              <h3 className="text-xl font-serif font-bold text-forest-green mb-4">
+                Real Reviews Only
+              </h3>
+              <p className="text-gray-600 leading-relaxed">
+                Every listing includes genuine reviews from real nomads who've actually stayed there.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+              <div className="bg-adventure-orange rounded-full w-16 h-16 flex items-center justify-center mb-6">
+                <Users size={28} className="text-white" />
+              </div>
+              <h3 className="text-xl font-serif font-bold text-forest-green mb-4">
+                Honest Recommendations
+              </h3>
+              <p className="text-gray-600 leading-relaxed">
+                We're upfront about who a place is for — and who it's not for. No sugarcoating.
+              </p>
+            </div>
+
+            <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 md:col-span-2 lg:col-span-1">
+              <div className="bg-forest-green rounded-full w-16 h-16 flex items-center justify-center mb-6">
+                <Heart size={28} className="text-white" />
+              </div>
+              <h3 className="text-xl font-serif font-bold text-forest-green mb-4">
+                What Really Matters
+              </h3>
+              <p className="text-gray-600 leading-relaxed">
+                Is there a true community? What's the vibe? What kind of people stay there?
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-8 lg:p-12 shadow-lg border border-gray-100">
+            <div className="max-w-4xl mx-auto text-center">
+              <div className="space-y-6 text-lg text-gray-700 leading-relaxed">
+                <p>
+                  I believe that finding the right co-living isn't about luck — it's about access to the right information.
+                </p>
+                <p>
+                  And I want to make that accessible for everyone living the remote lifestyle.
+                </p>
+                <p>
+                  So whether you're planning your first remote trip or looking for your next community, I hope Remote Work Deals helps you find a place where you feel like you truly belong.
+                </p>
+                
+                <div className="text-right mt-12 pt-8 border-t border-gray-200">
+                  <p className="font-serif text-2xl text-forest-green mb-2">— Joëlle</p>
+                  <p className="text-gray-600 font-medium">Founder of Remote Work Deals</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
