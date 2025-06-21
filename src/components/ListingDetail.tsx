@@ -1,12 +1,12 @@
 
-import ListingDetailEnhanced from './ListingDetailEnhanced';
+import ListingDetailOriginal from './ListingDetailOriginal';
 
 interface ListingDetailProps {
   listingId: number;
 }
 
 const ListingDetail = ({ listingId }: ListingDetailProps) => {
-  return <ListingDetailEnhanced listingId={listingId} />;
+  return <ListingDetailOriginal listingId={listingId} />;
 };
 
 export default ListingDetail;
