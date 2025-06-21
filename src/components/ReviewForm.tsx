@@ -171,7 +171,7 @@ const ReviewForm = ({ onSubmit }: ReviewFormProps) => {
             </div>
           </div>
           
-          <Button type="submit" className="bg-orange-500 hover:bg-orange-600 text-white">
+          <Button type="submit" className="adventure-button">
             Submit Review
           </Button>
         </form>

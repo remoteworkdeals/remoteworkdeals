@@ -67,8 +67,6 @@ export type Database = {
         Row: {
           amenities: string[] | null
           capacity: number | null
-          comfort_living_info: string | null
-          community_social_info: string | null
           country: string
           created_at: string
           created_by: string | null
@@ -82,12 +80,7 @@ export type Database = {
           instagram_url: string | null
           is_seasonal: boolean | null
           location: string
-          location_surroundings_info: string | null
-          minimum_stay: number | null
-          minimum_stay_unit: string | null
           original_price: number
-          price_value_info: string | null
-          pricing_unit: string | null
           rating: number | null
           review_count: number | null
           rooms: number | null
@@ -98,13 +91,10 @@ export type Database = {
           type: Database["public"]["Enums"]["listing_type"]
           updated_at: string
           website_url: string | null
-          work_wifi_info: string | null
         }
         Insert: {
           amenities?: string[] | null
           capacity?: number | null
-          comfort_living_info?: string | null
-          community_social_info?: string | null
           country: string
           created_at?: string
           created_by?: string | null
@@ -118,12 +108,7 @@ export type Database = {
           instagram_url?: string | null
           is_seasonal?: boolean | null
           location: string
-          location_surroundings_info?: string | null
-          minimum_stay?: number | null
-          minimum_stay_unit?: string | null
           original_price: number
-          price_value_info?: string | null
-          pricing_unit?: string | null
           rating?: number | null
           review_count?: number | null
           rooms?: number | null
@@ -134,13 +119,10 @@ export type Database = {
           type?: Database["public"]["Enums"]["listing_type"]
           updated_at?: string
           website_url?: string | null
-          work_wifi_info?: string | null
         }
         Update: {
           amenities?: string[] | null
           capacity?: number | null
-          comfort_living_info?: string | null
-          community_social_info?: string | null
           country?: string
           created_at?: string
           created_by?: string | null
@@ -154,12 +136,7 @@ export type Database = {
           instagram_url?: string | null
           is_seasonal?: boolean | null
           location?: string
-          location_surroundings_info?: string | null
-          minimum_stay?: number | null
-          minimum_stay_unit?: string | null
           original_price?: number
-          price_value_info?: string | null
-          pricing_unit?: string | null
           rating?: number | null
           review_count?: number | null
           rooms?: number | null
@@ -170,7 +147,6 @@ export type Database = {
           type?: Database["public"]["Enums"]["listing_type"]
           updated_at?: string
           website_url?: string | null
-          work_wifi_info?: string | null
         }
         Relationships: []
       }
@@ -206,21 +182,16 @@ export type Database = {
       }
       reviews: {
         Row: {
-          comfort_living: Json | null
           created_at: string
           facilities_notes: string | null
           facilities_rating: number | null
           id: string
           listing_id: number
-          location_surroundings: Json | null
-          optimized_flag: boolean | null
           overall_rating: number | null
           price_notes: string | null
           price_rating: number | null
-          price_value: Json | null
           review_text: string | null
           reviewer_name: string | null
-          social_community: Json | null
           social_notes: string | null
           social_rating: number | null
           surroundings_notes: string | null
@@ -228,24 +199,18 @@ export type Database = {
           user_id: string
           work_notes: string | null
           work_rating: number | null
-          work_wifi: Json | null
         }
         Insert: {
-          comfort_living?: Json | null
           created_at?: string
           facilities_notes?: string | null
           facilities_rating?: number | null
           id?: string
           listing_id: number
-          location_surroundings?: Json | null
-          optimized_flag?: boolean | null
           overall_rating?: number | null
           price_notes?: string | null
           price_rating?: number | null
-          price_value?: Json | null
           review_text?: string | null
           reviewer_name?: string | null
-          social_community?: Json | null
           social_notes?: string | null
           social_rating?: number | null
           surroundings_notes?: string | null
@@ -253,24 +218,18 @@ export type Database = {
           user_id: string
           work_notes?: string | null
           work_rating?: number | null
-          work_wifi?: Json | null
         }
         Update: {
-          comfort_living?: Json | null
           created_at?: string
           facilities_notes?: string | null
           facilities_rating?: number | null
           id?: string
           listing_id?: number
-          location_surroundings?: Json | null
-          optimized_flag?: boolean | null
           overall_rating?: number | null
           price_notes?: string | null
           price_rating?: number | null
-          price_value?: Json | null
           review_text?: string | null
           reviewer_name?: string | null
-          social_community?: Json | null
           social_notes?: string | null
           social_rating?: number | null
           surroundings_notes?: string | null
@@ -278,7 +237,6 @@ export type Database = {
           user_id?: string
           work_notes?: string | null
           work_rating?: number | null
-          work_wifi?: Json | null
         }
         Relationships: [
           {
