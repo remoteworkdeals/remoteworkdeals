@@ -83,7 +83,7 @@ const Hero = () => {
                   src="/lovable-uploads/6c22efa0-f3ff-4036-b52a-2c5adb94f2b9.jpg"
                   loading="eager"
                   decoding="async"
-                  fetchpriority="high"
+                  fetchPriority="high"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 40vw"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
