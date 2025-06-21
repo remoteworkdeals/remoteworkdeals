@@ -1,12 +1,9 @@
-
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { MapPin, Users, Globe, Heart } from 'lucide-react';
-
 const About = () => {
-  return (
-    <div className="min-h-screen">
+  return <div className="min-h-screen">
       <Navigation />
       
       {/* Hero Section */}
@@ -15,9 +12,7 @@ const About = () => {
           <h1 className="text-4xl lg:text-5xl font-serif font-bold mb-6">
             Built by Nomads, for Nomads
           </h1>
-          <p className="text-xl text-gray-100">
-            The story behind RemoteWork.Deals and our mission to make remote work adventures accessible to everyone.
-          </p>
+          <p className="text-xl text-gray-100">The story behind RemoteWork.Deals and our mission to make remote work adventures accessible to everyone.</p>
         </div>
       </section>
 
@@ -58,11 +53,7 @@ const About = () => {
             </div>
             
             <div className="relative">
-              <img
-                src="https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=600&q=80"
-                alt="Founder working remotely"
-                className="rounded-2xl shadow-2xl"
-              />
+              <img src="https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=600&q=80" alt="Founder working remotely" className="rounded-2xl shadow-2xl" />
               <div className="absolute -bottom-6 -right-6 bg-adventure-orange text-white p-6 rounded-xl shadow-lg">
                 <div className="text-2xl font-bold">47</div>
                 <div className="text-sm">Co-livings Visited</div>
@@ -141,35 +132,31 @@ const About = () => {
       <section className="py-20 bg-forest-green text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-serif font-bold mb-6">
-              Growing Global Community
-            </h2>
+            <h2 className="text-3xl lg:text-4xl font-serif font-bold mb-6">Growing Coliving Community</h2>
           </div>
 
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-4xl lg:text-5xl font-bold text-adventure-orange mb-2">2,847</div>
+              <div className="text-4xl lg:text-5xl font-bold text-adventure-orange mb-2">200+</div>
               <div className="text-lg">Happy Nomads</div>
             </div>
             <div>
-              <div className="text-4xl lg:text-5xl font-bold text-adventure-orange mb-2">147</div>
+              <div className="text-4xl lg:text-5xl font-bold text-adventure-orange mb-2">30+</div>
               <div className="text-lg">Partner Locations</div>
             </div>
             <div>
-              <div className="text-4xl lg:text-5xl font-bold text-adventure-orange mb-2">23</div>
+              <div className="text-4xl lg:text-5xl font-bold text-adventure-orange mb-2">15+</div>
               <div className="text-lg">Countries</div>
             </div>
             <div>
-              <div className="text-4xl lg:text-5xl font-bold text-adventure-orange mb-2">$1.2M</div>
-              <div className="text-lg">Total Savings</div>
+              <div className="text-4xl lg:text-5xl font-bold text-adventure-orange mb-2">20%</div>
+              <div className="text-lg">Avg. Discount</div>
             </div>
           </div>
         </div>
       </section>
 
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default About;
