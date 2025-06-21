@@ -14,7 +14,7 @@ interface SearchBarProps {
 }
 
 const SearchBar = ({ 
-  placeholder = "Search listings and blog posts...", 
+  placeholder = "Search", 
   className = "",
   onSubmit,
   autoFocus = false

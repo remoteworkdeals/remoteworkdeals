@@ -35,15 +35,18 @@ const Navigation = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
+          <div className="hidden lg:flex items-center space-x-4 xl:space-x-6">
             {/* Enhanced Search Bar - Desktop */}
-            <SearchBar className="w-48 xl:w-64" />
+            <SearchBar 
+              className="w-64 xl:w-80" 
+              placeholder="Search"
+            />
 
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`font-medium transition-colors text-sm xl:text-base ${
+                className={`font-medium transition-colors text-sm xl:text-base whitespace-nowrap ${
                   isActive(item.path)
                     ? 'text-adventure-orange border-b-2 border-adventure-orange'
                     : 'text-forest-green hover:text-adventure-orange'
@@ -53,7 +56,7 @@ const Navigation = () => {
               </Link>
             ))}
             <Link to="/exclusive-deals">
-              <button className="adventure-button text-sm xl:text-base py-2 xl:py-3 px-4 xl:px-6">
+              <button className="adventure-button text-sm xl:text-base py-2 xl:py-3 px-4 xl:px-6 whitespace-nowrap">
                 More discounts?
               </button>
             </Link>
@@ -78,7 +81,7 @@ const Navigation = () => {
               {/* Enhanced Mobile Search */}
               <SearchBar 
                 className="mb-2" 
-                placeholder="Search content..."
+                placeholder="Search"
               />
 
               {navItems.map((item) => (

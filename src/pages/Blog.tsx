@@ -9,8 +9,7 @@ import { useListings } from '@/hooks/useListings';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Search, Calendar, User, MapPin, FileText } from 'lucide-react';
+import { Calendar, User, MapPin, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Blog = () => {
@@ -43,15 +42,6 @@ const Blog = () => {
            listing.location.toLowerCase().includes(query);
   });
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      setSearchParams({ search: searchQuery.trim() });
-    } else {
-      setSearchParams({});
-    }
-  };
-
   const clearSearch = () => {
     setSearchQuery('');
     setSearchParams({});
@@ -83,42 +73,21 @@ const Blog = () => {
             )}
           </div>
 
-          {/* Search Bar */}
-          <div className="mb-8">
-            <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <Input
-                  type="text"
-                  placeholder="Search blog posts and listings..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 pr-4 py-4 text-lg border-2 border-gray-200 focus:border-forest-green focus:ring-forest-green rounded-xl"
-                />
-              </div>
-              {isSearching && (
-                <div className="flex justify-center mt-4">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    onClick={clearSearch}
-                    className="text-gray-600"
-                  >
-                    Clear search
-                  </Button>
-                </div>
-              )}
-            </form>
-          </div>
-
           {/* Search Results Summary */}
           {isSearching && (
             <div className="mb-8 text-center">
-              <p className="text-gray-600">
+              <p className="text-gray-600 mb-4">
                 Found {filteredBlogPosts.length} blog post{filteredBlogPosts.length !== 1 ? 's' : ''} 
                 {filteredListings.length > 0 && ` and ${filteredListings.length} listing${filteredListings.length !== 1 ? 's' : ''}`} 
                 for "<span className="font-semibold">{searchQuery}</span>"
               </p>
+              <Button 
+                variant="outline" 
+                onClick={clearSearch}
+                className="text-gray-600"
+              >
+                Clear search
+              </Button>
             </div>
           )}
 
