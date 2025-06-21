@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Listing } from '@/types/listing';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useListingForm = (listing?: Listing | null, onClose?: () => void) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,6 +36,7 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
   const [locationSurroundingsInfo, setLocationSurroundingsInfo] = useState('');
 
   const { toast } = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (listing) {
@@ -91,6 +93,8 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
     setIsSubmitting(true);
     
     console.log('=== FORM SUBMISSION STARTED ===');
+    console.log('Current user:', user?.id);
+    console.log('Is editing existing listing:', !!listing);
     console.log('Current form state at submission:', {
       title,
       description,
@@ -99,6 +103,16 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
       comfortLivingInfo,
       locationSurroundingsInfo,
     });
+    
+    if (!user?.id) {
+      toast({
+        title: 'Authentication required',
+        description: 'You must be logged in to save listings.',
+        variant: 'destructive',
+      });
+      setIsSubmitting(false);
+      return;
+    }
     
     try {
       const informationBlocksData = {
@@ -134,6 +148,7 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
         seasonal_end_date: seasonalEndDate || null,
         website_url: websiteUrl || null,
         instagram_url: instagramUrl || null,
+        created_by: user.id, // Always set created_by to current user
         ...informationBlocksData
       };
 
@@ -147,7 +162,6 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
         console.log('=== UPDATING EXISTING LISTING ===');
         console.log('Updating listing with ID:', listing.id);
         
-        // For updates, we use .select() to return the updated data
         result = await supabase
           .from('listings')
           .update(listingData)
@@ -156,7 +170,6 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
           
         console.log('Update result:', result);
         
-        // For updates with .select(), we expect data to be returned
         if (!result.error && result.data && result.data.length > 0) {
           operationSuccess = true;
           savedData = result.data[0];
@@ -165,8 +178,8 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
           console.error('Update failed with error:', result.error);
           throw result.error;
         } else {
-          console.error('Update failed: No data returned, possibly no matching record or no changes made');
-          throw new Error('Update operation did not affect any records. The listing may not exist or no changes were detected.');
+          console.error('Update failed: No data returned');
+          throw new Error('Update operation did not affect any records. Please check your permissions or try refreshing the page.');
         }
         
       } else {
@@ -179,7 +192,6 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
           
         console.log('Insert result:', result);
         
-        // For inserts, we expect data to be returned
         if (!result.error && result.data && result.data.length > 0) {
           operationSuccess = true;
           savedData = result.data[0];
@@ -204,8 +216,8 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
         });
 
         toast({
-          title: listing ? 'Listing updated successfully' : 'Listing created successfully',
-          description: 'All information has been saved including the information blocks.',
+          title: listing ? 'Listing updated successfully!' : 'Listing created successfully!',
+          description: 'All information has been saved. Changes are now live.',
         });
         
         console.log('=== FORM SUBMISSION COMPLETED SUCCESSFULLY ===');
@@ -213,7 +225,9 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
         // Close the form and trigger a refetch
         if (onClose) {
           console.log('Calling onClose to trigger refetch');
-          onClose();
+          setTimeout(() => {
+            onClose();
+          }, 1000); // Small delay to let user see success message
         }
       } else {
         console.error('=== OPERATION FAILED ===');
@@ -223,9 +237,13 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
       console.error('=== FORM SUBMISSION ERROR ===');
       console.error('Error details:', error);
       
-      let errorMessage = 'Please try again. Check browser console for details.';
+      let errorMessage = 'Failed to save listing. Please try again.';
       if (error instanceof Error) {
-        errorMessage = error.message;
+        if (error.message.includes('permission') || error.message.includes('policy')) {
+          errorMessage = 'Permission denied. Please make sure you have the right permissions to edit this listing.';
+        } else {
+          errorMessage = error.message;
+        }
       }
       
       toast({

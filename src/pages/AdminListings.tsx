@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Trash2, Eye, LogOut, Home } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, LogOut, Home, RefreshCw } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Listing } from '@/types/listing';
@@ -16,6 +16,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const AdminListings = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingListing, setEditingListing] = useState<Listing | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
   const { user, userRole, signOut } = useAuth();
   const queryClient = useQueryClient();
@@ -81,13 +82,28 @@ const AdminListings = () => {
     setShowForm(false);
     setEditingListing(null);
     
-    // Invalidate both admin and public listings cache
-    await queryClient.invalidateQueries({ queryKey: ['admin-listings'] });
-    await queryClient.invalidateQueries({ queryKey: ['listings'] });
-    
-    // Force refetch with fresh data
-    console.log('Forcing refetch after form close');
-    await refetch();
+    // Force a fresh fetch of data
+    await handleRefresh();
+  };
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      // Invalidate and refetch all listing-related queries
+      await queryClient.invalidateQueries({ queryKey: ['admin-listings'] });
+      await queryClient.invalidateQueries({ queryKey: ['listings'] });
+      
+      // Force refetch with fresh data
+      console.log('Forcing refetch after refresh');
+      await refetch();
+      
+      toast({ title: 'Data refreshed successfully' });
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+      toast({ title: 'Error refreshing data', variant: 'destructive' });
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -142,10 +158,21 @@ const AdminListings = () => {
 
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Coliving Listings ({listings?.length || 0})</h2>
-        <Button onClick={() => setShowForm(true)} className="adventure-button">
-          <Plus className="mr-2 h-4 w-4" />
-          Add New Listing
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={handleRefresh} 
+            variant="outline" 
+            disabled={isRefreshing}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button onClick={() => setShowForm(true)} className="adventure-button">
+            <Plus className="mr-2 h-4 w-4" />
+            Add New Listing
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6">
