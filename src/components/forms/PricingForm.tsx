@@ -1,4 +1,3 @@
-
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -91,7 +90,7 @@ const PricingForm = ({
         <div className="space-y-4">
           <div>
             <Label htmlFor="discountType">Discount Type</Label>
-            <Select value={discountType || ''} onValueChange={(value) => setDiscountType(value as 'percentage' | 'fixed_amount' || null)}>
+            <Select value={discountType || ''} onValueChange={(value) => setDiscountType(value === '' ? null : value as 'percentage' | 'fixed_amount')}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select discount type" />
               </SelectTrigger>
