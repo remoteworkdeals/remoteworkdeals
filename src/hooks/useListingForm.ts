@@ -37,6 +37,7 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
   const [communitySocialInfo, setCommunitySocialInfo] = useState('');
   const [comfortLivingInfo, setComfortLivingInfo] = useState('');
   const [locationSurroundingsInfo, setLocationSurroundingsInfo] = useState('');
+  const [featured, setFeatured] = useState(false);
 
   const { toast } = useToast();
   const { user } = useAuth();
@@ -72,6 +73,7 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
       setSeasonalEndDate(listing.seasonal_end_date || null);
       setWebsiteUrl(listing.website_url || null);
       setInstagramUrl(listing.instagram_url || null);
+      setFeatured(listing.featured || false);
       
       setWorkWifiInfo(listing.work_wifi_info || '');
       setCommunitySocialInfo(listing.community_social_info || '');
@@ -135,6 +137,7 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
         seasonal_end_date: seasonalEndDate || null,
         website_url: websiteUrl || null,
         instagram_url: instagramUrl || null,
+        featured: featured,
         created_by: user.id,
         ...informationBlocksData
       };
@@ -267,6 +270,7 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
     communitySocialInfo, setCommunitySocialInfo,
     comfortLivingInfo, setComfortLivingInfo,
     locationSurroundingsInfo, setLocationSurroundingsInfo,
+    featured, setFeatured,
     
     // Form actions
     isSubmitting,

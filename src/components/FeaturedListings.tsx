@@ -1,5 +1,5 @@
 
-import { MapPin, Users, Wifi, Star } from 'lucide-react';
+import { MapPin, Users, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { useListingUrl } from '@/hooks/useListingUrl';
 
 /**
  * Featured listings section with mobile-first responsive grid
- * Displays top discounted co-living spaces
+ * Displays manually featured listings first, then top discounted co-living spaces
  */
 const FeaturedListings = () => {
   const navigate = useNavigate();
@@ -19,8 +19,23 @@ const FeaturedListings = () => {
     loading
   } = useListings();
 
-  // Get first 3 listings with highest discount percentage for featured section
-  const featuredListings = listings.filter(listing => listing.discount_percentage && listing.discount_percentage > 0).sort((a, b) => (b.discount_percentage || 0) - (a.discount_percentage || 0)).slice(0, 3);
+  // Get featured listings - prioritize manually featured, then highest discount percentage
+  const featuredListings = (() => {
+    const manuallyFeatured = listings.filter(listing => listing.featured).slice(0, 3);
+    
+    if (manuallyFeatured.length >= 3) {
+      return manuallyFeatured;
+    }
+    
+    // Fill remaining slots with highest discount listings that aren't already featured
+    const remainingSlots = 3 - manuallyFeatured.length;
+    const discountedListings = listings
+      .filter(listing => !listing.featured && listing.discount_percentage && listing.discount_percentage > 0)
+      .sort((a, b) => (b.discount_percentage || 0) - (a.discount_percentage || 0))
+      .slice(0, remainingSlots);
+    
+    return [...manuallyFeatured, ...discountedListings];
+  })();
   
   const handleMoreInfo = (listing: any, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -111,14 +126,9 @@ const FeaturedListings = () => {
                         <Users size={14} className="mr-1" />
                         <span>Up to {listing.capacity}</span>
                       </div>}
-                    {listing.usp ? (
+                    {listing.usp && (
                       <div className="flex items-center">
                         <span>{listing.usp}</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center">
-                        <Wifi size={14} className="mr-1" />
-                        <span>High-speed WiFi</span>
                       </div>
                     )}
                   </div>

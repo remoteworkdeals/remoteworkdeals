@@ -35,6 +35,7 @@ export interface Listing {
   usp: string | null;
   discount_type: 'percentage' | 'fixed_amount' | null;
   discount_value: number | null;
+  featured: boolean;
 }
 
 export interface Review {

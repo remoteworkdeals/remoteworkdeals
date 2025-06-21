@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -186,6 +185,11 @@ const AdminListings = () => {
                       {listing.status}
                     </Badge>
                     <Badge variant="outline">{listing.type}</Badge>
+                    {listing.featured && (
+                      <Badge variant="default" className="bg-yellow-500 text-white">
+                        Featured
+                      </Badge>
+                    )}
                     {listing.discounted_price && (
                       <Badge variant="destructive">
                         {listing.discount_type === 'percentage' 

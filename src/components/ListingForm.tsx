@@ -10,6 +10,7 @@ import StayDetailsForm from './forms/StayDetailsForm';
 import MediaForm from './forms/MediaForm';
 import SeasonalForm from './forms/SeasonalForm';
 import ContactForm from './forms/ContactForm';
+import FeaturedForm from './forms/FeaturedForm';
 import InformationBlocksForm from './InformationBlocksForm';
 
 interface ListingFormProps {
@@ -64,6 +65,9 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
     communitySocialInfo, setCommunitySocialInfo,
     comfortLivingInfo, setComfortLivingInfo,
     locationSurroundingsInfo, setLocationSurroundingsInfo,
+    
+    // Featured
+    featured, setFeatured,
     
     // Form actions
     isSubmitting,
@@ -129,6 +133,11 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
           setCapacity={setCapacity}
           rooms={rooms}
           setRooms={setRooms}
+        />
+
+        <FeaturedForm
+          featured={featured}
+          setFeatured={setFeatured}
         />
         
         <InformationBlocksForm
