@@ -48,7 +48,7 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">For Partners</h3>
             <ul className="space-y-2 text-gray-300">
-              <li><a href="#" className="hover:text-white transition-colors">Become a Partner</a></li>
+              <li><Link to="/become-partner" className="hover:text-white transition-colors">Become a Partner</Link></li>
               <li><a href="#" className="hover:text-white transition-colors">Partner Resources</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Success Stories</a></li>
             </ul>

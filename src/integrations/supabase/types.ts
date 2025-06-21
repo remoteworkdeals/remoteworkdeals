@@ -174,6 +174,33 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_inquiries: {
+        Row: {
+          coliving_name: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          status: string | null
+        }
+        Insert: {
+          coliving_name: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          status?: string | null
+        }
+        Update: {
+          coliving_name?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

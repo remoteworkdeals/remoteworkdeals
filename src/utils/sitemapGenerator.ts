@@ -9,6 +9,7 @@ export const generateSitemap = (blogPosts: any[], listings: any[]) => {
     { url: '/coliving-deals', priority: '0.9', changefreq: 'daily', lastmod: currentDate },
     { url: '/exclusive-deals', priority: '0.8', changefreq: 'weekly', lastmod: currentDate },
     { url: '/about', priority: '0.7', changefreq: 'monthly', lastmod: currentDate },
+    { url: '/become-partner', priority: '0.8', changefreq: 'monthly', lastmod: currentDate },
   ];
 
   const blogPages = blogPosts.map(post => ({
