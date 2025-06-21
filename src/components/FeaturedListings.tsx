@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useListings } from '@/hooks/useListings';
+import { useListingUrl } from '@/hooks/useListingUrl';
 
 /**
  * Featured listings section with mobile-first responsive grid
@@ -12,6 +13,7 @@ import { useListings } from '@/hooks/useListings';
  */
 const FeaturedListings = () => {
   const navigate = useNavigate();
+  const { getListingUrl } = useListingUrl();
   const {
     listings,
     loading
@@ -22,11 +24,13 @@ const FeaturedListings = () => {
   
   const handleMoreInfo = (listing: any, e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/listing/${listing.id}`);
+    const url = getListingUrl(listing.title, listing.id);
+    navigate(url);
   };
   
-  const handleCardClick = (listingId: number) => {
-    navigate(`/listing/${listingId}`);
+  const handleCardClick = (listing: any) => {
+    const url = getListingUrl(listing.title, listing.id);
+    navigate(url);
   };
   
   if (loading || featuredListings.length === 0) {
@@ -50,7 +54,7 @@ const FeaturedListings = () => {
           const hasDiscount = listing.discount_percentage && listing.discount_percentage > 0;
           return <Card key={listing.id} className="overflow-hidden card-shadow hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-fade-in cursor-pointer" style={{
             animationDelay: `${index * 0.1}s`
-          }} onClick={() => handleCardClick(listing.id)}>
+          }} onClick={() => handleCardClick(listing)}>
                 <div className="relative">
                   <div className="aspect-[4/3] bg-gray-200 overflow-hidden">
                     <img 
@@ -107,10 +111,16 @@ const FeaturedListings = () => {
                         <Users size={14} className="mr-1" />
                         <span>Up to {listing.capacity}</span>
                       </div>}
-                    <div className="flex items-center">
-                      <Wifi size={14} className="mr-1" />
-                      <span>High-speed WiFi</span>
-                    </div>
+                    {listing.usp ? (
+                      <div className="flex items-center">
+                        <span>{listing.usp}</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center">
+                        <Wifi size={14} className="mr-1" />
+                        <span>High-speed WiFi</span>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="flex items-center justify-between mb-4 sm:mb-6">

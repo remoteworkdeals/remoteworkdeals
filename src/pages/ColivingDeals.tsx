@@ -9,9 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import DateRangePicker from '@/components/DateRangePicker';
 import { MapPin, Users, Wifi, Star, Filter, ExternalLink } from 'lucide-react';
 import { useListings } from '@/hooks/useListings';
+import { useListingUrl } from '@/hooks/useListingUrl';
 import type { DateRange } from 'react-day-picker';
+
 const ColivingDeals = () => {
   const navigate = useNavigate();
+  const { getListingUrl } = useListingUrl();
   const {
     listings,
     loading,
@@ -20,6 +23,7 @@ const ColivingDeals = () => {
   const [selectedLocation, setSelectedLocation] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
   const [selectedDates, setSelectedDates] = useState<DateRange | undefined>();
+
   const handleGetCode = (listing: any, e: React.MouseEvent) => {
     e.stopPropagation();
     if (listing.discount_code_url) {
@@ -30,34 +34,24 @@ const ColivingDeals = () => {
       window.open(whatsappUrl, '_blank');
     }
   };
+
   const handleMoreInfo = (listing: any, e: React.MouseEvent) => {
     e.stopPropagation();
-    navigate(`/listing/${listing.id}`);
+    const url = getListingUrl(listing.title, listing.id);
+    navigate(url);
   };
-  const handleCardClick = (listingId: number) => {
-    navigate(`/listing/${listingId}`);
-  };
-  const filteredListings = listings.filter(listing => {
-    const matchesLocation = selectedLocation === 'all' || listing.country.toLowerCase().includes(selectedLocation.toLowerCase());
-    const matchesType = selectedType === 'all' || listing.type.toLowerCase() === selectedType.toLowerCase();
-    let matchesDates = true;
-    if (selectedDates?.from && listing.is_seasonal && listing.seasonal_start_date && listing.seasonal_end_date) {
-      const startDate = new Date(listing.seasonal_start_date);
-      const endDate = new Date(listing.seasonal_end_date);
-      const userStartDate = selectedDates.from;
-      const userEndDate = selectedDates.to || selectedDates.from;
 
-      // Check if user dates overlap with seasonal dates
-      matchesDates = userStartDate <= endDate && userEndDate >= startDate;
-    }
-    return matchesLocation && matchesType && matchesDates;
-  });
+  const handleCardClick = (listing: any) => {
+    const url = getListingUrl(listing.title, listing.id);
+    navigate(url);
+  };
 
   // Get unique countries for the location filter
   const uniqueCountries: string[] = Array.from(new Set(listings.map(listing => listing.country))).sort();
 
   // Get unique types for the type filter
   const uniqueTypes: string[] = Array.from(new Set(listings.map(listing => listing.type))).sort();
+
   if (loading) {
     return <div className="min-h-screen">
         <Navigation />
@@ -139,7 +133,7 @@ const ColivingDeals = () => {
             const hasDiscount = listing.discount_percentage && listing.discount_percentage > 0;
             return <Card key={listing.id} className="overflow-hidden card-shadow hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 animate-fade-in cursor-pointer" style={{
               animationDelay: `${index * 0.1}s`
-            }} onClick={() => handleCardClick(listing.id)}>
+            }} onClick={() => handleCardClick(listing)}>
                     <div className="relative">
                       <img src={displayImage} alt={listing.title} className="w-full h-64 object-cover" />
                       <div className="absolute top-4 left-4 flex gap-2">
@@ -183,10 +177,16 @@ const ColivingDeals = () => {
                             <Users size={16} className="mr-1" />
                             <span>Up to {listing.capacity}</span>
                           </div>}
-                        <div className="flex items-center">
-                          <Wifi size={16} className="mr-1" />
-                          <span>High-speed WiFi</span>
-                        </div>
+                        {listing.usp ? (
+                          <div className="flex items-center">
+                            <span>{listing.usp}</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center">
+                            <Wifi size={16} className="mr-1" />
+                            <span>High-speed WiFi</span>
+                          </div>
+                        )}
                       </div>
                       
                       <div className="flex items-center justify-between mb-4">
@@ -214,4 +214,5 @@ const ColivingDeals = () => {
       <Footer />
     </div>;
 };
+
 export default ColivingDeals;
