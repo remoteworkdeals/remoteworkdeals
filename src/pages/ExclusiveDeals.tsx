@@ -1,16 +1,20 @@
+
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import Testimonials from '@/components/Testimonials';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MessageCircle, Clock, Globe, Heart, Gift, Users, Bell } from 'lucide-react';
 import { useState } from 'react';
+
 const ExclusiveDeals = () => {
   const [formData, setFormData] = useState({
     email: '',
     phone: ''
   });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Form submitted:', formData);
@@ -22,32 +26,9 @@ const ExclusiveDeals = () => {
     // Redirect to WhatsApp group
     window.open('https://chat.whatsapp.com/Bnb3F4ycBPcLsYRl2BxNtM', '_blank');
   };
-  const benefits = [{
-    icon: Bell,
-    title: "Early Access Deals",
-    description: "Get notified 24-48 hours before deals go public. Never miss out on the best spots."
-  }, {
-    icon: Clock,
-    title: "Last-Minute Discounts",
-    description: "Exclusive access to last-minute deals with up to 60% off premium co-livings."
-  }, {
-    icon: Gift,
-    title: "Content-for-Discount",
-    description: "Share your experience and get extra discounts on your next stay. Win-win!"
-  }, {
-    icon: MessageCircle,
-    title: "Real-Time Advice",
-    description: "Ask questions and get instant answers from nomads who've been there."
-  }, {
-    icon: Globe,
-    title: "Insider Tips",
-    description: "Hidden gems, local recommendations, and insider knowledge from our community."
-  }, {
-    icon: Users,
-    title: "Nomad Connections",
-    description: "Connect with like-minded nomads and potentially find travel buddies."
-  }];
-  const JoinForm = () => <Card className="card-shadow">
+
+  const JoinForm = () => (
+    <Card className="card-shadow">
       <CardHeader className="text-center">
         <CardTitle className="text-3xl font-serif text-forest-green mb-4">
           Get Access to Exclusive Coliving Deals
@@ -59,18 +40,27 @@ const ExclusiveDeals = () => {
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <Label htmlFor="email" className="text-base font-semibold">Email Address</Label>
-              <Input id="email" type="email" value={formData.email} onChange={e => setFormData({
-              ...formData,
-              email: e.target.value
-            })} placeholder="your@email.com" required className="mt-2 h-12" />
+              <Input 
+                id="email" 
+                type="email" 
+                value={formData.email} 
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })} 
+                placeholder="your@email.com" 
+                required 
+                className="mt-2 h-12" 
+              />
             </div>
             
             <div>
               <Label htmlFor="phone" className="text-base font-semibold">WhatsApp Number</Label>
-              <Input id="phone" type="tel" value={formData.phone} onChange={e => setFormData({
-              ...formData,
-              phone: e.target.value
-            })} placeholder="+1 234 567 8900" className="mt-2 h-12" />
+              <Input 
+                id="phone" 
+                type="tel" 
+                value={formData.phone} 
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })} 
+                placeholder="+1 234 567 8900" 
+                className="mt-2 h-12" 
+              />
             </div>
           </div>
           
@@ -86,8 +76,11 @@ const ExclusiveDeals = () => {
           </div>
         </form>
       </CardContent>
-    </Card>;
-  return <div className="min-h-screen">
+    </Card>
+  );
+
+  return (
+    <div className="min-h-screen">
       <Navigation />
       
       {/* Hero Section */}
@@ -135,78 +128,83 @@ const ExclusiveDeals = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            {benefits.map((benefit, index) => <div key={index} className="text-center animate-fade-in" style={{
-            animationDelay: `${index * 0.1}s`
-          }}>
-                <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <benefit.icon size={24} className="text-adventure-orange" />
-                </div>
-                <h3 className="text-xl font-serif font-bold text-forest-green mb-3">
-                  {benefit.title}
-                </h3>
-                <p className="text-gray-600">
-                  {benefit.description}
-                </p>
-              </div>)}
+            <div className="text-center animate-fade-in" style={{ animationDelay: '0s' }}>
+              <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <Bell size={24} className="text-adventure-orange" />
+              </div>
+              <h3 className="text-xl font-serif font-bold text-forest-green mb-3">
+                Early Access Deals
+              </h3>
+              <p className="text-gray-600">
+                Get notified 24-48 hours before deals go public. Never miss out on the best spots.
+              </p>
+            </div>
+
+            <div className="text-center animate-fade-in" style={{ animationDelay: '0.1s' }}>
+              <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <Clock size={24} className="text-adventure-orange" />
+              </div>
+              <h3 className="text-xl font-serif font-bold text-forest-green mb-3">
+                Last-Minute Discounts
+              </h3>
+              <p className="text-gray-600">
+                Exclusive access to last-minute deals with up to 60% off premium co-livings.
+              </p>
+            </div>
+
+            <div className="text-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
+              <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <Gift size={24} className="text-adventure-orange" />
+              </div>
+              <h3 className="text-xl font-serif font-bold text-forest-green mb-3">
+                Content-for-Discount
+              </h3>
+              <p className="text-gray-600">
+                Share your experience and get extra discounts on your next stay. Win-win!
+              </p>
+            </div>
+
+            <div className="text-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <MessageCircle size={24} className="text-adventure-orange" />
+              </div>
+              <h3 className="text-xl font-serif font-bold text-forest-green mb-3">
+                Real-Time Advice
+              </h3>
+              <p className="text-gray-600">
+                Ask questions and get instant answers from nomads who've been there.
+              </p>
+            </div>
+
+            <div className="text-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
+              <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <Globe size={24} className="text-adventure-orange" />
+              </div>
+              <h3 className="text-xl font-serif font-bold text-forest-green mb-3">
+                Insider Tips
+              </h3>
+              <p className="text-gray-600">
+                Hidden gems, local recommendations, and insider knowledge from our community.
+              </p>
+            </div>
+
+            <div className="text-center animate-fade-in" style={{ animationDelay: '0.5s' }}>
+              <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <Users size={24} className="text-adventure-orange" />
+              </div>
+              <h3 className="text-xl font-serif font-bold text-forest-green mb-3">
+                Nomad Connections
+              </h3>
+              <p className="text-gray-600">
+                Connect with like-minded nomads and potentially find travel buddies.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Social Proof */}
-      <section className="py-20 bg-desert-beige">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-serif font-bold text-forest-green mb-12">
-            What Our Community Says
-          </h2>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="bg-white card-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?auto=format&fit=crop&w=50&h=50&q=80" alt="Sarah" className="w-12 h-12 rounded-full mr-3" />
-                  <div>
-                    <div className="font-semibold">Sarah Chen</div>
-                    <div className="text-sm text-gray-600">UX Designer</div>
-                  </div>
-                </div>
-                <p className="text-gray-700">
-                  "Saved €800 on my 3-month Bali trip thanks to early access deals. The community tips were invaluable!"
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white card-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=50&h=50&q=80" alt="Mike" className="w-12 h-12 rounded-full mr-3" />
-                  <div>
-                    <div className="font-semibold">Mike Rodriguez</div>
-                    <div className="text-sm text-gray-600">Software Developer</div>
-                  </div>
-                </div>
-                <p className="text-gray-700">
-                  "The last-minute deals are incredible. Got a premium co-living in Lisbon for 50% off just 2 days before my trip."
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white card-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center mb-4">
-                  <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=50&h=50&q=80" alt="Emma" className="w-12 h-12 rounded-full mr-3" />
-                  <div>
-                    <div className="font-semibold">Emma Thompson</div>
-                    <div className="text-sm text-gray-600">Marketing Consultant</div>
-                  </div>
-                </div>
-                <p className="text-gray-700">
-                  "Found my co-living family through this community. The connections I've made are worth more than the discounts!"
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
+      {/* Use shared Testimonials component */}
+      <Testimonials />
 
       {/* Reinforcement CTA - Secondary form placement */}
       <section className="py-20">
@@ -222,6 +220,8 @@ const ExclusiveDeals = () => {
       </section>
 
       <Footer />
-    </div>;
+    </div>
+  );
 };
+
 export default ExclusiveDeals;
