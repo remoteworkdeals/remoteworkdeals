@@ -1,4 +1,3 @@
-
 import { MapPin, Users, Wifi, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,74 +11,50 @@ import { useListings } from '@/hooks/useListings';
  */
 const FeaturedListings = () => {
   const navigate = useNavigate();
-  const { listings, loading } = useListings();
+  const {
+    listings,
+    loading
+  } = useListings();
 
   // Get first 3 listings with highest discount percentage for featured section
-  const featuredListings = listings
-    .filter(listing => listing.discount_percentage && listing.discount_percentage > 0)
-    .sort((a, b) => (b.discount_percentage || 0) - (a.discount_percentage || 0))
-    .slice(0, 3);
-
+  const featuredListings = listings.filter(listing => listing.discount_percentage && listing.discount_percentage > 0).sort((a, b) => (b.discount_percentage || 0) - (a.discount_percentage || 0)).slice(0, 3);
   const handleMoreInfo = (listing: any, e: React.MouseEvent) => {
     e.stopPropagation();
     navigate(`/listing/${listing.id}`);
   };
-
   const handleCardClick = (listingId: number) => {
     navigate(`/listing/${listingId}`);
   };
-
   if (loading || featuredListings.length === 0) {
     return null;
   }
-
-  return (
-    <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
+  return <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12 sm:mb-16">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-forest-green mb-4 sm:mb-6">
             Featured Coliving Deals
           </h2>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
-            Hand-picked co-livings with the best discounts. These spots are popular 
-            among our community and fill up fast.
-          </p>
+          <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">These coliving places get booked fast, grab your code before it's gone. Trusted spaces. Real discounts. Loved by other nomads.</p>
         </div>
 
         {/* Mobile-first responsive grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {featuredListings.map((listing, index) => {
-            const displayImage = listing.featured_image || 
-              (listing.images && listing.images.length > 0 ? listing.images[0] : null) ||
-              "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80";
-            
-            const discountedPrice = listing.discounted_price || listing.original_price;
-            const hasDiscount = listing.discount_percentage && listing.discount_percentage > 0;
-
-            return (
-              <Card 
-                key={listing.id} 
-                className="overflow-hidden card-shadow hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-fade-in cursor-pointer"
-                style={{ animationDelay: `${index * 0.1}s` }}
-                onClick={() => handleCardClick(listing.id)}
-              >
+          const displayImage = listing.featured_image || (listing.images && listing.images.length > 0 ? listing.images[0] : null) || "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80";
+          const discountedPrice = listing.discounted_price || listing.original_price;
+          const hasDiscount = listing.discount_percentage && listing.discount_percentage > 0;
+          return <Card key={listing.id} className="overflow-hidden card-shadow hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-fade-in cursor-pointer" style={{
+            animationDelay: `${index * 0.1}s`
+          }} onClick={() => handleCardClick(listing.id)}>
                 <div className="relative">
-                  <img
-                    src={displayImage}
-                    alt={listing.title}
-                    className="w-full h-48 sm:h-56 lg:h-64 object-cover"
-                  />
+                  <img src={displayImage} alt={listing.title} className="w-full h-48 sm:h-56 lg:h-64 object-cover" />
                   <div className="absolute top-3 sm:top-4 left-3 sm:left-4 flex gap-2">
-                    {hasDiscount && (
-                      <Badge className="bg-adventure-orange text-white text-xs sm:text-sm">
+                    {hasDiscount && <Badge className="bg-adventure-orange text-white text-xs sm:text-sm">
                         -{listing.discount_percentage}%
-                      </Badge>
-                    )}
-                    {listing.is_seasonal && (
-                      <Badge className="bg-blue-500 text-white text-xs sm:text-sm">
+                      </Badge>}
+                    {listing.is_seasonal && <Badge className="bg-blue-500 text-white text-xs sm:text-sm">
                         Seasonal
-                      </Badge>
-                    )}
+                      </Badge>}
                   </div>
                   <Badge className="absolute top-3 sm:top-4 right-3 sm:right-4 bg-forest-green text-white text-xs sm:text-sm">
                     {listing.type}
@@ -87,16 +62,14 @@ const FeaturedListings = () => {
                 </div>
                 
                 <CardContent className="p-4 sm:p-6">
-                  {listing.rating && listing.review_count && (
-                    <div className="flex items-center gap-2 mb-2">
+                  {listing.rating && listing.review_count && <div className="flex items-center gap-2 mb-2">
                       <div className="flex items-center text-yellow-500">
                         <Star size={14} fill="currentColor" />
                         <span className="ml-1 text-sm font-medium text-gray-700">
                           {listing.rating} ({listing.review_count})
                         </span>
                       </div>
-                    </div>
-                  )}
+                    </div>}
                   
                   <h3 className="text-lg sm:text-xl font-serif font-bold text-forest-green mb-2 line-clamp-2">
                     {listing.title}
@@ -107,19 +80,15 @@ const FeaturedListings = () => {
                     <span className="text-sm truncate">{listing.location}</span>
                   </div>
 
-                  {listing.is_seasonal && listing.seasonal_start_date && listing.seasonal_end_date && (
-                    <div className="text-xs sm:text-sm text-blue-600 mb-3 line-clamp-2">
+                  {listing.is_seasonal && listing.seasonal_start_date && listing.seasonal_end_date && <div className="text-xs sm:text-sm text-blue-600 mb-3 line-clamp-2">
                       Available: {new Date(listing.seasonal_start_date).toLocaleDateString()} - {new Date(listing.seasonal_end_date).toLocaleDateString()}
-                    </div>
-                  )}
+                    </div>}
                   
                   <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4 text-xs sm:text-sm text-gray-600">
-                    {listing.capacity && (
-                      <div className="flex items-center">
+                    {listing.capacity && <div className="flex items-center">
                         <Users size={14} className="mr-1" />
                         <span>Up to {listing.capacity}</span>
-                      </div>
-                    )}
+                      </div>}
                     <div className="flex items-center">
                       <Wifi size={14} className="mr-1" />
                       <span>High-speed WiFi</span>
@@ -131,38 +100,25 @@ const FeaturedListings = () => {
                       <span className="text-xl sm:text-2xl font-bold text-forest-green">
                         €{discountedPrice}
                       </span>
-                      {hasDiscount && (
-                        <span className="text-sm sm:text-lg text-gray-500 line-through ml-2">
+                      {hasDiscount && <span className="text-sm sm:text-lg text-gray-500 line-through ml-2">
                           €{listing.original_price}
-                        </span>
-                      )}
+                        </span>}
                       <div className="text-xs sm:text-sm text-gray-600">per month</div>
                     </div>
                   </div>
                   
-                  <Button 
-                    className="adventure-button w-full py-2 sm:py-3 text-sm sm:text-base"
-                    onClick={(e) => handleMoreInfo(listing, e)}
-                  >
+                  <Button className="adventure-button w-full py-2 sm:py-3 text-sm sm:text-base" onClick={e => handleMoreInfo(listing, e)}>
                     More Info
                   </Button>
                 </CardContent>
-              </Card>
-            );
-          })}
+              </Card>;
+        })}
         </div>
         
         <div className="text-center mt-8 sm:mt-12">
-          <Button 
-            className="outline-button py-3 px-6 sm:px-8 text-sm sm:text-base" 
-            onClick={() => navigate('/coliving-deals')}
-          >
-            View All Deals
-          </Button>
+          <Button className="outline-button py-3 px-6 sm:px-8 text-sm sm:text-base" onClick={() => navigate('/coliving-deals')}>View All Coliving Deals</Button>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default FeaturedListings;

@@ -1,35 +1,19 @@
-
 import { Link } from 'react-router-dom';
 import { Instagram } from 'lucide-react';
-
 const Footer = () => {
-  return (
-    <footer className="bg-forest-green text-white py-16">
+  return <footer className="bg-forest-green text-white py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
             <Link to="/" className="text-2xl font-serif font-bold mb-4 block">
               RemoteWork.Deals
             </Link>
-            <p className="text-gray-300 mb-6 max-w-md">
-              Discover exclusive co-living deals around the world. Join thousands of digital nomads 
-              saving up to 40% on premium co-living spaces.
-            </p>
+            <p className="text-gray-300 mb-6 max-w-md">Discover exclusive coliving deals around the world. Join thousands of digital nomads saving up to 40% on only the best coliving spaces.</p>
             <div className="flex items-center gap-4">
-              <a 
-                href="https://wa.me/1234567890" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="adventure-button"
-              >
+              <a href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer" className="adventure-button">
                 Chat on WhatsApp
               </a>
-              <a 
-                href="https://instagram.com/remotework.deals" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-white transition-colors"
-              >
+              <a href="https://instagram.com/remotework.deals" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors">
                 <Instagram size={24} />
               </a>
             </div>
@@ -59,8 +43,6 @@ const Footer = () => {
           <p>&copy; 2024 RemoteWork.Deals. All rights reserved. Made with ❤️ for digital nomads worldwide.</p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
