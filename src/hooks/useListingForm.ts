@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,6 +7,8 @@ import { useAuth } from '@/contexts/AuthContext';
 
 export const useListingForm = (listing?: Listing | null, onClose?: () => void) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Initialize all state with proper defaults
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
@@ -46,40 +49,75 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
       console.log('=== LOADING LISTING DATA ===');
       console.log('Full listing object:', listing);
 
-      setTitle(listing.title || '');
-      setDescription(listing.description || '');
-      setLocation(listing.location || '');
-      setCountry(listing.country || '');
-      setType(listing.type || 'coliving');
-      setStatus(listing.status || 'active');
-      setUsp(listing.usp || '');
-      setOriginalPrice(listing.original_price || 0);
-      setPricingUnit((listing.pricing_unit as 'night' | 'month') || 'night');
-      setDiscountedPrice(listing.discounted_price || null);
-      setDiscountPercentage(listing.discount_percentage || null);
-      setDiscountCodeUrl(listing.discount_code_url || null);
-      setDiscountType(listing.discount_type || null);
-      setDiscountValue(listing.discount_value || null);
-      setMinimumStay(listing.minimum_stay || null);
-      setMinimumStayUnit((listing.minimum_stay_unit as 'nights' | 'weeks' | 'months') || 'nights');
-      setCapacity(listing.capacity || null);
-      setRooms(listing.rooms || null);
-      setAmenities(listing.amenities || []);
-      setImages(listing.images || []);
-      setFeaturedImage(listing.featured_image || null);
-      setIsSeasonal(listing.is_seasonal || false);
-      setSeasonalStartDate(listing.seasonal_start_date || null);
-      setSeasonalEndDate(listing.seasonal_end_date || null);
-      setWebsiteUrl(listing.website_url || null);
-      setInstagramUrl(listing.instagram_url || null);
-      setFeatured(listing.featured || false);
+      // Use safe assignments with fallbacks
+      setTitle(listing.title ?? '');
+      setDescription(listing.description ?? '');
+      setLocation(listing.location ?? '');
+      setCountry(listing.country ?? '');
+      setType(listing.type ?? 'coliving');
+      setStatus(listing.status ?? 'active');
+      setUsp(listing.usp ?? '');
+      setOriginalPrice(listing.original_price ?? 0);
+      setPricingUnit((listing.pricing_unit as 'night' | 'month') ?? 'night');
+      setDiscountedPrice(listing.discounted_price ?? null);
+      setDiscountPercentage(listing.discount_percentage ?? null);
+      setDiscountCodeUrl(listing.discount_code_url ?? null);
+      setDiscountType(listing.discount_type ?? null);
+      setDiscountValue(listing.discount_value ?? null);
+      setMinimumStay(listing.minimum_stay ?? null);
+      setMinimumStayUnit((listing.minimum_stay_unit as 'nights' | 'weeks' | 'months') ?? 'nights');
+      setCapacity(listing.capacity ?? null);
+      setRooms(listing.rooms ?? null);
+      setAmenities(listing.amenities ?? []);
+      setImages(listing.images ?? []);
+      setFeaturedImage(listing.featured_image ?? null);
+      setIsSeasonal(listing.is_seasonal ?? false);
+      setSeasonalStartDate(listing.seasonal_start_date ?? null);
+      setSeasonalEndDate(listing.seasonal_end_date ?? null);
+      setWebsiteUrl(listing.website_url ?? null);
+      setInstagramUrl(listing.instagram_url ?? null);
+      setFeatured(listing.featured ?? false);
       
-      setWorkWifiInfo(listing.work_wifi_info || '');
-      setCommunitySocialInfo(listing.community_social_info || '');
-      setComfortLivingInfo(listing.comfort_living_info || '');
-      setLocationSurroundingsInfo(listing.location_surroundings_info || '');
+      setWorkWifiInfo(listing.work_wifi_info ?? '');
+      setCommunitySocialInfo(listing.community_social_info ?? '');
+      setComfortLivingInfo(listing.comfort_living_info ?? '');
+      setLocationSurroundingsInfo(listing.location_surroundings_info ?? '');
       
       console.log('=== LISTING DATA LOADED ===');
+    } else {
+      // Reset all fields for new listing creation
+      console.log('=== INITIALIZING NEW LISTING FORM ===');
+      setTitle('');
+      setDescription('');
+      setLocation('');
+      setCountry('');
+      setType('coliving');
+      setStatus('active');
+      setUsp('');
+      setOriginalPrice(0);
+      setPricingUnit('night');
+      setDiscountedPrice(null);
+      setDiscountPercentage(null);
+      setDiscountCodeUrl(null);
+      setDiscountType(null);
+      setDiscountValue(null);
+      setMinimumStay(null);
+      setMinimumStayUnit('nights');
+      setCapacity(null);
+      setRooms(null);
+      setAmenities([]);
+      setImages([]);
+      setFeaturedImage(null);
+      setIsSeasonal(false);
+      setSeasonalStartDate(null);
+      setSeasonalEndDate(null);
+      setWebsiteUrl(null);
+      setInstagramUrl(null);
+      setFeatured(false);
+      setWorkWifiInfo('');
+      setCommunitySocialInfo('');
+      setComfortLivingInfo('');
+      setLocationSurroundingsInfo('');
     }
   }, [listing]);
 
@@ -110,32 +148,32 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
       };
 
       const listingData = {
-        title,
-        description: description || null,
-        location,
-        country,
+        title: title.trim(),
+        description: description?.trim() || null,
+        location: location.trim(),
+        country: country.trim(),
         type,
         status,
-        usp: usp.trim() || null,
-        original_price: originalPrice,
+        usp: usp?.trim() || null,
+        original_price: originalPrice || 0,
         pricing_unit: pricingUnit,
-        discounted_price: discountedPrice || null,
-        discount_percentage: discountPercentage || null,
-        discount_code_url: discountCodeUrl || null,
-        discount_type: discountType || null,
-        discount_value: discountValue || null,
-        minimum_stay: minimumStay || null,
+        discounted_price: discountedPrice,
+        discount_percentage: discountPercentage,
+        discount_code_url: discountCodeUrl?.trim() || null,
+        discount_type: discountType,
+        discount_value: discountValue,
+        minimum_stay: minimumStay,
         minimum_stay_unit: minimumStayUnit,
-        capacity: capacity || null,
-        rooms: rooms || null,
+        capacity: capacity,
+        rooms: rooms,
         amenities: amenities.length > 0 ? amenities : null,
         images: images.length > 0 ? images : null,
-        featured_image: featuredImage || null,
+        featured_image: featuredImage?.trim() || null,
         is_seasonal: isSeasonal,
-        seasonal_start_date: seasonalStartDate || null,
-        seasonal_end_date: seasonalEndDate || null,
-        website_url: websiteUrl || null,
-        instagram_url: instagramUrl || null,
+        seasonal_start_date: seasonalStartDate,
+        seasonal_end_date: seasonalEndDate,
+        website_url: websiteUrl?.trim() || null,
+        instagram_url: instagramUrl?.trim() || null,
         featured: featured,
         created_by: user.id,
         ...informationBlocksData

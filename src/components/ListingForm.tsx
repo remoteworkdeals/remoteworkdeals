@@ -13,7 +13,7 @@ import ContactForm from './forms/ContactForm';
 import FeaturedForm from './forms/FeaturedForm';
 import InformationBlocksForm from './InformationBlocksForm';
 import { useToast } from '@/hooks/use-toast';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface ListingFormProps {
   listing?: Listing | null;
@@ -22,7 +22,91 @@ interface ListingFormProps {
 
 const ListingForm = ({ listing, onClose }: ListingFormProps) => {
   const { toast } = useToast();
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
+  const formHook = useListingForm(listing, onClose);
+
+  // Add loading state to prevent premature rendering
+  useEffect(() => {
+    // Give the form hook time to initialize properly
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Add error boundary-like behavior
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      console.error('=== FRONTEND ERROR CAUGHT ===', event.error);
+      setHasError(true);
+      toast({
+        title: 'Form Error',
+        description: 'There was an issue loading the form. Please refresh and try again.',
+        variant: 'destructive',
+      });
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error('=== UNHANDLED PROMISE REJECTION ===', event.reason);
+      setHasError(true);
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, [toast]);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto p-8">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex items-center space-x-2">
+            <Loader2 className="h-6 w-6 animate-spin" />
+            <span>Loading form...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (hasError || !formHook) {
+    return (
+      <div className="max-w-4xl mx-auto p-8">
+        <div className="flex items-center mb-8">
+          <Button variant="ghost" onClick={onClose} className="mr-4">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Listings
+          </Button>
+          <h1 className="text-3xl font-bold text-red-600">Form Error</h1>
+        </div>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <h2 className="text-lg font-semibold text-red-800 mb-2">Unable to Load Form</h2>
+          <p className="text-red-700 mb-4">
+            There was an error loading the listing form. This could be due to missing data or a configuration issue.
+          </p>
+          <div className="flex gap-2">
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Refresh Page
+            </Button>
+            <Button onClick={onClose} variant="ghost">
+              Back to Listings
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Destructure form hook safely
   const {
     // Basic Information
     title, setTitle,
@@ -76,39 +160,7 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
     // Form actions
     isSubmitting,
     handleSubmit,
-  } = useListingForm(listing, onClose);
-
-  // Add error logging to catch any rendering issues
-  useEffect(() => {
-    console.log('=== LISTING FORM RENDERED ===');
-    console.log('Form state initialized:', {
-      title, originalPrice, pricingUnit, discountType, featured
-    });
-  }, [title, originalPrice, pricingUnit, discountType, featured]);
-
-  // Add error boundary-like behavior
-  useEffect(() => {
-    const handleError = (event: ErrorEvent) => {
-      console.error('=== FRONTEND ERROR CAUGHT ===', event.error);
-      toast({
-        title: 'Form Error',
-        description: 'There was an issue loading the form. Please refresh and try again.',
-        variant: 'destructive',
-      });
-    };
-
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      console.error('=== UNHANDLED PROMISE REJECTION ===', event.reason);
-    };
-
-    window.addEventListener('error', handleError);
-    window.addEventListener('unhandledrejection', handleUnhandledRejection);
-
-    return () => {
-      window.removeEventListener('error', handleError);
-      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-    };
-  }, [toast]);
+  } = formHook;
 
   try {
     return (
@@ -125,29 +177,29 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <BasicInformationForm
-            title={title}
+            title={title || ''}
             setTitle={setTitle}
-            description={description}
+            description={description || ''}
             setDescription={setDescription}
-            location={location}
+            location={location || ''}
             setLocation={setLocation}
-            country={country}
+            country={country || ''}
             setCountry={setCountry}
-            type={type}
+            type={type || 'coliving'}
             setType={setType}
-            status={status}
+            status={status || 'active'}
             setStatus={setStatus}
           />
 
           <USPForm
-            usp={usp}
+            usp={usp || ''}
             setUsp={setUsp}
           />
 
           <PricingForm
-            originalPrice={originalPrice}
+            originalPrice={originalPrice || 0}
             setOriginalPrice={setOriginalPrice}
-            pricingUnit={pricingUnit}
+            pricingUnit={pricingUnit || 'night'}
             setPricingUnit={setPricingUnit}
             discountedPrice={discountedPrice}
             setDiscountedPrice={setDiscountedPrice}
@@ -164,7 +216,7 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
           <StayDetailsForm
             minimumStay={minimumStay}
             setMinimumStay={setMinimumStay}
-            minimumStayUnit={minimumStayUnit}
+            minimumStayUnit={minimumStayUnit || 'nights'}
             setMinimumStayUnit={setMinimumStayUnit}
             capacity={capacity}
             setCapacity={setCapacity}
@@ -173,32 +225,32 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
           />
 
           <FeaturedForm
-            featured={featured}
+            featured={featured || false}
             setFeatured={setFeatured}
           />
           
           <InformationBlocksForm
-            workWifiInfo={workWifiInfo}
+            workWifiInfo={workWifiInfo || ''}
             setWorkWifiInfo={setWorkWifiInfo}
-            communitySocialInfo={communitySocialInfo}
+            communitySocialInfo={communitySocialInfo || ''}
             setCommunitySocialInfo={setCommunitySocialInfo}
-            comfortLivingInfo={comfortLivingInfo}
+            comfortLivingInfo={comfortLivingInfo || ''}
             setComfortLivingInfo={setComfortLivingInfo}
-            locationSurroundingsInfo={locationSurroundingsInfo}
+            locationSurroundingsInfo={locationSurroundingsInfo || ''}
             setLocationSurroundingsInfo={setLocationSurroundingsInfo}
           />
 
           <MediaForm
-            images={images}
+            images={images || []}
             setImages={setImages}
             featuredImage={featuredImage}
             setFeaturedImage={setFeaturedImage}
-            amenities={amenities}
+            amenities={amenities || []}
             setAmenities={setAmenities}
           />
 
           <SeasonalForm
-            isSeasonal={isSeasonal}
+            isSeasonal={isSeasonal || false}
             setIsSeasonal={setIsSeasonal}
             seasonalStartDate={seasonalStartDate}
             setSeasonalStartDate={setSeasonalStartDate}
@@ -242,9 +294,14 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
           <p className="text-red-700 mb-4">
             There was an error loading the listing form. This could be due to missing data or a configuration issue.
           </p>
-          <Button onClick={() => window.location.reload()} variant="outline">
-            Refresh Page
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Refresh Page
+            </Button>
+            <Button onClick={onClose} variant="ghost">
+              Back to Listings
+            </Button>
+          </div>
         </div>
       </div>
     );
