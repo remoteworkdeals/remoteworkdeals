@@ -1,3 +1,4 @@
+
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import Testimonials from '@/components/Testimonials';
@@ -11,6 +12,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { isValidPhoneNumber } from 'react-phone-number-input';
+
 const ExclusiveDeals = () => {
   const [formData, setFormData] = useState({
     email: '',
@@ -18,16 +20,12 @@ const ExclusiveDeals = () => {
   });
   const [phoneValid, setPhoneValid] = useState<boolean | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+
   const handlePhoneChange = (value: string | undefined) => {
     const phoneValue = value || '';
-    setFormData({
-      ...formData,
-      phone: phoneValue
-    });
-
+    setFormData({ ...formData, phone: phoneValue });
+    
     // Validate phone number in real-time
     if (phoneValue) {
       const isValid = isValidPhoneNumber(phoneValue);
@@ -36,8 +34,10 @@ const ExclusiveDeals = () => {
       setPhoneValid(null);
     }
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!formData.email) {
       toast({
         title: "Email Required",
@@ -56,22 +56,26 @@ const ExclusiveDeals = () => {
       });
       return;
     }
+
     setIsSubmitting(true);
+    
     try {
       console.log('Attempting to save community member:', formData);
-
+      
       // Save to Supabase
-      const {
-        data,
-        error
-      } = await supabase.from('community_members').insert([{
-        email: formData.email,
-        phone: formData.phone || null,
-        source: 'exclusive_deals'
-      }]);
+      const { data, error } = await supabase
+        .from('community_members')
+        .insert([
+          {
+            email: formData.email,
+            phone: formData.phone || null,
+            source: 'exclusive_deals'
+          }
+        ]);
+
       if (error) {
         console.error('Supabase error:', error);
-
+        
         // Handle duplicate email error specifically
         if (error.code === '23505') {
           toast({
@@ -96,16 +100,14 @@ const ExclusiveDeals = () => {
       }
 
       // Clear form
-      setFormData({
-        email: '',
-        phone: ''
-      });
+      setFormData({ email: '', phone: '' });
       setPhoneValid(null);
 
       // Redirect to WhatsApp group after a short delay
       setTimeout(() => {
         window.open('https://chat.whatsapp.com/Bnb3F4ycBPcLsYRl2BxNtM', '_blank');
       }, 1500);
+
     } catch (error) {
       console.error('Unexpected error:', error);
       toast({
@@ -117,7 +119,9 @@ const ExclusiveDeals = () => {
       setIsSubmitting(false);
     }
   };
-  const JoinForm = () => <Card className="card-shadow">
+
+  const JoinForm = () => (
+    <Card className="card-shadow">
       <CardHeader className="text-center">
         <CardTitle className="text-3xl font-serif text-forest-green mb-4">
           Get Access to Exclusive Coliving Deals
@@ -129,32 +133,56 @@ const ExclusiveDeals = () => {
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <Label htmlFor="email" className="text-base font-semibold">Email Address</Label>
-              <Input id="email" type="email" value={formData.email} onChange={e => setFormData({
-              ...formData,
-              email: e.target.value
-            })} placeholder="your@email.com" required className="mt-2 h-12" disabled={isSubmitting} />
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="your@email.com"
+                required
+                className="mt-2 h-12"
+                disabled={isSubmitting}
+              />
             </div>
             
             <div>
               <Label htmlFor="phone" className="text-base font-semibold">WhatsApp Number</Label>
               <div className="relative mt-2">
-                <PhoneInput value={formData.phone} onChange={handlePhoneChange} disabled={isSubmitting} placeholder="e.g. +44 7123 456789" className={`
+                <PhoneInput
+                  value={formData.phone}
+                  onChange={handlePhoneChange}
+                  disabled={isSubmitting}
+                  placeholder="e.g. +44 7123 456789"
+                  className={`
                     ${phoneValid === true ? 'phone-input-valid' : ''}
                     ${phoneValid === false ? 'phone-input-invalid' : ''}
-                  `} />
-                {formData.phone && <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    {phoneValid === true && <CheckCircle className="h-5 w-5 text-green-500" />}
-                    {phoneValid === false && <AlertCircle className="h-5 w-5 text-red-500" />}
-                  </div>}
+                  `}
+                />
+                {formData.phone && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    {phoneValid === true && (
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                    )}
+                    {phoneValid === false && (
+                      <AlertCircle className="h-5 w-5 text-red-500" />
+                    )}
+                  </div>
+                )}
               </div>
-              {phoneValid === false && formData.phone && <p className="text-sm text-red-600 mt-1">
+              {phoneValid === false && formData.phone && (
+                <p className="text-sm text-red-600 mt-1">
                   Please enter a valid phone number with country code
-                </p>}
+                </p>
+              )}
             </div>
           </div>
           
           <div className="text-center">
-            <Button type="submit" className="adventure-button text-lg px-12 py-4 w-full sm:w-auto" disabled={isSubmitting}>
+            <Button 
+              type="submit" 
+              className="adventure-button text-lg px-12 py-4 w-full sm:w-auto"
+              disabled={isSubmitting}
+            >
               <MessageCircle className="mr-2" size={20} />
               {isSubmitting ? 'Joining...' : 'Join the Community (Free)'}
             </Button>
@@ -165,8 +193,11 @@ const ExclusiveDeals = () => {
           </div>
         </form>
       </CardContent>
-    </Card>;
-  return <div className="min-h-screen">
+    </Card>
+  );
+
+  return (
+    <div className="min-h-screen">
       <Navigation />
       
       {/* Hero Section */}
@@ -211,9 +242,7 @@ const ExclusiveDeals = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            <div className="text-center animate-fade-in" style={{
-            animationDelay: '0s'
-          }}>
+            <div className="text-center animate-fade-in" style={{ animationDelay: '0s' }}>
               <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Bell size={24} className="text-adventure-orange" />
               </div>
@@ -221,9 +250,7 @@ const ExclusiveDeals = () => {
               <p className="text-gray-600">Never miss out on the best Coliving spots and deals.</p>
             </div>
 
-            <div className="text-center animate-fade-in" style={{
-            animationDelay: '0.1s'
-          }}>
+            <div className="text-center animate-fade-in" style={{ animationDelay: '0.1s' }}>
               <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Clock size={24} className="text-adventure-orange" />
               </div>
@@ -233,9 +260,7 @@ const ExclusiveDeals = () => {
               <p className="text-gray-600">Exclusive access to last-minute deals with up to 60% off Coliving prices.</p>
             </div>
 
-            <div className="text-center animate-fade-in" style={{
-            animationDelay: '0.2s'
-          }}>
+            <div className="text-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
               <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Gift size={24} className="text-adventure-orange" />
               </div>
@@ -245,9 +270,7 @@ const ExclusiveDeals = () => {
               </p>
             </div>
 
-            <div className="text-center animate-fade-in" style={{
-            animationDelay: '0.3s'
-          }}>
+            <div className="text-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
               <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <MessageCircle size={24} className="text-adventure-orange" />
               </div>
@@ -259,9 +282,7 @@ const ExclusiveDeals = () => {
               </p>
             </div>
 
-            <div className="text-center animate-fade-in" style={{
-            animationDelay: '0.4s'
-          }}>
+            <div className="text-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
               <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Globe size={24} className="text-adventure-orange" />
               </div>
@@ -273,9 +294,7 @@ const ExclusiveDeals = () => {
               </p>
             </div>
 
-            <div className="text-center animate-fade-in" style={{
-            animationDelay: '0.5s'
-          }}>
+            <div className="text-center animate-fade-in" style={{ animationDelay: '0.5s' }}>
               <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Users size={24} className="text-adventure-orange" />
               </div>
@@ -307,6 +326,8 @@ const ExclusiveDeals = () => {
       </section>
 
       <Footer />
-    </div>;
+    </div>
+  );
 };
+
 export default ExclusiveDeals;
