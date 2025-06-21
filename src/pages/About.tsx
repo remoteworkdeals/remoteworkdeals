@@ -1,9 +1,12 @@
+
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { MapPin, Users, Globe, Heart } from 'lucide-react';
+
 const About = () => {
-  return <div className="min-h-screen">
+  return (
+    <div className="min-h-screen">
       <Navigation />
       
       {/* Hero Section */}
@@ -22,49 +25,82 @@ const About = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
               <h2 className="text-3xl lg:text-4xl font-serif font-bold text-forest-green mb-6">
-                My Journey as a Digital Nomad
+                Why I Started Remote Work Deals
               </h2>
               <div className="space-y-4 text-lg text-gray-700">
                 <p>
-                  Three years ago, I packed my life into a backpack and bought a one-way ticket to Bali. 
-                  What started as a month-long "workation" turned into a complete lifestyle transformation.
+                  As a digital nomad, I quickly discovered the power of a good co-living.
                 </p>
                 <p>
-                  After visiting 47 co-living spaces across 23 countries, I noticed something: the best 
-                  places were often the most expensive, making nomadism accessible only to those with 
-                  high salaries or trust funds.
+                  When you find the right place — with the right people, the right energy, and the right vibe — something just clicks. Suddenly, remote life isn't just manageable... it becomes one of the best times of your life.
                 </p>
                 <p>
-                  I started negotiating group discounts with co-living operators I'd built relationships 
-                  with. Word spread in nomad WhatsApp groups, and soon I was managing discount codes for 
-                  hundreds of fellow travelers.
+                  I've experienced that magic myself.
                 </p>
                 <p>
-                  RemoteWork.Deals was born from this simple idea: everyone deserves access to amazing 
-                  co-living experiences, regardless of their budget.
+                  But I've also seen how often other nomads miss out on it — ending up in the wrong place, feeling isolated, or simply drained from always being "on the move." And that's a shame, because I genuinely believe:
+                </p>
+                <p className="font-semibold text-forest-green">
+                  a good co-living can change everything.
+                </p>
+                <p>
+                  That's why I created Remote Work Deals:
+                </p>
+                <p className="font-semibold">
+                  To help others find their version of that perfect fit.
                 </p>
               </div>
               
               <div className="mt-8">
-                <Button className="adventure-button">
-                  Chat with me on WhatsApp
-                </Button>
+                <a href="https://api.whatsapp.com/send/?phone=31628359453" target="_blank" rel="noopener noreferrer">
+                  <Button className="adventure-button">
+                    Chat with me on WhatsApp
+                  </Button>
+                </a>
               </div>
             </div>
             
             <div className="relative">
               <img src="https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=600&q=80" alt="Founder working remotely" className="rounded-2xl shadow-2xl" />
               <div className="absolute -bottom-6 -right-6 bg-adventure-orange text-white p-6 rounded-xl shadow-lg">
-                <div className="text-2xl font-bold">47</div>
-                <div className="text-sm">Co-livings Visited</div>
+                <div className="text-sm font-medium text-center">Let's find your perfect Coliving match together</div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Mission Section */}
+      {/* What Makes This Platform Different Section */}
       <section className="py-20 bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-serif font-bold text-forest-green mb-6">
+              What Makes This Platform Different
+            </h2>
+            <p className="text-xl text-gray-600">
+              This isn't just a list of discounts. It's a curated space, built around honest recommendations and real experiences.
+            </p>
+          </div>
+
+          <div className="space-y-6 text-lg text-gray-700">
+            <p>Every listing includes real reviews from real nomads</p>
+            <p>We're upfront about who a place is for — and who it's not for</p>
+            <p>We highlight the details that really matter:</p>
+            <p className="ml-4">Is there a true community? What's the vibe? What kind of people stay there?</p>
+            <p>I believe that finding the right co-living isn't about luck — it's about access to the right information.</p>
+            <p>And I want to make that accessible for everyone living the remote lifestyle.</p>
+            <p>So whether you're planning your first remote trip or looking for your next community, I hope Remote Work Deals helps you find a place where you feel like you truly belong.</p>
+            
+            <div className="text-right mt-8 pt-8 border-t border-gray-300">
+              <p className="font-serif text-2xl text-forest-green">— Joëlle</p>
+              <p className="text-gray-600">Founder of Remote Work Deals</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Mission Section */}
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-serif font-bold text-forest-green mb-6">
@@ -157,6 +193,8 @@ const About = () => {
       </section>
 
       <Footer />
-    </div>;
+    </div>
+  );
 };
+
 export default About;
