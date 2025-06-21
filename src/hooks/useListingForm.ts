@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -47,22 +46,22 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
       console.log('=== LOADING LISTING DATA ===');
       console.log('Full listing object:', listing);
 
-      setTitle(listing.title);
+      setTitle(listing.title || '');
       setDescription(listing.description || '');
-      setLocation(listing.location);
-      setCountry(listing.country);
-      setType(listing.type);
-      setStatus(listing.status);
+      setLocation(listing.location || '');
+      setCountry(listing.country || '');
+      setType(listing.type || 'coliving');
+      setStatus(listing.status || 'active');
       setUsp(listing.usp || '');
-      setOriginalPrice(listing.original_price);
-      setPricingUnit(listing.pricing_unit as 'night' | 'month');
+      setOriginalPrice(listing.original_price || 0);
+      setPricingUnit((listing.pricing_unit as 'night' | 'month') || 'night');
       setDiscountedPrice(listing.discounted_price || null);
       setDiscountPercentage(listing.discount_percentage || null);
       setDiscountCodeUrl(listing.discount_code_url || null);
       setDiscountType(listing.discount_type || null);
       setDiscountValue(listing.discount_value || null);
       setMinimumStay(listing.minimum_stay || null);
-      setMinimumStayUnit(listing.minimum_stay_unit as 'nights' | 'weeks' | 'months' || 'nights');
+      setMinimumStayUnit((listing.minimum_stay_unit as 'nights' | 'weeks' | 'months') || 'nights');
       setCapacity(listing.capacity || null);
       setRooms(listing.rooms || null);
       setAmenities(listing.amenities || []);
