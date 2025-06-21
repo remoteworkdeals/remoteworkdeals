@@ -101,7 +101,7 @@ export const useSEO = (seoData: SEOData) => {
 
     // Structured data
     if (structuredData) {
-      let scriptTag = document.querySelector('script[type="application/ld+json"]');
+      let scriptTag = document.querySelector('script[type="application/ld+json"]') as HTMLScriptElement;
       if (scriptTag) {
         scriptTag.remove();
       }

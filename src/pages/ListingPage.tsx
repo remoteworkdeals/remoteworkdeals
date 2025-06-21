@@ -9,7 +9,7 @@ import { useListingData } from '@/hooks/useListingData';
 const ListingPage = () => {
   const { id } = useParams();
   const listingId = parseInt(id || '1');
-  const { listing, isLoading } = useListingData(listingId);
+  const { listing, loading } = useListingData(listingId);
 
   const getSEOData = () => {
     if (!listing) {

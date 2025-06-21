@@ -4,11 +4,11 @@ export const generateSitemap = (blogPosts: any[], listings: any[]) => {
   const currentDate = new Date().toISOString().split('T')[0];
   
   const staticPages = [
-    { url: '/', priority: '1.0', changefreq: 'daily' },
-    { url: '/blog', priority: '0.9', changefreq: 'daily' },
-    { url: '/coliving-deals', priority: '0.9', changefreq: 'daily' },
-    { url: '/exclusive-deals', priority: '0.8', changefreq: 'weekly' },
-    { url: '/about', priority: '0.7', changefreq: 'monthly' },
+    { url: '/', priority: '1.0', changefreq: 'daily', lastmod: currentDate },
+    { url: '/blog', priority: '0.9', changefreq: 'daily', lastmod: currentDate },
+    { url: '/coliving-deals', priority: '0.9', changefreq: 'daily', lastmod: currentDate },
+    { url: '/exclusive-deals', priority: '0.8', changefreq: 'weekly', lastmod: currentDate },
+    { url: '/about', priority: '0.7', changefreq: 'monthly', lastmod: currentDate },
   ];
 
   const blogPages = blogPosts.map(post => ({
@@ -31,7 +31,7 @@ export const generateSitemap = (blogPosts: any[], listings: any[]) => {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${allPages.map(page => `  <url>
     <loc>${baseUrl}${page.url}</loc>
-    <lastmod>${page.lastmod || currentDate}</lastmod>
+    <lastmod>${page.lastmod}</lastmod>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
   </url>`).join('\n')}
