@@ -1,4 +1,3 @@
-
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import Testimonials from '@/components/Testimonials';
@@ -12,7 +11,6 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { isValidPhoneNumber } from 'react-phone-number-input';
-
 const ExclusiveDeals = () => {
   const [formData, setFormData] = useState({
     email: '',
@@ -20,12 +18,16 @@ const ExclusiveDeals = () => {
   });
   const [phoneValid, setPhoneValid] = useState<boolean | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   const handlePhoneChange = (value: string | undefined) => {
     const phoneValue = value || '';
-    setFormData({ ...formData, phone: phoneValue });
-    
+    setFormData({
+      ...formData,
+      phone: phoneValue
+    });
+
     // Validate phone number in real-time
     if (phoneValue) {
       const isValid = isValidPhoneNumber(phoneValue);
@@ -34,10 +36,8 @@ const ExclusiveDeals = () => {
       setPhoneValid(null);
     }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!formData.email) {
       toast({
         title: "Email Required",
@@ -56,31 +56,27 @@ const ExclusiveDeals = () => {
       });
       return;
     }
-
     setIsSubmitting(true);
-
     try {
       console.log('Attempting to save community member:', formData);
-      
-      // Save to Supabase
-      const { data, error } = await supabase
-        .from('community_members')
-        .insert([
-          {
-            email: formData.email,
-            phone: formData.phone || null,
-            source: 'exclusive_deals'
-          }
-        ]);
 
+      // Save to Supabase
+      const {
+        data,
+        error
+      } = await supabase.from('community_members').insert([{
+        email: formData.email,
+        phone: formData.phone || null,
+        source: 'exclusive_deals'
+      }]);
       if (error) {
         console.error('Supabase error:', error);
-        
+
         // Handle duplicate email error specifically
         if (error.code === '23505') {
           toast({
             title: "Already Registered",
-            description: "This email is already part of our community! Redirecting you to WhatsApp.",
+            description: "This email is already part of our community! Redirecting you to WhatsApp."
           });
         } else {
           toast({
@@ -95,7 +91,7 @@ const ExclusiveDeals = () => {
         console.log('Successfully saved community member:', data);
         toast({
           title: "Welcome to the Community!",
-          description: "You've successfully joined! Redirecting you to our WhatsApp group.",
+          description: "You've successfully joined! Redirecting you to our WhatsApp group."
         });
       }
 
@@ -110,7 +106,6 @@ const ExclusiveDeals = () => {
       setTimeout(() => {
         window.open('https://chat.whatsapp.com/Bnb3F4ycBPcLsYRl2BxNtM', '_blank');
       }, 1500);
-
     } catch (error) {
       console.error('Unexpected error:', error);
       toast({
@@ -122,9 +117,7 @@ const ExclusiveDeals = () => {
       setIsSubmitting(false);
     }
   };
-
-  const JoinForm = () => (
-    <Card className="card-shadow">
+  const JoinForm = () => <Card className="card-shadow">
       <CardHeader className="text-center">
         <CardTitle className="text-3xl font-serif text-forest-green mb-4">
           Get Access to Exclusive Coliving Deals
@@ -136,56 +129,32 @@ const ExclusiveDeals = () => {
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <Label htmlFor="email" className="text-base font-semibold">Email Address</Label>
-              <Input 
-                id="email" 
-                type="email" 
-                value={formData.email} 
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })} 
-                placeholder="your@email.com" 
-                required 
-                className="mt-2 h-12"
-                disabled={isSubmitting}
-              />
+              <Input id="email" type="email" value={formData.email} onChange={e => setFormData({
+              ...formData,
+              email: e.target.value
+            })} placeholder="your@email.com" required className="mt-2 h-12" disabled={isSubmitting} />
             </div>
             
             <div>
               <Label htmlFor="phone" className="text-base font-semibold">WhatsApp Number</Label>
               <div className="relative mt-2">
-                <PhoneInput
-                  value={formData.phone}
-                  onChange={handlePhoneChange}
-                  disabled={isSubmitting}
-                  placeholder="e.g. +44 7123 456789"
-                  className={`
+                <PhoneInput value={formData.phone} onChange={handlePhoneChange} disabled={isSubmitting} placeholder="e.g. +44 7123 456789" className={`
                     ${phoneValid === true ? 'phone-input-valid' : ''}
                     ${phoneValid === false ? 'phone-input-invalid' : ''}
-                  `}
-                />
-                {formData.phone && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    {phoneValid === true && (
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                    )}
-                    {phoneValid === false && (
-                      <AlertCircle className="h-5 w-5 text-red-500" />
-                    )}
-                  </div>
-                )}
+                  `} />
+                {formData.phone && <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    {phoneValid === true && <CheckCircle className="h-5 w-5 text-green-500" />}
+                    {phoneValid === false && <AlertCircle className="h-5 w-5 text-red-500" />}
+                  </div>}
               </div>
-              {phoneValid === false && formData.phone && (
-                <p className="text-sm text-red-600 mt-1">
+              {phoneValid === false && formData.phone && <p className="text-sm text-red-600 mt-1">
                   Please enter a valid phone number with country code
-                </p>
-              )}
+                </p>}
             </div>
           </div>
           
           <div className="text-center">
-            <Button 
-              type="submit" 
-              className="adventure-button text-lg px-12 py-4 w-full sm:w-auto"
-              disabled={isSubmitting}
-            >
+            <Button type="submit" className="adventure-button text-lg px-12 py-4 w-full sm:w-auto" disabled={isSubmitting}>
               <MessageCircle className="mr-2" size={20} />
               {isSubmitting ? 'Joining...' : 'Join the Community (Free)'}
             </Button>
@@ -196,11 +165,8 @@ const ExclusiveDeals = () => {
           </div>
         </form>
       </CardContent>
-    </Card>
-  );
-
-  return (
-    <div className="min-h-screen">
+    </Card>;
+  return <div className="min-h-screen">
       <Navigation />
       
       {/* Hero Section */}
@@ -209,22 +175,19 @@ const ExclusiveDeals = () => {
           <h1 className="text-4xl lg:text-5xl font-serif font-bold mb-6">
             Join Our Exclusive Coliving Community
           </h1>
-          <p className="text-xl text-gray-100 mb-8">
-            Get access to insider deals, last-minute discounts, and a global network 
-            of digital nomads sharing tips, recommendations, and experiences.
-          </p>
+          <p className="text-xl text-gray-100 mb-8">Get access to exclusive Coliving Deals, last-minute discounts, and a global network of digital nomads sharing tips, recommendations, and experiences.</p>
           <div className="flex items-center justify-center gap-8 text-sm">
             <div className="text-center">
-              <div className="text-2xl font-bold text-adventure-orange">2,847</div>
-              <div>Active Members</div>
+              <div className="text-2xl font-bold text-adventure-orange">200+</div>
+              <div>Active Community Members</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-adventure-orange">147</div>
-              <div>Partner Locations</div>
+              <div className="text-2xl font-bold text-adventure-orange">30+</div>
+              <div>Coliving partners</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-adventure-orange">€1.2M</div>
-              <div>Total Savings</div>
+              <div className="text-2xl font-bold text-adventure-orange">20%</div>
+              <div>Avg. discount</div>
             </div>
           </div>
         </div>
@@ -248,43 +211,43 @@ const ExclusiveDeals = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            <div className="text-center animate-fade-in" style={{ animationDelay: '0s' }}>
+            <div className="text-center animate-fade-in" style={{
+            animationDelay: '0s'
+          }}>
               <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Bell size={24} className="text-adventure-orange" />
               </div>
-              <h3 className="text-xl font-serif font-bold text-forest-green mb-3">
-                Early Access Deals
-              </h3>
-              <p className="text-gray-600">
-                Get notified 24-48 hours before deals go public. Never miss out on the best spots.
-              </p>
+              <h3 className="text-xl font-serif font-bold text-forest-green mb-3">Exclusive Coliving Deals</h3>
+              <p className="text-gray-600">Never miss out on the best Coliving spots and deals.</p>
             </div>
 
-            <div className="text-center animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <div className="text-center animate-fade-in" style={{
+            animationDelay: '0.1s'
+          }}>
               <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Clock size={24} className="text-adventure-orange" />
               </div>
               <h3 className="text-xl font-serif font-bold text-forest-green mb-3">
                 Last-Minute Discounts
               </h3>
-              <p className="text-gray-600">
-                Exclusive access to last-minute deals with up to 60% off premium co-livings.
-              </p>
+              <p className="text-gray-600">Exclusive access to last-minute deals with up to 60% off Coliving prices.</p>
             </div>
 
-            <div className="text-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <div className="text-center animate-fade-in" style={{
+            animationDelay: '0.2s'
+          }}>
               <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Gift size={24} className="text-adventure-orange" />
               </div>
-              <h3 className="text-xl font-serif font-bold text-forest-green mb-3">
-                Content-for-Discount
-              </h3>
+              <h3 className="text-xl font-serif font-bold text-forest-green mb-3">Discount in exchange for content</h3>
               <p className="text-gray-600">
                 Share your experience and get extra discounts on your next stay. Win-win!
               </p>
             </div>
 
-            <div className="text-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
+            <div className="text-center animate-fade-in" style={{
+            animationDelay: '0.3s'
+          }}>
               <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <MessageCircle size={24} className="text-adventure-orange" />
               </div>
@@ -296,7 +259,9 @@ const ExclusiveDeals = () => {
               </p>
             </div>
 
-            <div className="text-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <div className="text-center animate-fade-in" style={{
+            animationDelay: '0.4s'
+          }}>
               <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Globe size={24} className="text-adventure-orange" />
               </div>
@@ -308,7 +273,9 @@ const ExclusiveDeals = () => {
               </p>
             </div>
 
-            <div className="text-center animate-fade-in" style={{ animationDelay: '0.5s' }}>
+            <div className="text-center animate-fade-in" style={{
+            animationDelay: '0.5s'
+          }}>
               <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Users size={24} className="text-adventure-orange" />
               </div>
@@ -340,8 +307,6 @@ const ExclusiveDeals = () => {
       </section>
 
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default ExclusiveDeals;
