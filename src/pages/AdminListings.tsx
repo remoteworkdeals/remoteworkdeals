@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,7 +22,7 @@ const AdminListings = () => {
   const { data: listings, isLoading, refetch } = useQuery({
     queryKey: ['admin-listings'],
     queryFn: async () => {
-      console.log('Fetching all listings for admin...');
+      console.log('=== FETCHING ADMIN LISTINGS ===');
       const { data, error } = await supabase
         .from('listings')
         .select('*')
@@ -33,12 +32,30 @@ const AdminListings = () => {
         console.error('Error fetching admin listings:', error);
         throw error;
       }
-      console.log('Fetched admin listings:', data);
+      console.log('Fetched admin listings count:', data?.length);
+      if (data && data.length > 0) {
+        console.log('Sample listing with information blocks:', {
+          id: data[0].id,
+          title: data[0].title,
+          work_wifi_info: data[0].work_wifi_info,
+          community_social_info: data[0].community_social_info,
+          comfort_living_info: data[0].comfort_living_info,
+          location_surroundings_info: data[0].location_surroundings_info
+        });
+      }
       return data as Listing[];
     }
   });
 
   const handleEdit = (listing: Listing) => {
+    console.log('=== EDITING LISTING ===');
+    console.log('Editing listing:', listing.id);
+    console.log('Information blocks in listing to edit:', {
+      work_wifi_info: listing.work_wifi_info,
+      community_social_info: listing.community_social_info,
+      comfort_living_info: listing.comfort_living_info,
+      location_surroundings_info: listing.location_surroundings_info
+    });
     setEditingListing(listing);
     setShowForm(true);
   };
@@ -57,9 +74,16 @@ const AdminListings = () => {
   };
 
   const handleFormClose = () => {
+    console.log('=== FORM CLOSING ===');
+    console.log('Form is being closed, will refetch listings');
     setShowForm(false);
     setEditingListing(null);
-    refetch();
+    
+    // Force refetch with a small delay to ensure database operations are complete
+    setTimeout(() => {
+      console.log('Refetching listings after form close');
+      refetch();
+    }, 100);
   };
 
   const handleLogout = async () => {

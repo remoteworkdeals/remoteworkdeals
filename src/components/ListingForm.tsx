@@ -53,7 +53,15 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
 
   useEffect(() => {
     if (listing) {
-      console.log('Loading listing data:', listing);
+      console.log('=== LOADING LISTING DATA ===');
+      console.log('Full listing object:', listing);
+      console.log('Information blocks from listing:', {
+        work_wifi_info: listing.work_wifi_info,
+        community_social_info: listing.community_social_info,
+        comfort_living_info: listing.comfort_living_info,
+        location_surroundings_info: listing.location_surroundings_info
+      });
+
       setTitle(listing.title);
       setDescription(listing.description || '');
       setLocation(listing.location);
@@ -77,17 +85,19 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
       setSeasonalEndDate(listing.seasonal_end_date || null);
       setWebsiteUrl(listing.website_url || null);
       setInstagramUrl(listing.instagram_url || null);
+      
       setWorkWifiInfo(listing.work_wifi_info || '');
       setCommunitySocialInfo(listing.community_social_info || '');
       setComfortLivingInfo(listing.comfort_living_info || '');
       setLocationSurroundingsInfo(listing.location_surroundings_info || '');
       
-      console.log('Information blocks loaded:', {
-        workWifiInfo: listing.work_wifi_info,
-        communitySocialInfo: listing.community_social_info,
-        comfortLivingInfo: listing.comfort_living_info,
-        locationSurroundingsInfo: listing.location_surroundings_info
+      console.log('Form state after loading:', {
+        workWifiInfo: listing.work_wifi_info || '',
+        communitySocialInfo: listing.community_social_info || '',
+        comfortLivingInfo: listing.comfort_living_info || '',
+        locationSurroundingsInfo: listing.location_surroundings_info || ''
       });
+      console.log('=== LISTING DATA LOADED ===');
     }
   }, [listing]);
 
@@ -96,16 +106,29 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
     setIsSubmitting(true);
     
     console.log('=== FORM SUBMISSION STARTED ===');
-    console.log('Current form values:', {
+    console.log('Current form state at submission:', {
       title,
       description,
       workWifiInfo,
       communitySocialInfo,
       comfortLivingInfo,
-      locationSurroundingsInfo
+      locationSurroundingsInfo,
+      workWifiInfoLength: workWifiInfo.length,
+      communitySocialInfoLength: communitySocialInfo.length,
+      comfortLivingInfoLength: comfortLivingInfo.length,
+      locationSurroundingsInfoLength: locationSurroundingsInfo.length
     });
     
     try {
+      const informationBlocksData = {
+        work_wifi_info: workWifiInfo.trim() || null,
+        community_social_info: communitySocialInfo.trim() || null,
+        comfort_living_info: comfortLivingInfo.trim() || null,
+        location_surroundings_info: locationSurroundingsInfo.trim() || null,
+      };
+
+      console.log('Information blocks data prepared:', informationBlocksData);
+
       const listingData = {
         title,
         description: description || null,
@@ -130,14 +153,11 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
         seasonal_end_date: seasonalEndDate || null,
         website_url: websiteUrl || null,
         instagram_url: instagramUrl || null,
-        work_wifi_info: workWifiInfo.trim() || null,
-        community_social_info: communitySocialInfo.trim() || null,
-        comfort_living_info: comfortLivingInfo.trim() || null,
-        location_surroundings_info: locationSurroundingsInfo.trim() || null,
+        ...informationBlocksData
       };
 
-      console.log('Data being sent to database:', listingData);
-      console.log('Information blocks in data:', {
+      console.log('Complete data being sent to database:', listingData);
+      console.log('Information blocks in final data:', {
         work_wifi_info: listingData.work_wifi_info,
         community_social_info: listingData.community_social_info,
         comfort_living_info: listingData.comfort_living_info,
@@ -146,50 +166,89 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
 
       let result;
       if (listing) {
-        console.log('Updating existing listing with ID:', listing.id);
+        console.log('=== UPDATING EXISTING LISTING ===');
+        console.log('Updating listing with ID:', listing.id);
+        
         result = await supabase
           .from('listings')
           .update(listingData)
           .eq('id', listing.id)
-          .select(); // Add select to see what was actually saved
+          .select('*');
       } else {
-        console.log('Creating new listing');
+        console.log('=== CREATING NEW LISTING ===');
+        
         result = await supabase
           .from('listings')
           .insert(listingData)
-          .select(); // Add select to see what was actually saved
+          .select('*');
       }
 
-      console.log('Database result:', result);
+      console.log('Database operation result:', result);
 
       if (result.error) {
-        console.error('Database error:', result.error);
+        console.error('=== DATABASE ERROR ===');
+        console.error('Error details:', result.error);
+        console.error('Error message:', result.error.message);
+        console.error('Error code:', result.error.code);
         throw result.error;
       }
 
-      if (result.data) {
-        console.log('Successfully saved data:', result.data);
+      if (result.data && result.data.length > 0) {
+        console.log('=== DATABASE OPERATION SUCCESSFUL ===');
+        const savedData = result.data[0];
+        console.log('Successfully saved data:', savedData);
         console.log('Information blocks in saved data:', {
-          work_wifi_info: result.data[0]?.work_wifi_info,
-          community_social_info: result.data[0]?.community_social_info,
-          comfort_living_info: result.data[0]?.comfort_living_info,
-          location_surroundings_info: result.data[0]?.location_surroundings_info
+          work_wifi_info: savedData.work_wifi_info,
+          community_social_info: savedData.community_social_info,
+          comfort_living_info: savedData.comfort_living_info,
+          location_surroundings_info: savedData.location_surroundings_info
         });
-      }
 
-      toast({
-        title: listing ? 'Listing updated successfully' : 'Listing created successfully',
-        description: 'All information has been saved including the information blocks.',
-      });
-      
-      console.log('=== FORM SUBMISSION COMPLETED SUCCESSFULLY ===');
-      onClose();
+        // Verify data was actually saved by fetching it back immediately
+        console.log('=== VERIFYING SAVED DATA ===');
+        const { data: verificationData, error: verificationError } = await supabase
+          .from('listings')
+          .select('*')
+          .eq('id', savedData.id)
+          .single();
+
+        if (verificationError) {
+          console.error('Verification fetch error:', verificationError);
+        } else {
+          console.log('Verification data from database:', verificationData);
+          console.log('Verification - Information blocks:', {
+            work_wifi_info: verificationData.work_wifi_info,
+            community_social_info: verificationData.community_social_info,
+            comfort_living_info: verificationData.comfort_living_info,
+            location_surroundings_info: verificationData.location_surroundings_info
+          });
+        }
+
+        toast({
+          title: listing ? 'Listing updated successfully' : 'Listing created successfully',
+          description: 'All information has been saved including the information blocks.',
+        });
+        
+        console.log('=== FORM SUBMISSION COMPLETED SUCCESSFULLY ===');
+        
+        // Add a small delay before closing to ensure all operations complete
+        setTimeout(() => {
+          onClose();
+        }, 500);
+      } else {
+        console.error('=== NO DATA RETURNED FROM DATABASE ===');
+        throw new Error('No data returned from database operation');
+      }
     } catch (error) {
       console.error('=== FORM SUBMISSION ERROR ===');
+      console.error('Error type:', typeof error);
       console.error('Error details:', error);
+      console.error('Error message:', error instanceof Error ? error.message : 'Unknown error');
+      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+      
       toast({
         title: 'Error saving listing',
-        description: error instanceof Error ? error.message : 'Please try again',
+        description: error instanceof Error ? error.message : 'Please try again. Check console for details.',
         variant: 'destructive',
       });
     } finally {
