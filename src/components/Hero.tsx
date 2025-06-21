@@ -1,3 +1,4 @@
+
 import { Search, MapPin, Users, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +11,9 @@ import { useNavigate } from 'react-router-dom';
  */
 const Hero = () => {
   const navigate = useNavigate();
-  return <section className="hero-gradient text-white py-12 sm:py-16 lg:py-32">
+  
+  return (
+    <section className="hero-gradient text-white py-12 sm:py-16 lg:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Content */}
@@ -88,6 +91,8 @@ const Hero = () => {
           </div>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default Hero;

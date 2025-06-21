@@ -1,61 +1,100 @@
 
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import ListingDetail from '@/components/ListingDetail';
 import SEOHead from '@/components/SEOHead';
 import { useListingData } from '@/hooks/useListingData';
+import { useListings } from '@/hooks/useListings';
+import { extractListingIdFromOldUrl } from '@/utils/slugUtils';
 
 const ListingPage = () => {
-  const { id } = useParams();
-  const listingId = parseInt(id || '1');
-  const { listing, loading } = useListingData(listingId);
+  const { slug } = useParams();
+  const navigate = useNavigate();
+  const { listings } = useListings();
+  
+  // Handle old URL format redirects
+  useEffect(() => {
+    const currentPath = window.location.pathname;
+    const oldId = extractListingIdFromOldUrl(currentPath);
+    
+    if (oldId && listings.length > 0) {
+      const listing = listings.find(l => l.id === oldId);
+      if (listing) {
+        const newSlug = listing.title
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .trim()
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '');
+        navigate(`/colivings/${newSlug}`, { replace: true });
+        return;
+      }
+    }
+  }, [listings, navigate]);
+
+  // Find listing by slug
+  const listing = listings.find(l => {
+    const listingSlug = l.title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+    return listingSlug === slug;
+  });
+
+  const listingId = listing?.id || 1;
+  const { listing: detailedListing, loading } = useListingData(listingId);
 
   const getSEOData = () => {
-    if (!listing) {
+    if (!detailedListing) {
       return {
         title: 'Coliving Space Details | RemoteWork.Deals',
         description: 'Discover amazing coliving spaces and remote work accommodations worldwide.',
       };
     }
 
-    const discountText = listing.discount_percentage 
-      ? ` - ${listing.discount_percentage}% OFF` 
+    const discountText = detailedListing.discount_percentage 
+      ? ` - ${detailedListing.discount_percentage}% OFF` 
       : '';
     
     return {
-      title: `${listing.title}${discountText} | ${listing.location} Coliving | RemoteWork.Deals`,
-      description: `${listing.description?.substring(0, 150) || `Coliving space in ${listing.location}, ${listing.country}. Starting from $${listing.original_price}/${listing.pricing_unit}.`} Perfect for digital nomads and remote workers.`,
+      title: `${detailedListing.title}${discountText} | ${detailedListing.location} Coliving | RemoteWork.Deals`,
+      description: `${detailedListing.description?.substring(0, 150) || `Coliving space in ${detailedListing.location}, ${detailedListing.country}. Starting from $${detailedListing.original_price}/${detailedListing.pricing_unit}.`} Perfect for digital nomads and remote workers.`,
       keywords: [
         'coliving',
-        listing.location.toLowerCase(),
-        listing.country.toLowerCase(),
+        detailedListing.location.toLowerCase(),
+        detailedListing.country.toLowerCase(),
         'remote work',
         'digital nomad accommodation',
-        listing.title.toLowerCase()
+        detailedListing.title.toLowerCase()
       ],
-      image: listing.featured_image,
+      image: detailedListing.featured_image,
       type: 'product' as const
     };
   };
 
-  const structuredData = listing ? {
+  const structuredData = detailedListing ? {
     "@context": "https://schema.org",
     "@type": "Product",
-    "name": listing.title,
-    "description": listing.description,
-    "image": listing.featured_image,
+    "name": detailedListing.title,
+    "description": detailedListing.description,
+    "image": detailedListing.featured_image,
     "offers": {
       "@type": "Offer",
-      "price": listing.discounted_price || listing.original_price,
+      "price": detailedListing.discounted_price || detailedListing.original_price,
       "priceCurrency": "USD",
       "availability": "https://schema.org/InStock",
-      "url": `https://remotework.deals/listing/${listing.id}`
+      "url": `https://remotework.deals/colivings/${slug}`
     },
-    "aggregateRating": listing.rating && listing.review_count ? {
+    "aggregateRating": detailedListing.rating && detailedListing.review_count ? {
       "@type": "AggregateRating",
-      "ratingValue": listing.rating,
-      "reviewCount": listing.review_count
+      "ratingValue": detailedListing.rating,
+      "reviewCount": detailedListing.review_count
     } : undefined,
     "brand": {
       "@type": "Organization",
@@ -64,7 +103,7 @@ const ListingPage = () => {
     "category": "Coliving Space",
     "location": {
       "@type": "Place",
-      "name": `${listing.location}, ${listing.country}`
+      "name": `${detailedListing.location}, ${detailedListing.country}`
     }
   } : undefined;
 
