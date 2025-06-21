@@ -15,8 +15,19 @@ import { Link } from 'react-router-dom';
 const Blog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const { data: blogPosts = [], isLoading: blogLoading } = useBlogPosts();
   const { listings, loading: listingsLoading } = useListings();
+
+  const categories = [
+    'All',
+    'Guides',
+    'Nomad Lifestyle',
+    'Reviews',
+    'Destination Spotlights',
+    'Tips & Tricks',
+    'Community'
+  ];
 
   // Update search query when URL params change
   useEffect(() => {
@@ -24,8 +35,14 @@ const Blog = () => {
     setSearchQuery(searchParam);
   }, [searchParams]);
 
-  // Filter blog posts based on search
+  // Filter blog posts based on search and category
   const filteredBlogPosts = blogPosts.filter(post => {
+    // Category filter
+    if (selectedCategory !== 'All' && post.category !== selectedCategory) {
+      return false;
+    }
+    
+    // Search filter
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return post.title.toLowerCase().includes(query) ||
@@ -45,6 +62,10 @@ const Blog = () => {
   const clearSearch = () => {
     setSearchQuery('');
     setSearchParams({});
+  };
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
   };
 
   const hasResults = filteredBlogPosts.length > 0 || filteredListings.length > 0;
@@ -72,6 +93,27 @@ const Blog = () => {
               </p>
             )}
           </div>
+
+          {/* Category Filter Section */}
+          {!isSearching && (
+            <div className="mb-8">
+              <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => handleCategoryChange(category)}
+                    className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
+                      selectedCategory === category
+                        ? 'bg-forest-green text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Search Results Summary */}
           {isSearching && (
