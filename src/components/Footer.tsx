@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
-import { Instagram } from 'lucide-react';
+import { Instagram, ArrowRight } from 'lucide-react';
+
 const Footer = () => {
-  return <footer className="bg-forest-green text-white py-16">
+  return (
+    <footer className="bg-forest-green text-white py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
@@ -13,9 +15,15 @@ const Footer = () => {
               <a href="https://api.whatsapp.com/send/?phone=31628359453" target="_blank" rel="noopener noreferrer" className="adventure-button">
                 Chat on WhatsApp
               </a>
-              <a href="https://instagram.com/remotework.deals" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors">
-                <Instagram size={24} />
-              </a>
+              <div className="flex items-center gap-2 group">
+                <span className="text-gray-300 text-sm font-medium group-hover:text-white transition-colors">
+                  Follow us on Instagram
+                </span>
+                <ArrowRight size={16} className="text-adventure-orange group-hover:translate-x-1 transition-transform duration-300" />
+                <a href="https://instagram.com/remotework.deals" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors">
+                  <Instagram size={24} />
+                </a>
+              </div>
             </div>
           </div>
           
@@ -43,6 +51,8 @@ const Footer = () => {
           <p>© 2024 RemoteWork.Deals. All rights reserved. Built by nomads, for nomads.</p>
         </div>
       </div>
-    </footer>;
+    </footer>
+  );
 };
+
 export default Footer;
