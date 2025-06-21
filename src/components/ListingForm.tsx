@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { X, ArrowLeft } from 'lucide-react';
+import { X, ArrowLeft, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Listing } from '@/types/listing';
@@ -21,6 +20,7 @@ interface ListingFormProps {
 }
 
 const ListingForm = ({ listing, onClose }: ListingFormProps) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
@@ -53,6 +53,7 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
 
   useEffect(() => {
     if (listing) {
+      console.log('Loading listing data:', listing);
       setTitle(listing.title);
       setDescription(listing.description || '');
       setLocation(listing.location);
@@ -80,11 +81,29 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
       setCommunitySocialInfo(listing.community_social_info || '');
       setComfortLivingInfo(listing.comfort_living_info || '');
       setLocationSurroundingsInfo(listing.location_surroundings_info || '');
+      
+      console.log('Information blocks loaded:', {
+        workWifiInfo: listing.work_wifi_info,
+        communitySocialInfo: listing.community_social_info,
+        comfortLivingInfo: listing.comfort_living_info,
+        locationSurroundingsInfo: listing.location_surroundings_info
+      });
     }
   }, [listing]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    
+    console.log('=== FORM SUBMISSION STARTED ===');
+    console.log('Current form values:', {
+      title,
+      description,
+      workWifiInfo,
+      communitySocialInfo,
+      comfortLivingInfo,
+      locationSurroundingsInfo
+    });
     
     try {
       const listingData = {
@@ -111,38 +130,70 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
         seasonal_end_date: seasonalEndDate || null,
         website_url: websiteUrl || null,
         instagram_url: instagramUrl || null,
-        work_wifi_info: workWifiInfo || null,
-        community_social_info: communitySocialInfo || null,
-        comfort_living_info: comfortLivingInfo || null,
-        location_surroundings_info: locationSurroundingsInfo || null,
+        work_wifi_info: workWifiInfo.trim() || null,
+        community_social_info: communitySocialInfo.trim() || null,
+        comfort_living_info: comfortLivingInfo.trim() || null,
+        location_surroundings_info: locationSurroundingsInfo.trim() || null,
       };
+
+      console.log('Data being sent to database:', listingData);
+      console.log('Information blocks in data:', {
+        work_wifi_info: listingData.work_wifi_info,
+        community_social_info: listingData.community_social_info,
+        comfort_living_info: listingData.comfort_living_info,
+        location_surroundings_info: listingData.location_surroundings_info
+      });
 
       let result;
       if (listing) {
+        console.log('Updating existing listing with ID:', listing.id);
         result = await supabase
           .from('listings')
           .update(listingData)
-          .eq('id', listing.id);
+          .eq('id', listing.id)
+          .select(); // Add select to see what was actually saved
       } else {
+        console.log('Creating new listing');
         result = await supabase
           .from('listings')
-          .insert(listingData);
+          .insert(listingData)
+          .select(); // Add select to see what was actually saved
       }
 
-      if (result.error) throw result.error;
+      console.log('Database result:', result);
+
+      if (result.error) {
+        console.error('Database error:', result.error);
+        throw result.error;
+      }
+
+      if (result.data) {
+        console.log('Successfully saved data:', result.data);
+        console.log('Information blocks in saved data:', {
+          work_wifi_info: result.data[0]?.work_wifi_info,
+          community_social_info: result.data[0]?.community_social_info,
+          comfort_living_info: result.data[0]?.comfort_living_info,
+          location_surroundings_info: result.data[0]?.location_surroundings_info
+        });
+      }
 
       toast({
         title: listing ? 'Listing updated successfully' : 'Listing created successfully',
+        description: 'All information has been saved including the information blocks.',
       });
       
+      console.log('=== FORM SUBMISSION COMPLETED SUCCESSFULLY ===');
       onClose();
     } catch (error) {
-      console.error('Error saving listing:', error);
+      console.error('=== FORM SUBMISSION ERROR ===');
+      console.error('Error details:', error);
       toast({
         title: 'Error saving listing',
-        description: 'Please try again',
+        description: error instanceof Error ? error.message : 'Please try again',
         variant: 'destructive',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -541,8 +592,15 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
           </CardContent>
         </Card>
 
-        <Button type="submit" className="adventure-button">
-          {listing ? 'Update Listing' : 'Create Listing'}
+        <Button type="submit" className="adventure-button" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            listing ? 'Update Listing' : 'Create Listing'
+          )}
         </Button>
       </form>
     </div>
