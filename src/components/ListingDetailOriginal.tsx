@@ -195,7 +195,7 @@ const ListingDetailOriginal = ({ listingId }: ListingDetailOriginalProps) => {
         </Card>
       )}
 
-      {/* New Information Sections */}
+      {/* Information Sections Grid */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Work & WiFi */}
         <Card>
@@ -253,20 +253,6 @@ const ListingDetailOriginal = ({ listingId }: ListingDetailOriginalProps) => {
           </CardContent>
         </Card>
       </div>
-
-      {/* Price & Value */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold flex items-center gap-2">
-            💰 Price & Value
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-700 leading-relaxed">
-            {listing.price_value_info || "Exceptional value with all utilities, high-speed internet, and cleaning services included. No hidden fees - transparent pricing for hassle-free living."}
-          </p>
-        </CardContent>
-      </Card>
 
       {/* Reviews Section */}
       <ReviewsSection reviews={reviews} />
