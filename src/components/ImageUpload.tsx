@@ -28,6 +28,10 @@ const ImageUpload = ({ onImageUploaded, currentImage, label = "Upload Image", cl
       }
 
       const file = event.target.files[0];
+      
+      // Basic image optimization before upload
+      const optimizedFile = await optimizeImage(file);
+      
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = fileName;
@@ -37,11 +41,11 @@ const ImageUpload = ({ onImageUploaded, currentImage, label = "Upload Image", cl
       reader.onload = (e) => {
         setPreview(e.target?.result as string);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(optimizedFile);
 
       const { error: uploadError } = await supabase.storage
         .from('listing-images')
-        .upload(filePath, file);
+        .upload(filePath, optimizedFile);
 
       if (uploadError) {
         throw uploadError;
@@ -69,6 +73,41 @@ const ImageUpload = ({ onImageUploaded, currentImage, label = "Upload Image", cl
     }
   };
 
+  // Basic image optimization function
+  const optimizeImage = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        // Calculate optimal dimensions (max 1200px width)
+        const maxWidth = 1200;
+        const scale = Math.min(1, maxWidth / img.width);
+        
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        
+        // Draw and compress
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+        
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const optimizedFile = new File([blob], file.name, {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            resolve(optimizedFile);
+          } else {
+            resolve(file);
+          }
+        }, 'image/jpeg', 0.85);
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const removeImage = () => {
     setPreview(null);
     onImageUploaded('');
@@ -80,11 +119,15 @@ const ImageUpload = ({ onImageUploaded, currentImage, label = "Upload Image", cl
       
       {preview ? (
         <div className="relative">
-          <img
-            src={preview}
-            alt="Preview"
-            className="w-full h-48 object-cover rounded-lg border"
-          />
+          <div className="aspect-video rounded-lg bg-gray-100 overflow-hidden">
+            <img
+              src={preview}
+              alt="Preview"
+              className="w-full h-full object-cover"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
           <Button
             type="button"
             variant="destructive"
@@ -96,9 +139,10 @@ const ImageUpload = ({ onImageUploaded, currentImage, label = "Upload Image", cl
           </Button>
         </div>
       ) : (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
           <Image className="mx-auto h-12 w-12 text-gray-400 mb-4" />
           <p className="text-gray-600 mb-4">Click to upload an image</p>
+          <p className="text-sm text-gray-500">Images will be optimized automatically</p>
         </div>
       )}
 
@@ -114,7 +158,7 @@ const ImageUpload = ({ onImageUploaded, currentImage, label = "Upload Image", cl
       {uploading && (
         <div className="flex items-center justify-center">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-adventure-orange mr-2"></div>
-          <span className="text-sm text-gray-600">Uploading...</span>
+          <span className="text-sm text-gray-600">Optimizing and uploading...</span>
         </div>
       )}
     </div>

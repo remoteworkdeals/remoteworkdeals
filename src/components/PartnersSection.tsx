@@ -1,6 +1,8 @@
+
 import { Button } from '@/components/ui/button';
 import { Building, Users, TrendingUp, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
 const PartnersSection = () => {
   return <section className="py-20 bg-forest-green text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -58,7 +60,20 @@ const PartnersSection = () => {
           </div>
           
           <div className="relative">
-            <img alt="Co-living partners" className="rounded-2xl shadow-2xl" src="/lovable-uploads/6ac830c3-8a61-4649-bb1b-547c4a58a652.jpg" />
+            <div className="aspect-[4/3] rounded-2xl bg-gray-700 overflow-hidden">
+              <img 
+                alt="Co-living partners working together in modern space" 
+                className="w-full h-full object-cover transition-opacity duration-300" 
+                src="/lovable-uploads/6ac830c3-8a61-4649-bb1b-547c4a58a652.jpg"
+                loading="lazy"
+                decoding="async"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80";
+                }}
+              />
+            </div>
             <div className="absolute -bottom-6 -left-6 bg-adventure-orange text-white p-6 rounded-xl shadow-lg">
               <div className="text-3xl font-bold">30+</div>
               <div className="text-sm">Happy Partners</div>
@@ -68,4 +83,5 @@ const PartnersSection = () => {
       </div>
     </section>;
 };
+
 export default PartnersSection;

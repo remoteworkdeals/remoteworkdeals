@@ -1,3 +1,4 @@
+
 import { MapPin, Users, Wifi, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,16 +19,20 @@ const FeaturedListings = () => {
 
   // Get first 3 listings with highest discount percentage for featured section
   const featuredListings = listings.filter(listing => listing.discount_percentage && listing.discount_percentage > 0).sort((a, b) => (b.discount_percentage || 0) - (a.discount_percentage || 0)).slice(0, 3);
+  
   const handleMoreInfo = (listing: any, e: React.MouseEvent) => {
     e.stopPropagation();
     navigate(`/listing/${listing.id}`);
   };
+  
   const handleCardClick = (listingId: number) => {
     navigate(`/listing/${listingId}`);
   };
+  
   if (loading || featuredListings.length === 0) {
     return null;
   }
+  
   return <section className="py-12 sm:py-16 lg:py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12 sm:mb-16">
@@ -47,7 +52,20 @@ const FeaturedListings = () => {
             animationDelay: `${index * 0.1}s`
           }} onClick={() => handleCardClick(listing.id)}>
                 <div className="relative">
-                  <img src={displayImage} alt={listing.title} className="w-full h-48 sm:h-56 lg:h-64 object-cover" />
+                  <div className="aspect-[4/3] bg-gray-200 overflow-hidden">
+                    <img 
+                      src={displayImage} 
+                      alt={listing.title}
+                      className="w-full h-full object-cover transition-opacity duration-300"
+                      loading="lazy"
+                      decoding="async"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80";
+                      }}
+                    />
+                  </div>
                   <div className="absolute top-3 sm:top-4 left-3 sm:left-4 flex gap-2">
                     {hasDiscount && <Badge className="bg-adventure-orange text-white text-xs sm:text-sm">
                         -{listing.discount_percentage}%
@@ -121,4 +139,5 @@ const FeaturedListings = () => {
       </div>
     </section>;
 };
+
 export default FeaturedListings;

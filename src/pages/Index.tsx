@@ -8,8 +8,23 @@ import Testimonials from '@/components/Testimonials';
 import PartnersSection from '@/components/PartnersSection';
 import Footer from '@/components/Footer';
 import SEOHead from '@/components/SEOHead';
+import { useEffect } from 'react';
 
 const Index = () => {
+  // Preload critical hero image
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = '/lovable-uploads/6c22efa0-f3ff-4036-b52a-2c5adb94f2b9.jpg';
+    link.fetchPriority = 'high';
+    document.head.appendChild(link);
+
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, []);
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "WebSite",

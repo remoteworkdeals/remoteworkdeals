@@ -73,10 +73,24 @@ const Hero = () => {
             </div>
           </div>
 
-          {/* Hero Image - Mobile optimized */}
+          {/* Hero Image - Mobile optimized with performance optimizations */}
           <div className="animate-scale-in order-first lg:order-last">
             <div className="relative">
-              <img alt="Digital nomad working in a beautiful co-living space" className="rounded-xl sm:rounded-2xl shadow-2xl w-full" src="/lovable-uploads/6c22efa0-f3ff-4036-b52a-2c5adb94f2b9.jpg" />
+              <div className="aspect-video rounded-xl sm:rounded-2xl bg-gray-200 overflow-hidden">
+                <img 
+                  alt="Digital nomad working in a beautiful co-living space" 
+                  className="w-full h-full object-cover transition-opacity duration-300" 
+                  src="/lovable-uploads/6c22efa0-f3ff-4036-b52a-2c5adb94f2b9.jpg"
+                  loading="eager"
+                  decoding="async"
+                  fetchpriority="high"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 40vw"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80";
+                  }}
+                />
+              </div>
               <div className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 bg-adventure-orange text-white p-3 sm:p-4 rounded-lg sm:rounded-xl shadow-lg">
                 <div className="text-xl sm:text-2xl font-bold">Up to 60%</div>
                 <div className="text-xs sm:text-sm">Exclusive Savings</div>
@@ -87,4 +101,5 @@ const Hero = () => {
       </div>
     </section>;
 };
+
 export default Hero;
