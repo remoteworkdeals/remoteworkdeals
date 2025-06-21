@@ -1,10 +1,7 @@
-
 import { Link } from 'react-router-dom';
 import { Instagram, ArrowRight } from 'lucide-react';
-
 const Footer = () => {
-  return (
-    <footer className="bg-forest-green text-white py-16">
+  return <footer className="bg-forest-green text-white py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
@@ -29,7 +26,7 @@ const Footer = () => {
           </div>
           
           <div>
-            <h3 className="font-semibold mb-4">Quick Links</h3>
+            <h3 className="font-semibold mb-4">For Nomads</h3>
             <ul className="space-y-2 text-gray-300">
               <li><Link to="/coliving-deals" className="hover:text-white transition-colors">All Listings</Link></li>
               <li><Link to="/blog" className="hover:text-white transition-colors">Blog</Link></li>
@@ -49,8 +46,6 @@ const Footer = () => {
           <p>© 2024 RemoteWork.Deals. All rights reserved. Built by nomads, for nomads.</p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
