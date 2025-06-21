@@ -152,7 +152,28 @@ export const useListingData = (listingId: number) => {
 
   const submitReview = async (reviewData: ReviewSubmissionData) => {
     try {
+      console.log('=== REVIEW SUBMISSION DEBUG ===');
       console.log('Attempting to submit review:', reviewData);
+      console.log('Target listing ID:', listingId);
+      
+      // First, verify the listing exists
+      const { data: listingCheck, error: listingCheckError } = await supabase
+        .from('listings')
+        .select('id, title')
+        .eq('id', listingId)
+        .single();
+        
+      if (listingCheckError) {
+        console.error('Listing verification failed:', listingCheckError);
+        toast({
+          title: "Error",
+          description: "Invalid listing. Please refresh and try again.",
+          variant: "destructive",
+        });
+        return false;
+      }
+      
+      console.log('Listing verified:', listingCheck);
       
       // Generate a valid UUID for anonymous users
       const generateAnonymousUUID = () => {
@@ -164,6 +185,7 @@ export const useListingData = (listingId: number) => {
       };
 
       const anonymousUserId = generateAnonymousUUID();
+      console.log('Generated anonymous user ID:', anonymousUserId);
 
       const reviewPayload = {
         listing_id: listingId,
@@ -183,7 +205,11 @@ export const useListingData = (listingId: number) => {
         price_notes: reviewData.priceNotes || null
       };
 
-      console.log('Review payload:', reviewPayload);
+      console.log('Final review payload:', reviewPayload);
+      console.log('Data types check:');
+      console.log('- listing_id:', typeof reviewPayload.listing_id, reviewPayload.listing_id);
+      console.log('- overall_rating:', typeof reviewPayload.overall_rating, reviewPayload.overall_rating);
+      console.log('- user_id:', typeof reviewPayload.user_id, reviewPayload.user_id);
 
       const { data, error } = await supabase
         .from('reviews')
@@ -191,16 +217,22 @@ export const useListingData = (listingId: number) => {
         .select();
 
       if (error) {
-        console.error('Error submitting review:', error);
+        console.error('=== SUPABASE ERROR DETAILS ===');
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        console.error('Error details:', error.details);
+        console.error('Error hint:', error.hint);
+        console.error('Full error object:', error);
+        
         toast({
           title: "Error",
-          description: "Failed to submit review. Please try again.",
+          description: `Failed to submit review: ${error.message}`,
           variant: "destructive",
         });
         return false;
       }
 
-      console.log('Review submitted successfully:', data);
+      console.log('✅ Review submitted successfully:', data);
 
       // Refresh reviews and recalculate ratings
       const { data: updatedReviews } = await supabase
@@ -244,6 +276,7 @@ export const useListingData = (listingId: number) => {
 
       return true;
     } catch (err) {
+      console.error('=== UNEXPECTED ERROR ===');
       console.error('Unexpected error submitting review:', err);
       toast({
         title: "Error",
