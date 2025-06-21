@@ -5,53 +5,36 @@ import Testimonials from '@/components/Testimonials';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PhoneInput } from '@/components/ui/phone-input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageCircle, Clock, Globe, Heart, Gift, Users, Bell, CheckCircle, AlertCircle } from 'lucide-react';
+import { MessageCircle, Clock, Globe, Heart, Gift, Users, Bell } from 'lucide-react';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { isValidPhoneNumber } from 'react-phone-number-input';
 
 const ExclusiveDeals = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    phone: ''
+    name: '',
+    email: ''
   });
-  const [phoneValid, setPhoneValid] = useState<boolean | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-
-  const handlePhoneChange = (value: string | undefined) => {
-    const phoneValue = value || '';
-    setFormData({ ...formData, phone: phoneValue });
-    
-    // Validate phone number in real-time
-    if (phoneValue) {
-      const isValid = isValidPhoneNumber(phoneValue);
-      setPhoneValid(isValid);
-    } else {
-      setPhoneValid(null);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.email) {
+    if (!formData.name) {
       toast({
-        title: "Email Required",
-        description: "Please enter your email address to join the community.",
+        title: "Name Required",
+        description: "Please enter your name to join the community.",
         variant: "destructive"
       });
       return;
     }
 
-    // Validate phone number if provided
-    if (formData.phone && !isValidPhoneNumber(formData.phone)) {
+    if (!formData.email) {
       toast({
-        title: "Invalid Phone Number",
-        description: "Please enter a valid phone number with country code.",
+        title: "Email Required",
+        description: "Please enter your email address to join the community.",
         variant: "destructive"
       });
       return;
@@ -67,8 +50,8 @@ const ExclusiveDeals = () => {
         .from('community_members')
         .insert([
           {
+            name: formData.name,
             email: formData.email,
-            phone: formData.phone || null,
             source: 'exclusive_deals'
           }
         ]);
@@ -100,8 +83,7 @@ const ExclusiveDeals = () => {
       }
 
       // Clear form
-      setFormData({ email: '', phone: '' });
-      setPhoneValid(null);
+      setFormData({ name: '', email: '' });
 
       // Redirect to WhatsApp group after a short delay
       setTimeout(() => {
@@ -132,6 +114,20 @@ const ExclusiveDeals = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
             <div>
+              <Label htmlFor="name" className="text-base font-semibold">Full Name</Label>
+              <Input
+                id="name"
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Your full name"
+                required
+                className="mt-2 h-12"
+                disabled={isSubmitting}
+              />
+            </div>
+            
+            <div>
               <Label htmlFor="email" className="text-base font-semibold">Email Address</Label>
               <Input
                 id="email"
@@ -143,37 +139,6 @@ const ExclusiveDeals = () => {
                 className="mt-2 h-12"
                 disabled={isSubmitting}
               />
-            </div>
-            
-            <div>
-              <Label htmlFor="phone" className="text-base font-semibold">WhatsApp Number</Label>
-              <div className="relative mt-2">
-                <PhoneInput
-                  value={formData.phone}
-                  onChange={handlePhoneChange}
-                  disabled={isSubmitting}
-                  placeholder="e.g. +44 7123 456789"
-                  className={`
-                    ${phoneValid === true ? 'phone-input-valid' : ''}
-                    ${phoneValid === false ? 'phone-input-invalid' : ''}
-                  `}
-                />
-                {formData.phone && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    {phoneValid === true && (
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                    )}
-                    {phoneValid === false && (
-                      <AlertCircle className="h-5 w-5 text-red-500" />
-                    )}
-                  </div>
-                )}
-              </div>
-              {phoneValid === false && formData.phone && (
-                <p className="text-sm text-red-600 mt-1">
-                  Please enter a valid phone number with country code
-                </p>
-              )}
             </div>
           </div>
           

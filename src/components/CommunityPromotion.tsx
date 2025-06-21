@@ -4,35 +4,28 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PhoneInput } from '@/components/ui/phone-input';
-import { MessageCircle, CheckCircle, AlertCircle } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { isValidPhoneNumber } from 'react-phone-number-input';
 
 const CommunityPromotion = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [phoneValid, setPhoneValid] = useState<boolean | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-
-  const handlePhoneChange = (value: string | undefined) => {
-    const phoneValue = value || '';
-    setPhone(phoneValue);
-    
-    // Validate phone number in real-time
-    if (phoneValue) {
-      const isValid = isValidPhoneNumber(phoneValue);
-      setPhoneValid(isValid);
-    } else {
-      setPhoneValid(null);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!name) {
+      toast({
+        title: "Name Required",
+        description: "Please enter your name to join the community.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!email) {
       toast({
         title: "Email Required",
@@ -42,28 +35,18 @@ const CommunityPromotion = () => {
       return;
     }
 
-    // Validate phone number if provided
-    if (phone && !isValidPhoneNumber(phone)) {
-      toast({
-        title: "Invalid Phone Number",
-        description: "Please enter a valid phone number with country code.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
-      console.log('Attempting to save community member:', { email, phone });
+      console.log('Attempting to save community member:', { name, email });
       
       // Save to Supabase
       const { data, error } = await supabase
         .from('community_members')
         .insert([
           {
+            name: name,
             email: email,
-            phone: phone || null,
             source: 'community_promotion'
           }
         ]);
@@ -95,9 +78,8 @@ const CommunityPromotion = () => {
       }
 
       // Clear form
+      setName('');
       setEmail('');
-      setPhone('');
-      setPhoneValid(null);
 
       // Redirect to WhatsApp group after a short delay
       setTimeout(() => {
@@ -130,6 +112,20 @@ const CommunityPromotion = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
             <div>
+              <Label htmlFor="name" className="text-base font-semibold">Full Name</Label>
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your full name"
+                required
+                className="mt-2 h-12"
+                disabled={isSubmitting}
+              />
+            </div>
+            
+            <div>
               <Label htmlFor="email" className="text-base font-semibold">Email Address</Label>
               <Input
                 id="email"
@@ -141,37 +137,6 @@ const CommunityPromotion = () => {
                 className="mt-2 h-12"
                 disabled={isSubmitting}
               />
-            </div>
-            
-            <div>
-              <Label htmlFor="phone" className="text-base font-semibold">WhatsApp Number</Label>
-              <div className="relative mt-2">
-                <PhoneInput
-                  value={phone}
-                  onChange={handlePhoneChange}
-                  disabled={isSubmitting}
-                  placeholder="e.g. +44 7123 456789"
-                  className={`
-                    ${phoneValid === true ? 'phone-input-valid' : ''}
-                    ${phoneValid === false ? 'phone-input-invalid' : ''}
-                  `}
-                />
-                {phone && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    {phoneValid === true && (
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                    )}
-                    {phoneValid === false && (
-                      <AlertCircle className="h-5 w-5 text-red-500" />
-                    )}
-                  </div>
-                )}
-              </div>
-              {phoneValid === false && phone && (
-                <p className="text-sm text-red-600 mt-1">
-                  Please enter a valid phone number with country code
-                </p>
-              )}
             </div>
           </div>
           
