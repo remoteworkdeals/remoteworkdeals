@@ -166,6 +166,11 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
               </div>
             </div>
 
+            {/* Mobile Booking Card - Shows only on mobile, positioned after description */}
+            <div className="lg:hidden mb-8">
+              <BookingCard listing={listing} />
+            </div>
+
             {/* Information Blocks */}
             <div className="mb-8">
               <h3 className="text-2xl font-serif font-bold text-forest-green mb-6">What to expect</h3>
@@ -205,8 +210,8 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
             <RatingBars averageRatings={averageRatings} />
           </div>
 
-          {/* Right Column - Booking Card */}
-          <div className="lg:col-span-1">
+          {/* Right Column - Desktop Booking Card */}
+          <div className="lg:col-span-1 hidden lg:block">
             <BookingCard listing={listing} />
           </div>
         </div>
