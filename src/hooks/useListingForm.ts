@@ -141,18 +141,33 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
 
       let result;
       let operationSuccess = false;
+      let savedData = null;
       
       if (listing) {
         console.log('=== UPDATING EXISTING LISTING ===');
         console.log('Updating listing with ID:', listing.id);
         
+        // For updates, we use .select() to return the updated data
         result = await supabase
           .from('listings')
           .update(listingData)
-          .eq('id', listing.id);
+          .eq('id', listing.id)
+          .select('*');
           
-        // For updates, check if there's no error (update operations don't return data by default)
-        operationSuccess = !result.error;
+        console.log('Update result:', result);
+        
+        // For updates with .select(), we expect data to be returned
+        if (!result.error && result.data && result.data.length > 0) {
+          operationSuccess = true;
+          savedData = result.data[0];
+          console.log('Update successful, returned data:', savedData);
+        } else if (result.error) {
+          console.error('Update failed with error:', result.error);
+          throw result.error;
+        } else {
+          console.error('Update failed: No data returned, possibly no matching record or no changes made');
+          throw new Error('Update operation did not affect any records. The listing may not exist or no changes were detected.');
+        }
         
       } else {
         console.log('=== CREATING NEW LISTING ===');
@@ -162,44 +177,31 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
           .insert(listingData)
           .select('*');
           
+        console.log('Insert result:', result);
+        
         // For inserts, we expect data to be returned
-        operationSuccess = !result.error && result.data && result.data.length > 0;
-      }
-
-      console.log('Database operation result:', result);
-
-      if (result.error) {
-        console.error('=== DATABASE ERROR ===');
-        console.error('Error details:', result.error);
-        throw result.error;
-      }
-
-      if (operationSuccess) {
-        console.log('=== DATABASE OPERATION SUCCESSFUL ===');
-        
-        // Verify the data was saved by fetching it back
-        console.log('=== VERIFYING SAVED DATA ===');
-        const verificationId = listing ? listing.id : (result.data && result.data[0] ? result.data[0].id : null);
-        
-        if (verificationId) {
-          const { data: verificationData, error: verificationError } = await supabase
-            .from('listings')
-            .select('*')
-            .eq('id', verificationId)
-            .single();
-
-          if (verificationError) {
-            console.error('Verification fetch error:', verificationError);
-          } else {
-            console.log('Verification data from database:', verificationData);
-            console.log('Verification - Information blocks:', {
-              work_wifi_info: verificationData.work_wifi_info,
-              community_social_info: verificationData.community_social_info,
-              comfort_living_info: verificationData.comfort_living_info,
-              location_surroundings_info: verificationData.location_surroundings_info
-            });
-          }
+        if (!result.error && result.data && result.data.length > 0) {
+          operationSuccess = true;
+          savedData = result.data[0];
+          console.log('Insert successful, returned data:', savedData);
+        } else if (result.error) {
+          console.error('Insert failed with error:', result.error);
+          throw result.error;
+        } else {
+          console.error('Insert failed: No data returned');
+          throw new Error('Insert operation failed to return the created record.');
         }
+      }
+
+      if (operationSuccess && savedData) {
+        console.log('=== DATABASE OPERATION SUCCESSFUL ===');
+        console.log('Final saved data:', savedData);
+        console.log('Information blocks in saved data:', {
+          work_wifi_info: savedData.work_wifi_info,
+          community_social_info: savedData.community_social_info,
+          comfort_living_info: savedData.comfort_living_info,
+          location_surroundings_info: savedData.location_surroundings_info
+        });
 
         toast({
           title: listing ? 'Listing updated successfully' : 'Listing created successfully',
@@ -208,10 +210,11 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
         
         console.log('=== FORM SUBMISSION COMPLETED SUCCESSFULLY ===');
         
-        // Add a small delay before closing to ensure all operations complete
-        setTimeout(() => {
-          onClose?.();
-        }, 500);
+        // Close the form and trigger a refetch
+        if (onClose) {
+          console.log('Calling onClose to trigger refetch');
+          onClose();
+        }
       } else {
         console.error('=== OPERATION FAILED ===');
         throw new Error('Database operation failed - no confirmation of success');
@@ -220,9 +223,14 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
       console.error('=== FORM SUBMISSION ERROR ===');
       console.error('Error details:', error);
       
+      let errorMessage = 'Please try again. Check browser console for details.';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: 'Error saving listing',
-        description: error instanceof Error ? error.message : 'Please try again. Check console for details.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {

@@ -1,10 +1,11 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Edit, Trash2, Eye, LogOut, Home } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Listing } from '@/types/listing';
 import { useDeleteListing } from '@/hooks/useListings';
@@ -17,6 +18,7 @@ const AdminListings = () => {
   const [editingListing, setEditingListing] = useState<Listing | null>(null);
   const { toast } = useToast();
   const { user, userRole, signOut } = useAuth();
+  const queryClient = useQueryClient();
   const deleteMutation = useDeleteListing();
 
   const { data: listings, isLoading, refetch } = useQuery({
@@ -73,17 +75,19 @@ const AdminListings = () => {
     }
   };
 
-  const handleFormClose = () => {
+  const handleFormClose = async () => {
     console.log('=== FORM CLOSING ===');
-    console.log('Form is being closed, will refetch listings');
+    console.log('Form is being closed, invalidating cache and refetching');
     setShowForm(false);
     setEditingListing(null);
     
-    // Force refetch with a small delay to ensure database operations are complete
-    setTimeout(() => {
-      console.log('Refetching listings after form close');
-      refetch();
-    }, 100);
+    // Invalidate both admin and public listings cache
+    await queryClient.invalidateQueries({ queryKey: ['admin-listings'] });
+    await queryClient.invalidateQueries({ queryKey: ['listings'] });
+    
+    // Force refetch with fresh data
+    console.log('Forcing refetch after form close');
+    await refetch();
   };
 
   const handleLogout = async () => {
