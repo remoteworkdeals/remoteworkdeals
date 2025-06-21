@@ -14,6 +14,12 @@ const CommunityPromotion = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  const validatePhone = (phone: string) => {
+    // Basic validation: at least 7 digits, can contain +, spaces, dashes, parentheses
+    const phoneRegex = /^[+]?[\d\s\-\(\)]{7,}$/;
+    return phoneRegex.test(phone.trim());
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -21,6 +27,16 @@ const CommunityPromotion = () => {
       toast({
         title: "Email Required",
         description: "Please enter your email address to join the community.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate phone number if provided
+    if (phone && !validatePhone(phone)) {
+      toast({
+        title: "Invalid Phone Number",
+        description: "Please enter a valid phone number with at least 7 digits.",
         variant: "destructive"
       });
       return;
@@ -126,8 +142,8 @@ const CommunityPromotion = () => {
                 placeholder="+1 234 567 8900"
                 className="mt-2 h-12"
                 disabled={isSubmitting}
-                pattern="[+]?[\d\s\-\(\)]{7,}"
-                title="Please enter a valid phone number (minimum 7 digits)"
+                inputMode="tel"
+                autoComplete="tel"
               />
             </div>
           </div>
