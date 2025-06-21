@@ -67,6 +67,8 @@ export type Database = {
         Row: {
           amenities: string[] | null
           capacity: number | null
+          comfort_living_info: string | null
+          community_social_info: string | null
           country: string
           created_at: string
           created_by: string | null
@@ -80,9 +82,11 @@ export type Database = {
           instagram_url: string | null
           is_seasonal: boolean | null
           location: string
+          location_surroundings_info: string | null
           minimum_stay: number | null
           minimum_stay_unit: string | null
           original_price: number
+          price_value_info: string | null
           pricing_unit: string | null
           rating: number | null
           review_count: number | null
@@ -94,10 +98,13 @@ export type Database = {
           type: Database["public"]["Enums"]["listing_type"]
           updated_at: string
           website_url: string | null
+          work_wifi_info: string | null
         }
         Insert: {
           amenities?: string[] | null
           capacity?: number | null
+          comfort_living_info?: string | null
+          community_social_info?: string | null
           country: string
           created_at?: string
           created_by?: string | null
@@ -111,9 +118,11 @@ export type Database = {
           instagram_url?: string | null
           is_seasonal?: boolean | null
           location: string
+          location_surroundings_info?: string | null
           minimum_stay?: number | null
           minimum_stay_unit?: string | null
           original_price: number
+          price_value_info?: string | null
           pricing_unit?: string | null
           rating?: number | null
           review_count?: number | null
@@ -125,10 +134,13 @@ export type Database = {
           type?: Database["public"]["Enums"]["listing_type"]
           updated_at?: string
           website_url?: string | null
+          work_wifi_info?: string | null
         }
         Update: {
           amenities?: string[] | null
           capacity?: number | null
+          comfort_living_info?: string | null
+          community_social_info?: string | null
           country?: string
           created_at?: string
           created_by?: string | null
@@ -142,9 +154,11 @@ export type Database = {
           instagram_url?: string | null
           is_seasonal?: boolean | null
           location?: string
+          location_surroundings_info?: string | null
           minimum_stay?: number | null
           minimum_stay_unit?: string | null
           original_price?: number
+          price_value_info?: string | null
           pricing_unit?: string | null
           rating?: number | null
           review_count?: number | null
@@ -156,6 +170,7 @@ export type Database = {
           type?: Database["public"]["Enums"]["listing_type"]
           updated_at?: string
           website_url?: string | null
+          work_wifi_info?: string | null
         }
         Relationships: []
       }

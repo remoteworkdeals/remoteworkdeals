@@ -1,4 +1,3 @@
-
 export interface Listing {
   id: number;
   title: string;
@@ -29,6 +28,11 @@ export interface Listing {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  work_wifi_info: string | null;
+  community_social_info: string | null;
+  comfort_living_info: string | null;
+  location_surroundings_info: string | null;
+  price_value_info: string | null;
 }
 
 export interface Review {
