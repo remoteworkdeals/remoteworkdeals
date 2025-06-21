@@ -1,3 +1,4 @@
+
 import { Link } from 'react-router-dom';
 import { Instagram } from 'lucide-react';
 const Footer = () => {
@@ -10,7 +11,7 @@ const Footer = () => {
             </Link>
             <p className="text-gray-300 mb-6 max-w-md">Discover exclusive coliving deals around the world. Join thousands of digital nomads saving up to 40% on only the best coliving spaces.</p>
             <div className="flex items-center gap-4">
-              <a href="https://wa.me/1234567890" target="_blank" rel="noopener noreferrer" className="adventure-button">
+              <a href="https://api.whatsapp.com/send/?phone=31628359453" target="_blank" rel="noopener noreferrer" className="adventure-button">
                 Chat on WhatsApp
               </a>
               <a href="https://instagram.com/remotework.deals" target="_blank" rel="noopener noreferrer" className="text-gray-300 hover:text-white transition-colors">
