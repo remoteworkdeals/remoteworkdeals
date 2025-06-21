@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { Instagram } from 'lucide-react';
 const Footer = () => {
@@ -9,7 +8,7 @@ const Footer = () => {
             <Link to="/" className="text-2xl font-serif font-bold mb-4 block">
               RemoteWork.Deals
             </Link>
-            <p className="text-gray-300 mb-6 max-w-md">Discover exclusive coliving deals around the world. Join thousands of digital nomads saving up to 40% on only the best coliving spaces.</p>
+            <p className="text-gray-300 mb-6 max-w-md">Discover the best Colivings around the world and unlock big discounts. Join hundreds of Digital Nomads saving up to 60% on only the best coliving spaces.</p>
             <div className="flex items-center gap-4">
               <a href="https://api.whatsapp.com/send/?phone=31628359453" target="_blank" rel="noopener noreferrer" className="adventure-button">
                 Chat on WhatsApp
@@ -41,7 +40,7 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-gray-600 mt-12 pt-8 text-center text-gray-300">
-          <p>&copy; 2024 RemoteWork.Deals. All rights reserved. Made with ❤️ for digital nomads worldwide.</p>
+          <p>© 2024 RemoteWork.Deals. All rights reserved. Built by nomads, for nomads.</p>
         </div>
       </div>
     </footer>;
