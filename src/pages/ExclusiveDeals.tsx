@@ -1,4 +1,3 @@
-
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import Testimonials from '@/components/Testimonials';
@@ -8,59 +7,45 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MessageCircle, Clock, Globe, Heart, Gift, Users, Bell } from 'lucide-react';
 import { useCommunityForm } from '@/hooks/useCommunityForm';
-
 const ExclusiveDeals = () => {
-  const { form, isSubmitting, onSubmit } = useCommunityForm({ source: 'exclusive_deals' });
-  const { register, formState: { errors } } = form;
-
-  const JoinForm = () => (
-    <Card className="card-shadow">
+  const {
+    form,
+    isSubmitting,
+    onSubmit
+  } = useCommunityForm({
+    source: 'exclusive_deals'
+  });
+  const {
+    register,
+    formState: {
+      errors
+    }
+  } = form;
+  const JoinForm = () => <Card className="card-shadow">
       <CardHeader className="text-center">
         <CardTitle className="text-3xl font-serif text-forest-green mb-4">
           Get Access to Exclusive Coliving Deals
         </CardTitle>
-        <p className="text-xl text-gray-600">Join our community to unlock even bigger discounts.</p>
+        <p className="text-xl text-gray-600">Join our WhatsApp Community to unlock even bigger discounts.</p>
       </CardHeader>
       <CardContent className="p-8">
         <form onSubmit={onSubmit} className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <Label htmlFor="name" className="text-base font-semibold">Full Name</Label>
-              <Input
-                id="name"
-                type="text"
-                {...register('name')}
-                placeholder="Your full name"
-                className="mt-2 h-12"
-                disabled={isSubmitting}
-              />
-              {errors.name && (
-                <p className="mt-2 text-sm text-red-600">{errors.name.message}</p>
-              )}
+              <Input id="name" type="text" {...register('name')} placeholder="Your full name" className="mt-2 h-12" disabled={isSubmitting} />
+              {errors.name && <p className="mt-2 text-sm text-red-600">{errors.name.message}</p>}
             </div>
             
             <div>
               <Label htmlFor="email" className="text-base font-semibold">Email Address</Label>
-              <Input
-                id="email"
-                type="email"
-                {...register('email')}
-                placeholder="your@email.com"
-                className="mt-2 h-12"
-                disabled={isSubmitting}
-              />
-              {errors.email && (
-                <p className="mt-2 text-sm text-red-600">{errors.email.message}</p>
-              )}
+              <Input id="email" type="email" {...register('email')} placeholder="your@email.com" className="mt-2 h-12" disabled={isSubmitting} />
+              {errors.email && <p className="mt-2 text-sm text-red-600">{errors.email.message}</p>}
             </div>
           </div>
           
           <div className="text-center">
-            <Button 
-              type="submit" 
-              className="adventure-button text-lg px-12 py-4 w-full sm:w-auto"
-              disabled={isSubmitting}
-            >
+            <Button type="submit" className="adventure-button text-lg px-12 py-4 w-full sm:w-auto" disabled={isSubmitting}>
               <MessageCircle className="mr-2" size={20} />
               {isSubmitting ? 'Joining...' : 'Join the Community (Free)'}
             </Button>
@@ -71,11 +56,8 @@ const ExclusiveDeals = () => {
           </div>
         </form>
       </CardContent>
-    </Card>
-  );
-
-  return (
-    <div className="min-h-screen">
+    </Card>;
+  return <div className="min-h-screen">
       <Navigation />
       
       {/* Hero Section */}
@@ -120,7 +102,9 @@ const ExclusiveDeals = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            <div className="text-center animate-fade-in" style={{ animationDelay: '0s' }}>
+            <div className="text-center animate-fade-in" style={{
+            animationDelay: '0s'
+          }}>
               <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Bell size={24} className="text-adventure-orange" />
               </div>
@@ -128,7 +112,9 @@ const ExclusiveDeals = () => {
               <p className="text-gray-600">Never miss out on the best Coliving spots and deals.</p>
             </div>
 
-            <div className="text-center animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <div className="text-center animate-fade-in" style={{
+            animationDelay: '0.1s'
+          }}>
               <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Clock size={24} className="text-adventure-orange" />
               </div>
@@ -138,7 +124,9 @@ const ExclusiveDeals = () => {
               <p className="text-gray-600">Exclusive access to last-minute deals with up to 60% off Coliving prices.</p>
             </div>
 
-            <div className="text-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <div className="text-center animate-fade-in" style={{
+            animationDelay: '0.2s'
+          }}>
               <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Gift size={24} className="text-adventure-orange" />
               </div>
@@ -148,7 +136,9 @@ const ExclusiveDeals = () => {
               </p>
             </div>
 
-            <div className="text-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
+            <div className="text-center animate-fade-in" style={{
+            animationDelay: '0.3s'
+          }}>
               <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <MessageCircle size={24} className="text-adventure-orange" />
               </div>
@@ -160,7 +150,9 @@ const ExclusiveDeals = () => {
               </p>
             </div>
 
-            <div className="text-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <div className="text-center animate-fade-in" style={{
+            animationDelay: '0.4s'
+          }}>
               <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Globe size={24} className="text-adventure-orange" />
               </div>
@@ -172,7 +164,9 @@ const ExclusiveDeals = () => {
               </p>
             </div>
 
-            <div className="text-center animate-fade-in" style={{ animationDelay: '0.5s' }}>
+            <div className="text-center animate-fade-in" style={{
+            animationDelay: '0.5s'
+          }}>
               <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <Users size={24} className="text-adventure-orange" />
               </div>
@@ -204,8 +198,6 @@ const ExclusiveDeals = () => {
       </section>
 
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default ExclusiveDeals;
