@@ -4,20 +4,30 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { MessageCircle } from 'lucide-react';
+import { PhoneInput } from '@/components/ui/phone-input';
+import { MessageCircle, CheckCircle, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { isValidPhoneNumber } from 'react-phone-number-input';
 
 const CommunityPromotion = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [phoneValid, setPhoneValid] = useState<boolean | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const validatePhone = (phone: string) => {
-    // Basic validation: at least 7 digits, can contain +, spaces, dashes, parentheses
-    const phoneRegex = /^[+]?[\d\s\-\(\)]{7,}$/;
-    return phoneRegex.test(phone.trim());
+  const handlePhoneChange = (value: string | undefined) => {
+    const phoneValue = value || '';
+    setPhone(phoneValue);
+    
+    // Validate phone number in real-time
+    if (phoneValue) {
+      const isValid = isValidPhoneNumber(phoneValue);
+      setPhoneValid(isValid);
+    } else {
+      setPhoneValid(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,10 +43,10 @@ const CommunityPromotion = () => {
     }
 
     // Validate phone number if provided
-    if (phone && !validatePhone(phone)) {
+    if (phone && !isValidPhoneNumber(phone)) {
       toast({
         title: "Invalid Phone Number",
-        description: "Please enter a valid phone number with at least 7 digits.",
+        description: "Please enter a valid phone number with country code.",
         variant: "destructive"
       });
       return;
@@ -87,6 +97,7 @@ const CommunityPromotion = () => {
       // Clear form
       setEmail('');
       setPhone('');
+      setPhoneValid(null);
 
       // Redirect to WhatsApp group after a short delay
       setTimeout(() => {
@@ -134,17 +145,33 @@ const CommunityPromotion = () => {
             
             <div>
               <Label htmlFor="phone" className="text-base font-semibold">WhatsApp Number</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+1 234 567 8900"
-                className="mt-2 h-12"
-                disabled={isSubmitting}
-                inputMode="tel"
-                autoComplete="tel"
-              />
+              <div className="relative mt-2">
+                <PhoneInput
+                  value={phone}
+                  onChange={handlePhoneChange}
+                  disabled={isSubmitting}
+                  placeholder="e.g. +44 7123 456789"
+                  className={`
+                    ${phoneValid === true ? 'phone-input-valid' : ''}
+                    ${phoneValid === false ? 'phone-input-invalid' : ''}
+                  `}
+                />
+                {phone && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    {phoneValid === true && (
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                    )}
+                    {phoneValid === false && (
+                      <AlertCircle className="h-5 w-5 text-red-500" />
+                    )}
+                  </div>
+                )}
+              </div>
+              {phoneValid === false && phone && (
+                <p className="text-sm text-red-600 mt-1">
+                  Please enter a valid phone number with country code
+                </p>
+              )}
             </div>
           </div>
           

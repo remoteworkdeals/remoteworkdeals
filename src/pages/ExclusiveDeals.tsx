@@ -5,24 +5,34 @@ import Testimonials from '@/components/Testimonials';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PhoneInput } from '@/components/ui/phone-input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageCircle, Clock, Globe, Heart, Gift, Users, Bell } from 'lucide-react';
+import { MessageCircle, Clock, Globe, Heart, Gift, Users, Bell, CheckCircle, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { isValidPhoneNumber } from 'react-phone-number-input';
 
 const ExclusiveDeals = () => {
   const [formData, setFormData] = useState({
     email: '',
     phone: ''
   });
+  const [phoneValid, setPhoneValid] = useState<boolean | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const validatePhone = (phone: string) => {
-    // Basic validation: at least 7 digits, can contain +, spaces, dashes, parentheses
-    const phoneRegex = /^[+]?[\d\s\-\(\)]{7,}$/;
-    return phoneRegex.test(phone.trim());
+  const handlePhoneChange = (value: string | undefined) => {
+    const phoneValue = value || '';
+    setFormData({ ...formData, phone: phoneValue });
+    
+    // Validate phone number in real-time
+    if (phoneValue) {
+      const isValid = isValidPhoneNumber(phoneValue);
+      setPhoneValid(isValid);
+    } else {
+      setPhoneValid(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,10 +48,10 @@ const ExclusiveDeals = () => {
     }
 
     // Validate phone number if provided
-    if (formData.phone && !validatePhone(formData.phone)) {
+    if (formData.phone && !isValidPhoneNumber(formData.phone)) {
       toast({
         title: "Invalid Phone Number",
-        description: "Please enter a valid phone number with at least 7 digits.",
+        description: "Please enter a valid phone number with country code.",
         variant: "destructive"
       });
       return;
@@ -94,6 +104,7 @@ const ExclusiveDeals = () => {
         email: '',
         phone: ''
       });
+      setPhoneValid(null);
 
       // Redirect to WhatsApp group after a short delay
       setTimeout(() => {
@@ -139,17 +150,33 @@ const ExclusiveDeals = () => {
             
             <div>
               <Label htmlFor="phone" className="text-base font-semibold">WhatsApp Number</Label>
-              <Input 
-                id="phone" 
-                type="tel" 
-                value={formData.phone} 
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })} 
-                placeholder="+1 234 567 8900" 
-                className="mt-2 h-12"
-                disabled={isSubmitting}
-                inputMode="tel"
-                autoComplete="tel"
-              />
+              <div className="relative mt-2">
+                <PhoneInput
+                  value={formData.phone}
+                  onChange={handlePhoneChange}
+                  disabled={isSubmitting}
+                  placeholder="e.g. +44 7123 456789"
+                  className={`
+                    ${phoneValid === true ? 'phone-input-valid' : ''}
+                    ${phoneValid === false ? 'phone-input-invalid' : ''}
+                  `}
+                />
+                {formData.phone && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    {phoneValid === true && (
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                    )}
+                    {phoneValid === false && (
+                      <AlertCircle className="h-5 w-5 text-red-500" />
+                    )}
+                  </div>
+                )}
+              </div>
+              {phoneValid === false && formData.phone && (
+                <p className="text-sm text-red-600 mt-1">
+                  Please enter a valid phone number with country code
+                </p>
+              )}
             </div>
           </div>
           

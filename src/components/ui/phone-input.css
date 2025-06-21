@@ -1,0 +1,62 @@
+
+/* Phone Input Custom Styles */
+.phone-input-custom {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.phone-input-custom .PhoneInputCountry {
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
+  padding: 8px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px 0 0 6px;
+  background-color: hsl(var(--background));
+  min-width: 70px;
+  justify-content: center;
+}
+
+.phone-input-custom .PhoneInputCountrySelect {
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.phone-input-custom .PhoneInputCountryIcon {
+  width: 20px;
+  height: 15px;
+  margin-right: 4px;
+}
+
+.phone-input-custom .PhoneInputInput {
+  flex: 1;
+  border-radius: 0 6px 6px 0 !important;
+  border-left: none !important;
+  height: 48px !important;
+}
+
+.phone-input-custom .PhoneInputCountrySelect:focus {
+  box-shadow: 0 0 0 2px hsl(var(--ring));
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .phone-input-custom .PhoneInputInput {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+}
+
+/* Validation states */
+.phone-input-valid .PhoneInputInput {
+  border-color: #10b981;
+  box-shadow: 0 0 0 1px #10b981;
+}
+
+.phone-input-invalid .PhoneInputInput {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 1px #ef4444;
+}
