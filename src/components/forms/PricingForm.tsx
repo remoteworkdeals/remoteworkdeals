@@ -69,14 +69,14 @@ const PricingForm = ({
             <Input
               id="originalPrice"
               type="number"
-              value={String(originalPrice)}
-              onChange={(e) => setOriginalPrice(Number(e.target.value))}
+              value={String(originalPrice || 0)}
+              onChange={(e) => setOriginalPrice(Number(e.target.value) || 0)}
               required
             />
           </div>
           <div>
             <Label htmlFor="pricingUnit">Pricing Unit</Label>
-            <Select value={pricingUnit} onValueChange={(value) => setPricingUnit(value as 'night' | 'month')}>
+            <Select value={pricingUnit || 'night'} onValueChange={(value) => setPricingUnit(value as 'night' | 'month')}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a unit" />
               </SelectTrigger>
@@ -91,7 +91,10 @@ const PricingForm = ({
         <div className="space-y-4">
           <div>
             <Label htmlFor="discountType">Discount Type</Label>
-            <Select value={discountType || ''} onValueChange={(value) => setDiscountType(value as 'percentage' | 'fixed_amount' || null)}>
+            <Select 
+              value={discountType || ''} 
+              onValueChange={(value) => setDiscountType(value === '' ? null : value as 'percentage' | 'fixed_amount')}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select discount type" />
               </SelectTrigger>
@@ -147,7 +150,7 @@ const PricingForm = ({
             id="discountCodeUrl"
             type="url"
             value={discountCodeUrl || ''}
-            onChange={(e) => setDiscountCodeUrl(e.target.value)}
+            onChange={(e) => setDiscountCodeUrl(e.target.value || null)}
           />
         </div>
       </CardContent>
