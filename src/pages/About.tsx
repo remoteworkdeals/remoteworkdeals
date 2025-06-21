@@ -1,12 +1,9 @@
-
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { MapPin, Users, Globe, Heart, CheckCircle } from 'lucide-react';
-
 const About = () => {
-  return (
-    <div className="min-h-screen">
+  return <div className="min-h-screen">
       <Navigation />
       
       {/* Hero Section */}
@@ -28,21 +25,13 @@ const About = () => {
                 Why I Started Remote Work Deals
               </h2>
               <div className="space-y-4 text-lg text-gray-700">
-                <p>
-                  As a digital nomad, I quickly discovered the power of a good co-living.
-                </p>
-                <p>
-                  When you find the right place — with the right people, the right energy, and the right vibe — something just clicks. Suddenly, remote life isn't just manageable... it becomes one of the best times of your life.
-                </p>
+                <p>As a digital nomad, I quickly discovered the power of a good coliving.</p>
+                <p>When you find the right place — with the right people, the right energy, and the right vibe — something just clicks. Suddenly, remote life isn't just amazing... it becomes one of the best times of your life.</p>
                 <p>
                   I've experienced that magic myself.
                 </p>
-                <p>
-                  But I've also seen how often other nomads miss out on it — ending up in the wrong place, feeling isolated, or simply drained from always being "on the move." And that's a shame, because I genuinely believe:
-                </p>
-                <p className="font-semibold text-forest-green">
-                  a good co-living can change everything.
-                </p>
+                <p>But I've also seen how often other nomads miss out on it, ending up in the wrong place, feeling isolated, or simply drained from always being "on the move." And that's a shame, because I genuinely believe:</p>
+                <p className="font-semibold text-forest-green">A good coliving can change everything.</p>
                 <p>
                   That's why I created Remote Work Deals:
                 </p>
@@ -102,9 +91,7 @@ const About = () => {
               <h3 className="text-xl font-serif font-bold text-forest-green mb-4">
                 Honest Recommendations
               </h3>
-              <p className="text-gray-600 leading-relaxed">
-                We're upfront about who a place is for — and who it's not for. No sugarcoating.
-              </p>
+              <p className="text-gray-600 leading-relaxed">We're upfront about who a place is for and who it's not for. No sugarcoating.</p>
             </div>
 
             <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 md:col-span-2 lg:col-span-1">
@@ -123,9 +110,7 @@ const About = () => {
           <div className="bg-white rounded-2xl p-8 lg:p-12 shadow-lg border border-gray-100">
             <div className="max-w-4xl mx-auto text-center">
               <div className="space-y-6 text-lg text-gray-700 leading-relaxed">
-                <p>
-                  I believe that finding the right co-living isn't about luck — it's about access to the right information.
-                </p>
+                <p>I believe that finding the right coliving isn't about luck, it's about access to the right information.</p>
                 <p>
                   And I want to make that accessible for everyone living the remote lifestyle.
                 </p>
@@ -164,9 +149,7 @@ const About = () => {
               <h3 className="text-xl font-serif font-bold text-forest-green mb-3">
                 Global Access
               </h3>
-              <p className="text-gray-600">
-                Making world-class co-livings accessible to nomads from all backgrounds and budgets.
-              </p>
+              <p className="text-gray-600">Making real and good colivings accessible to nomads from all backgrounds and budgets.</p>
             </div>
 
             <div className="text-center">
@@ -188,9 +171,7 @@ const About = () => {
               <h3 className="text-xl font-serif font-bold text-forest-green mb-3">
                 Quality Spaces
               </h3>
-              <p className="text-gray-600">
-                Partnering only with co-livings that meet our standards for comfort, wifi, and community.
-              </p>
+              <p className="text-gray-600">Partnering only with colivings that meet our standards for comfort, wifi, and community.</p>
             </div>
 
             <div className="text-center">
@@ -200,9 +181,7 @@ const About = () => {
               <h3 className="text-xl font-serif font-bold text-forest-green mb-3">
                 Human Touch
               </h3>
-              <p className="text-gray-600">
-                Real humans, real relationships. No bots, no algorithms, just genuine care for each nomad.
-              </p>
+              <p className="text-gray-600">Real humans, real recommendations. No spam or fake listings.</p>
             </div>
           </div>
         </div>
@@ -237,8 +216,6 @@ const About = () => {
       </section>
 
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default About;
