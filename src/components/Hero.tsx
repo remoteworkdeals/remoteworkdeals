@@ -1,4 +1,3 @@
-
 import { Search, MapPin, Users, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,9 +10,7 @@ import { useNavigate } from 'react-router-dom';
  */
 const Hero = () => {
   const navigate = useNavigate();
-  
-  return (
-    <section className="hero-gradient text-white py-12 sm:py-16 lg:py-32">
+  return <section className="hero-gradient text-white py-12 sm:py-16 lg:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Content */}
@@ -21,11 +18,9 @@ const Hero = () => {
             <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-serif font-bold leading-tight mb-4 sm:mb-6">
               Find Your Perfect
               <br />
-              <span className="text-adventure-orange">Co-living Match.</span>
+              <span className="text-adventure-orange">Coliving Match & Deal.</span>
             </h1>
-            <p className="text-lg sm:text-xl lg:text-2xl mb-6 sm:mb-8 text-gray-100 leading-relaxed">
-              Join our trusted community of digital nomads. Get personalized co-living recommendations, exclusive discounts up to 60%, and real reviews from fellow nomads.
-            </p>
+            <p className="text-lg sm:text-xl lg:text-2xl mb-6 sm:mb-8 text-gray-100 leading-relaxed">Join our trusted community of Digital Nomads. Get personalized coliving recommendations, exclusive discounts up to 60%, and real coliving reviews from fellow nomads.</p>
             
             {/* Trust Indicators - Mobile optimized */}
             <div className="grid grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8 text-sm">
@@ -38,8 +33,10 @@ const Hero = () => {
                 <div className="text-xs sm:text-sm">Coliving Partners</div>
               </div>
               <div className="text-center">
-                <div className="text-xl sm:text-2xl font-bold text-adventure-orange">€1.2M</div>
-                <div className="text-xs sm:text-sm">Total Savings</div>
+                <div className="text-xl sm:text-2xl font-bold text-adventure-orange">
+              </div>
+                <div className="text-xs sm:text-sm">
+              </div>
               </div>
             </div>
             
@@ -73,9 +70,7 @@ const Hero = () => {
                 <MessageCircle className="mr-2" size={18} />
                 Join Free Community
               </Button>
-              <Button variant="outline" className="outline-button text-base sm:text-lg py-3 sm:py-4 px-6 sm:px-8 bg-transparent border-white text-white hover:bg-white hover:text-forest-green w-full sm:w-auto" onClick={() => navigate('/coliving-deals')}>
-                Browse All Deals
-              </Button>
+              <Button variant="outline" className="outline-button text-base sm:text-lg py-3 sm:py-4 px-6 sm:px-8 bg-transparent border-white text-white hover:bg-white hover:text-forest-green w-full sm:w-auto" onClick={() => navigate('/coliving-deals')}>Browse All Coliving Deals</Button>
             </div>
           </div>
 
@@ -91,8 +86,6 @@ const Hero = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default Hero;
