@@ -19,7 +19,7 @@ const Testimonials = () => {
                 <img alt="Sarah Chen" className="w-12 h-12 rounded-full mr-4 object-cover" src="/lovable-uploads/126a5697-ad72-47ef-b923-3376f7caaf4e.jpg" />
                 <div>
                   <h4 className="font-semibold text-forest-green">Hannah</h4>
-                  <p className="text-sm text-gray-600">Stayed in Nomadico Coliving Medellin</p>
+                  <p className="text-sm text-gray-600">Stayed at Nomadico Coliving Medellin</p>
                 </div>
               </div>
               
