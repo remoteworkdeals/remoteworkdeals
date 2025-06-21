@@ -63,6 +63,23 @@
     font-family: 'Crimson Text', serif;
     font-weight: 600;
   }
+
+  /* Mobile touch targets - minimum 44px */
+  button, 
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  a {
+    min-height: 44px;
+    @apply flex items-center justify-center;
+  }
+
+  /* Improved text readability on mobile */
+  @media (max-width: 768px) {
+    body {
+      font-size: 16px; /* Prevents zoom on iOS */
+    }
+  }
 }
 
 @layer components {
@@ -78,11 +95,53 @@
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   }
   
+  /* Mobile-optimized button styles */
   .adventure-button {
     @apply bg-[#F0530A] hover:bg-[#d4470a] text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5;
+    min-height: 44px; /* Touch target size */
   }
   
   .outline-button {
     @apply border-2 border-[#41472D] text-[#41472D] hover:bg-[#41472D] hover:text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200;
+    min-height: 44px; /* Touch target size */
+  }
+
+  /* Text truncation utilities for mobile */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Mobile-specific spacing */
+  @media (max-width: 640px) {
+    .container {
+      @apply px-4;
+    }
+  }
+
+  /* Ensure proper touch targets on mobile */
+  @media (max-width: 768px) {
+    .adventure-button,
+    .outline-button {
+      @apply text-base py-3 px-6;
+      min-height: 48px;
+    }
+
+    /* Larger touch targets for form elements */
+    input, 
+    select, 
+    textarea {
+      min-height: 44px;
+      @apply text-base; /* Prevents zoom on iOS */
+    }
   }
 }
