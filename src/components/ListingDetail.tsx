@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { MapPin, Users, Wifi, Star, Heart, MessageCircle, ArrowLeft, ExternalLink, Calendar, Globe, Instagram } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -55,10 +56,6 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
     }
   };
 
-  const handleLearnMore = () => {
-    window.open('https://chat.whatsapp.com/Bnb3F4ycBPcLsYRl2BxNtM', '_blank');
-  };
-
   const renderStars = (rating: number) => {
     return (
       <div className="flex items-center">
@@ -103,6 +100,29 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
   const images = displayImages.length > 0 ? displayImages : [];
   const amenities = listing.amenities || [];
   const discountAmount = listing.original_price - (listing.discounted_price || listing.original_price);
+
+  const informationBlocks = [
+    {
+      title: 'Work & WiFi',
+      content: listing.work_wifi_info,
+      icon: <Wifi className="w-6 h-6 text-adventure-orange" />
+    },
+    {
+      title: 'Community & Social',
+      content: listing.community_social_info,
+      icon: <Users className="w-6 h-6 text-adventure-orange" />
+    },
+    {
+      title: 'Comfort & Living',
+      content: listing.comfort_living_info,
+      icon: <Heart className="w-6 h-6 text-adventure-orange" />
+    },
+    {
+      title: 'Location & Surroundings',
+      content: listing.location_surroundings_info,
+      icon: <MapPin className="w-6 h-6 text-adventure-orange" />
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-white">
@@ -259,6 +279,26 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
               </div>
             </div>
 
+            {/* Information Blocks */}
+            <div className="mb-8">
+              <h3 className="text-2xl font-serif font-bold text-forest-green mb-6">What to expect</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                {informationBlocks.map((block, index) => (
+                  block.content && (
+                    <Card key={index} className="border-l-4 border-l-adventure-orange">
+                      <CardContent className="p-6">
+                        <div className="flex items-center mb-3">
+                          {block.icon}
+                          <h4 className="text-lg font-semibold text-forest-green ml-3">{block.title}</h4>
+                        </div>
+                        <p className="text-gray-600 leading-relaxed">{block.content}</p>
+                      </CardContent>
+                    </Card>
+                  )
+                ))}
+              </div>
+            </div>
+
             {/* Amenities */}
             {amenities.length > 0 && (
               <div className="mb-8">
@@ -280,13 +320,13 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   {averageRatings.overall > 0 && renderRatingBar('overall experience', averageRatings.overall)}
-                  {renderRatingBar('social', averageRatings.social)}
-                  {renderRatingBar('work environment', averageRatings.work)}
+                  {renderRatingBar('work & wifi', averageRatings.work)}
+                  {renderRatingBar('community & social', averageRatings.social)}
                 </div>
                 <div>
-                  {renderRatingBar('surroundings', averageRatings.surroundings)}
-                  {renderRatingBar('facilities', averageRatings.facilities)}
-                  {renderRatingBar('price', averageRatings.price)}
+                  {renderRatingBar('comfort & living', averageRatings.facilities)}
+                  {renderRatingBar('location & surroundings', averageRatings.surroundings)}
+                  {renderRatingBar('price & value', averageRatings.price)}
                 </div>
               </div>
             </div>

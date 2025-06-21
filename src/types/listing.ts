@@ -26,6 +26,10 @@ export interface Listing {
   review_count: number | null;
   website_url: string | null;
   instagram_url: string | null;
+  work_wifi_info: string | null;
+  community_social_info: string | null;
+  comfort_living_info: string | null;
+  location_surroundings_info: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;

@@ -67,11 +67,11 @@ const ReviewForm = ({ onSubmit }: ReviewFormProps) => {
   };
 
   const categories = [
-    { key: 'social', label: 'Social', description: 'Community and social atmosphere' },
-    { key: 'work', label: 'Work/WiFi', description: 'Work environment and internet quality' },
-    { key: 'surroundings', label: 'Surroundings', description: 'Location and neighborhood' },
-    { key: 'facilities', label: 'Facilities', description: 'Amenities and infrastructure' },
-    { key: 'price', label: 'Price', description: 'Value for money' }
+    { key: 'work', label: 'Work & WiFi', description: 'Internet quality and work environment' },
+    { key: 'social', label: 'Community & Social', description: 'Social atmosphere and community' },
+    { key: 'facilities', label: 'Comfort & Living', description: 'Living comfort and facilities' },
+    { key: 'surroundings', label: 'Location & Surroundings', description: 'Location and neighborhood' },
+    { key: 'price', label: 'Price & Value', description: 'Value for money' }
   ];
 
   return (
