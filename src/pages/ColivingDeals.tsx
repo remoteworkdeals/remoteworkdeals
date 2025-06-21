@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -23,6 +24,36 @@ const ColivingDeals = () => {
   const [selectedLocation, setSelectedLocation] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
   const [selectedDates, setSelectedDates] = useState<DateRange | undefined>();
+
+  // Filter listings based on selected criteria
+  const filteredListings = useMemo(() => {
+    return listings.filter(listing => {
+      // Location filter
+      if (selectedLocation !== 'all' && listing.country.toLowerCase() !== selectedLocation) {
+        return false;
+      }
+      
+      // Type filter
+      if (selectedType !== 'all' && listing.type.toLowerCase() !== selectedType) {
+        return false;
+      }
+      
+      // Date filter for seasonal listings
+      if (selectedDates?.from && selectedDates?.to && listing.is_seasonal) {
+        const startDate = new Date(listing.seasonal_start_date || '');
+        const endDate = new Date(listing.seasonal_end_date || '');
+        const selectedStart = selectedDates.from;
+        const selectedEnd = selectedDates.to;
+        
+        // Check if selected dates overlap with seasonal availability
+        if (selectedStart > endDate || selectedEnd < startDate) {
+          return false;
+        }
+      }
+      
+      return true;
+    });
+  }, [listings, selectedLocation, selectedType, selectedDates]);
 
   const handleGetCode = (listing: any, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -70,6 +101,7 @@ const ColivingDeals = () => {
         <Footer />
       </div>;
   }
+
   return <div className="min-h-screen">
       <Navigation />
       
