@@ -7,100 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MessageCircle, Clock, Globe, Heart, Gift, Users, Bell } from 'lucide-react';
-import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useCommunityForm } from '@/hooks/useCommunityForm';
 
 const ExclusiveDeals = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: ''
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.name) {
-      toast({
-        title: "Name Required",
-        description: "Please enter your name to join the community.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!formData.email) {
-      toast({
-        title: "Email Required",
-        description: "Please enter your email address to join the community.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-    
-    try {
-      console.log('Attempting to save community member:', formData);
-      
-      // Save to Supabase
-      const { data, error } = await supabase
-        .from('community_members')
-        .insert([
-          {
-            name: formData.name,
-            email: formData.email,
-            source: 'exclusive_deals'
-          }
-        ]);
-
-      if (error) {
-        console.error('Supabase error:', error);
-        
-        // Handle duplicate email error specifically
-        if (error.code === '23505') {
-          toast({
-            title: "Already Registered",
-            description: "This email is already part of our community! Redirecting you to WhatsApp."
-          });
-        } else {
-          toast({
-            title: "Error Joining Community",
-            description: "There was an issue saving your information. Please try again.",
-            variant: "destructive"
-          });
-          setIsSubmitting(false);
-          return;
-        }
-      } else {
-        console.log('Successfully saved community member:', data);
-        toast({
-          title: "Welcome to the Community!",
-          description: "You've successfully joined! Redirecting you to our WhatsApp group."
-        });
-      }
-
-      // Clear form
-      setFormData({ name: '', email: '' });
-
-      // Redirect to WhatsApp group after a short delay
-      setTimeout(() => {
-        window.open('https://chat.whatsapp.com/Bnb3F4ycBPcLsYRl2BxNtM', '_blank');
-      }, 1500);
-
-    } catch (error) {
-      console.error('Unexpected error:', error);
-      toast({
-        title: "Unexpected Error",
-        description: "Something went wrong. Please try again or contact support.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const { form, isSubmitting, onSubmit } = useCommunityForm({ source: 'exclusive_deals' });
+  const { register, formState: { errors } } = form;
 
   const JoinForm = () => (
     <Card className="card-shadow">
@@ -111,20 +22,21 @@ const ExclusiveDeals = () => {
         <p className="text-xl text-gray-600">Join our community to unlock even bigger discounts.</p>
       </CardHeader>
       <CardContent className="p-8">
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={onSubmit} className="space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <Label htmlFor="name" className="text-base font-semibold">Full Name</Label>
               <Input
                 id="name"
                 type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                {...register('name')}
                 placeholder="Your full name"
-                required
                 className="mt-2 h-12"
                 disabled={isSubmitting}
               />
+              {errors.name && (
+                <p className="mt-2 text-sm text-red-600">{errors.name.message}</p>
+              )}
             </div>
             
             <div>
@@ -132,13 +44,14 @@ const ExclusiveDeals = () => {
               <Input
                 id="email"
                 type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                {...register('email')}
                 placeholder="your@email.com"
-                required
                 className="mt-2 h-12"
                 disabled={isSubmitting}
               />
+              {errors.email && (
+                <p className="mt-2 text-sm text-red-600">{errors.email.message}</p>
+              )}
             </div>
           </div>
           
