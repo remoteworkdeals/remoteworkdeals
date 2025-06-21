@@ -38,6 +38,8 @@ const PartnerForm = ({ onSuccess }: PartnerFormProps) => {
     setIsSubmitting(true);
     
     try {
+      console.log('Attempting to save partner inquiry:', data);
+      
       const { error } = await supabase
         .from('partner_inquiries')
         .insert([
@@ -49,9 +51,11 @@ const PartnerForm = ({ onSuccess }: PartnerFormProps) => {
         ]);
 
       if (error) {
+        console.error('Supabase error:', error);
         throw error;
       }
 
+      console.log('Successfully saved partner inquiry');
       reset();
       onSuccess();
       
@@ -85,6 +89,7 @@ const PartnerForm = ({ onSuccess }: PartnerFormProps) => {
               {...register('fullName')}
               className="mt-1"
               placeholder="Your full name"
+              disabled={isSubmitting}
             />
             {errors.fullName && (
               <p className="mt-2 text-sm text-red-600">{errors.fullName.message}</p>
@@ -101,6 +106,7 @@ const PartnerForm = ({ onSuccess }: PartnerFormProps) => {
               {...register('colivingName')}
               className="mt-1"
               placeholder="Name of your coliving space"
+              disabled={isSubmitting}
             />
             {errors.colivingName && (
               <p className="mt-2 text-sm text-red-600">{errors.colivingName.message}</p>
@@ -117,6 +123,7 @@ const PartnerForm = ({ onSuccess }: PartnerFormProps) => {
               {...register('email')}
               className="mt-1"
               placeholder="your@email.com"
+              disabled={isSubmitting}
             />
             {errors.email && (
               <p className="mt-2 text-sm text-red-600">{errors.email.message}</p>

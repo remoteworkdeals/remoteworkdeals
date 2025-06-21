@@ -126,6 +126,8 @@ const CommunityPromotion = () => {
                 placeholder="+1 234 567 8900"
                 className="mt-2 h-12"
                 disabled={isSubmitting}
+                pattern="[+]?[\d\s\-\(\)]{7,}"
+                title="Please enter a valid phone number (minimum 7 digits)"
               />
             </div>
           </div>
