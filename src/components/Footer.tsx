@@ -1,3 +1,4 @@
+
 import { Link } from 'react-router-dom';
 import { Instagram, ArrowRight } from 'lucide-react';
 
@@ -30,10 +31,9 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2 text-gray-300">
-              <li><Link to="/listings" className="hover:text-white transition-colors">All Listings</Link></li>
+              <li><Link to="/coliving-deals" className="hover:text-white transition-colors">All Listings</Link></li>
               <li><Link to="/blog" className="hover:text-white transition-colors">Blog</Link></li>
               <li><Link to="/about" className="hover:text-white transition-colors">About Us</Link></li>
-              <li><Link to="/contact" className="hover:text-white transition-colors">Contact</Link></li>
             </ul>
           </div>
           
@@ -41,8 +41,6 @@ const Footer = () => {
             <h3 className="font-semibold mb-4">For Partners</h3>
             <ul className="space-y-2 text-gray-300">
               <li><Link to="/become-partner" className="hover:text-white transition-colors">Become a Partner</Link></li>
-              <li><a href="#" className="hover:text-white transition-colors">Partner Resources</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Success Stories</a></li>
             </ul>
           </div>
         </div>

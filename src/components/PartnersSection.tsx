@@ -1,7 +1,11 @@
+
 import { Button } from '@/components/ui/button';
 import { Building, Users, TrendingUp, Globe } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
 const PartnersSection = () => {
-  return <section className="py-20 bg-forest-green text-white">
+  return (
+    <section className="py-20 bg-forest-green text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div>
@@ -43,12 +47,16 @@ const PartnersSection = () => {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button className="adventure-button">
-                Become a Partner
-              </Button>
-              <Button variant="outline" className="border-white hover:bg-white hover:text-forest-green text-zinc-900">
-                Learn More
-              </Button>
+              <Link to="/become-partner">
+                <Button className="adventure-button">
+                  Become a Partner
+                </Button>
+              </Link>
+              <Link to="/become-partner">
+                <Button variant="outline" className="border-white hover:bg-white hover:text-forest-green text-zinc-900">
+                  Learn More
+                </Button>
+              </Link>
             </div>
           </div>
           
@@ -61,6 +69,8 @@ const PartnersSection = () => {
           </div>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default PartnersSection;
