@@ -1,3 +1,4 @@
+
 import { Search, MapPin, Users, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,10 +34,8 @@ const Hero = () => {
                 <div className="text-xs sm:text-sm">Coliving Partners</div>
               </div>
               <div className="text-center">
-                <div className="text-xl sm:text-2xl font-bold text-adventure-orange">
-              </div>
-                <div className="text-xs sm:text-sm">
-              </div>
+                <div className="text-xl sm:text-2xl font-bold text-adventure-orange">4.8★</div>
+                <div className="text-xs sm:text-sm">Average Rating</div>
               </div>
             </div>
             

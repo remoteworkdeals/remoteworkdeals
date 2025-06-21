@@ -3,29 +3,6 @@ import { Users, MessageCircle, Globe, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const CommunitySection = () => {
-  const benefits = [
-    {
-      icon: MessageCircle,
-      title: "Real-time Advice",
-      description: "Get instant answers from nomads who've been there before."
-    },
-    {
-      icon: Globe,
-      title: "Local Tips",
-      description: "Discover hidden gems and insider knowledge in every destination."
-    },
-    {
-      icon: Users,
-      title: "Personal Recommendations",
-      description: "Connect with like-minded nomads and get personalized suggestions."
-    },
-    {
-      icon: Heart,
-      title: "Co-living Q&A",
-      description: "Ask questions and share experiences about specific co-living spaces."
-    }
-  ];
-
   return (
     <section className="py-20 bg-desert-beige">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -44,19 +21,53 @@ const CommunitySection = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {benefits.map((benefit, index) => (
-            <div key={index} className="text-center animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
-              <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <benefit.icon size={24} className="text-adventure-orange" />
-              </div>
-              <h3 className="text-xl font-serif font-bold text-forest-green mb-3">
-                {benefit.title}
-              </h3>
-              <p className="text-gray-600">
-                {benefit.description}
-              </p>
+          <div className="text-center animate-fade-in" style={{ animationDelay: '0s' }}>
+            <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <MessageCircle size={24} className="text-adventure-orange" />
             </div>
-          ))}
+            <h3 className="text-xl font-serif font-bold text-forest-green mb-3">
+              Real-time Advice
+            </h3>
+            <p className="text-gray-600">
+              Get instant answers from nomads who've been there before.
+            </p>
+          </div>
+
+          <div className="text-center animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Globe size={24} className="text-adventure-orange" />
+            </div>
+            <h3 className="text-xl font-serif font-bold text-forest-green mb-3">
+              Local Tips
+            </h3>
+            <p className="text-gray-600">
+              Discover hidden gems and insider knowledge in every destination.
+            </p>
+          </div>
+
+          <div className="text-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Users size={24} className="text-adventure-orange" />
+            </div>
+            <h3 className="text-xl font-serif font-bold text-forest-green mb-3">
+              Personal Recommendations
+            </h3>
+            <p className="text-gray-600">
+              Connect with like-minded nomads and get personalized suggestions.
+            </p>
+          </div>
+
+          <div className="text-center animate-fade-in" style={{ animationDelay: '0.3s' }}>
+            <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Heart size={24} className="text-adventure-orange" />
+            </div>
+            <h3 className="text-xl font-serif font-bold text-forest-green mb-3">
+              Co-living Q&A
+            </h3>
+            <p className="text-gray-600">
+              Ask questions and share experiences about specific co-living spaces.
+            </p>
+          </div>
         </div>
       </div>
     </section>

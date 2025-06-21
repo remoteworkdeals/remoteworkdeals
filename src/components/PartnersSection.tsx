@@ -3,24 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Building, Users, TrendingUp, Globe } from 'lucide-react';
 
 const PartnersSection = () => {
-  const benefits = [
-    {
-      icon: Users,
-      title: "Quality Nomads",
-      description: "Access to our vetted community of remote workers and digital nomads"
-    },
-    {
-      icon: TrendingUp,
-      title: "Increased Bookings",
-      description: "Boost your occupancy rates with our engaged audience"
-    },
-    {
-      icon: Globe,
-      title: "Global Reach",
-      description: "Connect with nomads from around the world looking for their next home"
-    }
-  ];
-
   return (
     <section className="py-20 bg-forest-green text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -35,17 +17,35 @@ const PartnersSection = () => {
             </p>
             
             <div className="space-y-6 mb-8">
-              {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-start gap-4">
-                  <div className="bg-adventure-orange rounded-lg p-3 flex-shrink-0">
-                    <benefit.icon size={24} />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">{benefit.title}</h3>
-                    <p className="text-gray-200">{benefit.description}</p>
-                  </div>
+              <div className="flex items-start gap-4">
+                <div className="bg-adventure-orange rounded-lg p-3 flex-shrink-0">
+                  <Users size={24} />
                 </div>
-              ))}
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Quality Nomads</h3>
+                  <p className="text-gray-200">Access to our vetted community of remote workers and digital nomads</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="bg-adventure-orange rounded-lg p-3 flex-shrink-0">
+                  <TrendingUp size={24} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Increased Bookings</h3>
+                  <p className="text-gray-200">Boost your occupancy rates with our engaged audience</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="bg-adventure-orange rounded-lg p-3 flex-shrink-0">
+                  <Globe size={24} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Global Reach</h3>
+                  <p className="text-gray-200">Connect with nomads from around the world looking for their next home</p>
+                </div>
+              </div>
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4">
