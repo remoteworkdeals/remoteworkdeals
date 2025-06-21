@@ -113,10 +113,6 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
       communitySocialInfo,
       comfortLivingInfo,
       locationSurroundingsInfo,
-      workWifiInfoLength: workWifiInfo.length,
-      communitySocialInfoLength: communitySocialInfo.length,
-      comfortLivingInfoLength: comfortLivingInfo.length,
-      locationSurroundingsInfoLength: locationSurroundingsInfo.length
     });
     
     try {
@@ -157,14 +153,10 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
       };
 
       console.log('Complete data being sent to database:', listingData);
-      console.log('Information blocks in final data:', {
-        work_wifi_info: listingData.work_wifi_info,
-        community_social_info: listingData.community_social_info,
-        comfort_living_info: listingData.comfort_living_info,
-        location_surroundings_info: listingData.location_surroundings_info
-      });
 
       let result;
+      let operationSuccess = false;
+      
       if (listing) {
         console.log('=== UPDATING EXISTING LISTING ===');
         console.log('Updating listing with ID:', listing.id);
@@ -172,8 +164,11 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
         result = await supabase
           .from('listings')
           .update(listingData)
-          .eq('id', listing.id)
-          .select('*');
+          .eq('id', listing.id);
+          
+        // For updates, success is determined by no error, not returned data
+        operationSuccess = !result.error;
+        
       } else {
         console.log('=== CREATING NEW LISTING ===');
         
@@ -181,6 +176,9 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
           .from('listings')
           .insert(listingData)
           .select('*');
+          
+        // For inserts, we expect data to be returned
+        operationSuccess = !result.error && result.data && result.data.length > 0;
       }
 
       console.log('Database operation result:', result);
@@ -188,40 +186,34 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
       if (result.error) {
         console.error('=== DATABASE ERROR ===');
         console.error('Error details:', result.error);
-        console.error('Error message:', result.error.message);
-        console.error('Error code:', result.error.code);
         throw result.error;
       }
 
-      if (result.data && result.data.length > 0) {
+      if (operationSuccess) {
         console.log('=== DATABASE OPERATION SUCCESSFUL ===');
-        const savedData = result.data[0];
-        console.log('Successfully saved data:', savedData);
-        console.log('Information blocks in saved data:', {
-          work_wifi_info: savedData.work_wifi_info,
-          community_social_info: savedData.community_social_info,
-          comfort_living_info: savedData.comfort_living_info,
-          location_surroundings_info: savedData.location_surroundings_info
-        });
-
-        // Verify data was actually saved by fetching it back immediately
+        
+        // Verify the data was saved by fetching it back
         console.log('=== VERIFYING SAVED DATA ===');
-        const { data: verificationData, error: verificationError } = await supabase
-          .from('listings')
-          .select('*')
-          .eq('id', savedData.id)
-          .single();
+        const verificationId = listing ? listing.id : (result.data && result.data[0] ? result.data[0].id : null);
+        
+        if (verificationId) {
+          const { data: verificationData, error: verificationError } = await supabase
+            .from('listings')
+            .select('*')
+            .eq('id', verificationId)
+            .single();
 
-        if (verificationError) {
-          console.error('Verification fetch error:', verificationError);
-        } else {
-          console.log('Verification data from database:', verificationData);
-          console.log('Verification - Information blocks:', {
-            work_wifi_info: verificationData.work_wifi_info,
-            community_social_info: verificationData.community_social_info,
-            comfort_living_info: verificationData.comfort_living_info,
-            location_surroundings_info: verificationData.location_surroundings_info
-          });
+          if (verificationError) {
+            console.error('Verification fetch error:', verificationError);
+          } else {
+            console.log('Verification data from database:', verificationData);
+            console.log('Verification - Information blocks:', {
+              work_wifi_info: verificationData.work_wifi_info,
+              community_social_info: verificationData.community_social_info,
+              comfort_living_info: verificationData.comfort_living_info,
+              location_surroundings_info: verificationData.location_surroundings_info
+            });
+          }
         }
 
         toast({
@@ -236,15 +228,12 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
           onClose();
         }, 500);
       } else {
-        console.error('=== NO DATA RETURNED FROM DATABASE ===');
-        throw new Error('No data returned from database operation');
+        console.error('=== OPERATION FAILED ===');
+        throw new Error('Database operation failed - no confirmation of success');
       }
     } catch (error) {
       console.error('=== FORM SUBMISSION ERROR ===');
-      console.error('Error type:', typeof error);
       console.error('Error details:', error);
-      console.error('Error message:', error instanceof Error ? error.message : 'Unknown error');
-      console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
       
       toast({
         title: 'Error saving listing',
