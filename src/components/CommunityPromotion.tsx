@@ -66,7 +66,7 @@ const CommunityPromotion = () => {
           </div>
           
           <div className="text-center">
-            <Button type="submit" className="adventure-button text-lg px-12 py-4">
+            <Button type="submit" className="adventure-button text-lg px-8 py-4 max-w-xs w-full sm:w-auto">
               <MessageCircle className="mr-2" size={20} />
               Join the Community (Free)
             </Button>
