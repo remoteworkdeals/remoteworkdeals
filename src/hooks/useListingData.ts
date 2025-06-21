@@ -1,9 +1,9 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Listing, Review } from '@/types/listing';
 import { useToast } from '@/hooks/use-toast';
 import { ReviewSubmissionData } from '@/components/ReviewForm';
+import { fetchListingWithReviews, calculateAverageRatings, submitListingReview } from '@/services/listingService';
 
 export const useListingData = (listingId: number) => {
   const [listing, setListing] = useState<Listing | null>(null);
@@ -13,76 +13,27 @@ export const useListingData = (listingId: number) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchListing = async () => {
+    const loadListingData = async () => {
       try {
         setLoading(true);
+        setError(null);
         
-        const { data: listingData, error: listingError } = await supabase
-          .from('listings')
-          .select('*')
-          .eq('id', listingId)
-          .eq('status', 'active')
-          .single();
-
-        if (listingError) {
-          console.error('Error fetching listing:', listingError);
-          setError('Listing not found');
+        const result = await fetchListingWithReviews(listingId);
+        
+        if (result.error) {
+          setError(result.error);
+          toast({
+            title: "Error",
+            description: "Failed to load listing data",
+            variant: "destructive",
+          });
           return;
         }
 
-        // Transform the data to match the Listing type, providing defaults for new fields
-        const transformedListing: Listing = {
-          ...listingData,
-          pricing_unit: (listingData as any).pricing_unit || 'night',
-          minimum_stay: (listingData as any).minimum_stay || null,
-          minimum_stay_unit: (listingData as any).minimum_stay_unit || 'nights'
-        };
-
-        setListing(transformedListing);
-
-        // Fetch reviews for this listing
-        const { data: reviewsData, error: reviewsError } = await supabase
-          .from('reviews')
-          .select('*')
-          .eq('listing_id', listingId)
-          .order('created_at', { ascending: false });
-
-        if (reviewsError) {
-          console.error('Error fetching reviews:', reviewsError);
-        } else {
-          console.log('Fetched reviews:', reviewsData);
-          setReviews(reviewsData || []);
-          
-          // Update listing rating and review count based on reviews
-          if (reviewsData && reviewsData.length > 0) {
-            const overallRatings = reviewsData
-              .map(r => r.overall_rating)
-              .filter(rating => rating !== null) as number[];
-            
-            if (overallRatings.length > 0) {
-              const averageRating = overallRatings.reduce((sum, rating) => sum + rating, 0) / overallRatings.length;
-              
-              // Update the listing in the database with calculated values
-              await supabase
-                .from('listings')
-                .update({ 
-                  rating: Number(averageRating.toFixed(1)), 
-                  review_count: reviewsData.length 
-                })
-                .eq('id', listingId);
-
-              // Update local state
-              setListing(prev => prev ? { 
-                ...prev, 
-                rating: Number(averageRating.toFixed(1)), 
-                review_count: reviewsData.length 
-              } : null);
-            }
-          }
-        }
-
+        setListing(result.listing);
+        setReviews(result.reviews);
       } catch (err) {
-        console.error('Unexpected error:', err);
+        console.error('Unexpected error loading listing:', err);
         setError('An unexpected error occurred');
         toast({
           title: "Error",
@@ -95,192 +46,31 @@ export const useListingData = (listingId: number) => {
     };
 
     if (listingId) {
-      fetchListing();
+      loadListingData();
     }
   }, [listingId, toast]);
 
-  const calculateAverageRatings = () => {
-    console.log('Calculating average ratings from', reviews.length, 'reviews');
+  const averageRatings = calculateAverageRatings(reviews);
+
+  const submitReview = async (reviewData: ReviewSubmissionData): Promise<boolean> => {
+    const result = await submitListingReview(listingId, reviewData);
     
-    if (reviews.length === 0) {
-      return {
-        overall: 0,
-        social: 0,
-        work: 0,
-        surroundings: 0,
-        facilities: 0,
-        price: 0
-      };
-    }
-
-    const validReviews = reviews.filter(review => 
-      review.social_rating && review.work_rating && 
-      review.surroundings_rating && review.facilities_rating && 
-      review.price_rating
-    );
-
-    const overallRatings = reviews
-      .map(r => r.overall_rating)
-      .filter(rating => rating !== null) as number[];
-
-    console.log('Valid reviews for detailed ratings:', validReviews.length);
-    console.log('Overall ratings:', overallRatings);
-
-    if (validReviews.length === 0 && overallRatings.length === 0) {
-      return {
-        overall: 0,
-        social: 0,
-        work: 0,
-        surroundings: 0,
-        facilities: 0,
-        price: 0
-      };
-    }
-
-    const result = {
-      overall: overallRatings.length > 0 ? overallRatings.reduce((sum, r) => sum + r, 0) / overallRatings.length : 0,
-      social: validReviews.length > 0 ? validReviews.reduce((sum, r) => sum + (r.social_rating || 0), 0) / validReviews.length : 0,
-      work: validReviews.length > 0 ? validReviews.reduce((sum, r) => sum + (r.work_rating || 0), 0) / validReviews.length : 0,
-      surroundings: validReviews.length > 0 ? validReviews.reduce((sum, r) => sum + (r.surroundings_rating || 0), 0) / validReviews.length : 0,
-      facilities: validReviews.length > 0 ? validReviews.reduce((sum, r) => sum + (r.facilities_rating || 0), 0) / validReviews.length : 0,
-      price: validReviews.length > 0 ? validReviews.reduce((sum, r) => sum + (r.price_rating || 0), 0) / validReviews.length : 0
-    };
-
-    console.log('Calculated average ratings:', result);
-    return result;
-  };
-
-  const submitReview = async (reviewData: ReviewSubmissionData) => {
-    try {
-      console.log('=== REVIEW SUBMISSION DEBUG ===');
-      console.log('Attempting to submit review:', reviewData);
-      console.log('Target listing ID:', listingId);
-      
-      // First, verify the listing exists
-      const { data: listingCheck, error: listingCheckError } = await supabase
-        .from('listings')
-        .select('id, title')
-        .eq('id', listingId)
-        .single();
-        
-      if (listingCheckError) {
-        console.error('Listing verification failed:', listingCheckError);
-        toast({
-          title: "Error",
-          description: "Invalid listing. Please refresh and try again.",
-          variant: "destructive",
-        });
-        return false;
+    if (result.success) {
+      // Refresh data after successful submission
+      setReviews(result.updatedReviews || []);
+      if (result.updatedListing) {
+        setListing(result.updatedListing);
       }
       
-      console.log('Listing verified:', listingCheck);
-      
-      // Generate a valid UUID for anonymous users
-      const generateAnonymousUUID = () => {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-          const r = Math.random() * 16 | 0;
-          const v = c == 'x' ? r : (r & 0x3 | 0x8);
-          return v.toString(16);
-        });
-      };
-
-      const anonymousUserId = generateAnonymousUUID();
-      console.log('Generated anonymous user ID:', anonymousUserId);
-
-      const reviewPayload = {
-        listing_id: listingId,
-        user_id: anonymousUserId,
-        reviewer_name: reviewData.name || 'Anonymous nomad',
-        review_text: reviewData.review,
-        overall_rating: reviewData.overall,
-        social_rating: reviewData.social,
-        work_rating: reviewData.work,
-        surroundings_rating: reviewData.surroundings,
-        facilities_rating: reviewData.facilities,
-        price_rating: reviewData.price,
-        social_notes: reviewData.socialNotes || null,
-        work_notes: reviewData.workNotes || null,
-        surroundings_notes: reviewData.surroundingsNotes || null,
-        facilities_notes: reviewData.facilitiesNotes || null,
-        price_notes: reviewData.priceNotes || null
-      };
-
-      console.log('Final review payload:', reviewPayload);
-      console.log('Data types check:');
-      console.log('- listing_id:', typeof reviewPayload.listing_id, reviewPayload.listing_id);
-      console.log('- overall_rating:', typeof reviewPayload.overall_rating, reviewPayload.overall_rating);
-      console.log('- user_id:', typeof reviewPayload.user_id, reviewPayload.user_id);
-
-      const { data, error } = await supabase
-        .from('reviews')
-        .insert(reviewPayload)
-        .select();
-
-      if (error) {
-        console.error('=== SUPABASE ERROR DETAILS ===');
-        console.error('Error code:', error.code);
-        console.error('Error message:', error.message);
-        console.error('Error details:', error.details);
-        console.error('Error hint:', error.hint);
-        console.error('Full error object:', error);
-        
-        toast({
-          title: "Error",
-          description: `Failed to submit review: ${error.message}`,
-          variant: "destructive",
-        });
-        return false;
-      }
-
-      console.log('✅ Review submitted successfully:', data);
-
-      // Refresh reviews and recalculate ratings
-      const { data: updatedReviews } = await supabase
-        .from('reviews')
-        .select('*')
-        .eq('listing_id', listingId)
-        .order('created_at', { ascending: false });
-
-      if (updatedReviews) {
-        console.log('Updated reviews after submission:', updatedReviews);
-        setReviews(updatedReviews);
-        
-        // Recalculate and update listing rating
-        const overallRatings = updatedReviews
-          .map(r => r.overall_rating)
-          .filter(rating => rating !== null) as number[];
-        
-        if (overallRatings.length > 0) {
-          const averageRating = overallRatings.reduce((sum, rating) => sum + rating, 0) / overallRatings.length;
-          
-          await supabase
-            .from('listings')
-            .update({ 
-              rating: Number(averageRating.toFixed(1)), 
-              review_count: updatedReviews.length 
-            })
-            .eq('id', listingId);
-
-          setListing(prev => prev ? { 
-            ...prev, 
-            rating: Number(averageRating.toFixed(1)), 
-            review_count: updatedReviews.length 
-          } : null);
-        }
-      }
-
       toast({
         title: "Success",
         description: "Your review has been submitted!",
       });
-
       return true;
-    } catch (err) {
-      console.error('=== UNEXPECTED ERROR ===');
-      console.error('Unexpected error submitting review:', err);
+    } else {
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: result.error || "Failed to submit review",
         variant: "destructive",
       });
       return false;
@@ -292,7 +82,7 @@ export const useListingData = (listingId: number) => {
     reviews,
     loading,
     error,
-    averageRatings: calculateAverageRatings(),
+    averageRatings,
     submitReview
   };
 };

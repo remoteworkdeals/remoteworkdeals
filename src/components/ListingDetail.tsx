@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { MapPin, Users, Wifi, Star, Heart, MessageCircle, ArrowLeft, ExternalLink, Calendar, Globe, Instagram } from 'lucide-react';
+import { MapPin, Users, Wifi, Heart, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,17 +10,25 @@ import ReviewsSection from './ReviewsSection';
 import ReviewForm from './ReviewForm';
 import LinkedBlogPosts from './LinkedBlogPosts';
 import CommunityPromotion from './CommunityPromotion';
+import { ListingHeader } from './listing/ListingHeader';
+import { BookingCard } from './listing/BookingCard';
+import { RatingBars } from './listing/RatingBars';
 
 interface ListingDetailProps {
   listingId: number;
 }
 
+/**
+ * Main listing detail page component
+ * Displays comprehensive listing information including images, details, ratings, and reviews
+ */
 const ListingDetail = ({ listingId }: ListingDetailProps) => {
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(0);
 
   const { listing, reviews, loading, error, averageRatings, submitReview } = useListingData(listingId);
 
+  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -32,6 +40,7 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
     );
   }
 
+  // Error state
   if (error || !listing) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -46,49 +55,7 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
     );
   }
 
-  const handleGetCode = () => {
-    if (listing.discount_code_url) {
-      window.open(listing.discount_code_url, '_blank');
-    } else {
-      const message = `Hi! I'm interested in getting the discount code for ${listing.title} in ${listing.location}. Can you help me?`;
-      const whatsappUrl = `https://wa.me/1234567890?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
-    }
-  };
-
-  const renderStars = (rating: number) => {
-    return (
-      <div className="flex items-center">
-        {[...Array(5)].map((_, i) => (
-          <Star
-            key={i}
-            size={16}
-            className={i < Math.floor(rating) ? "text-yellow-500 fill-current" : "text-gray-300"}
-          />
-        ))}
-        <span className="ml-2 text-sm text-gray-600">{rating.toFixed(1)}</span>
-      </div>
-    );
-  };
-
-  const renderRatingBar = (category: string, rating: number) => {
-    return (
-      <div className="mb-4">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium text-gray-700 capitalize">{category}</span>
-          <span className="text-sm text-gray-600">{rating.toFixed(1)}</span>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div
-            className="bg-adventure-orange h-2 rounded-full"
-            style={{ width: `${(rating / 5) * 100}%` }}
-          />
-        </div>
-      </div>
-    );
-  };
-
-  // Use featured image first, then fall back to images array
+  // Prepare image gallery
   const displayImages = [];
   if (listing.featured_image) {
     displayImages.push(listing.featured_image);
@@ -96,11 +63,10 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
   if (listing.images) {
     displayImages.push(...listing.images.filter(img => img !== listing.featured_image));
   }
-  
   const images = displayImages.length > 0 ? displayImages : [];
   const amenities = listing.amenities || [];
-  const discountAmount = listing.original_price - (listing.discounted_price || listing.original_price);
 
+  // Information blocks for "What to expect" section
   const informationBlocks = [
     {
       title: 'Work & WiFi',
@@ -141,87 +107,8 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            {listing.discount_percentage && (
-              <Badge className="bg-adventure-orange text-white">
-                -{listing.discount_percentage}%
-              </Badge>
-            )}
-            <Badge className="bg-forest-green text-white">
-              {listing.type}
-            </Badge>
-            {listing.is_seasonal && (
-              <Badge className="bg-blue-500 text-white">
-                <Calendar size={14} className="mr-1" />
-                Seasonal
-              </Badge>
-            )}
-          </div>
-          
-          <h1 className="text-4xl font-serif font-bold text-forest-green mb-4">
-            {listing.title}
-          </h1>
-          
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center text-gray-600">
-              <MapPin size={20} className="mr-2" />
-              <span className="text-lg">{listing.location}, {listing.country}</span>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              {listing.rating && listing.rating > 0 ? (
-                <>
-                  {renderStars(listing.rating)}
-                  <span className="text-sm text-gray-600">({listing.review_count || 0} reviews)</span>
-                </>
-              ) : (
-                <span className="text-sm text-gray-600">No reviews yet</span>
-              )}
-            </div>
-          </div>
-
-          {/* Social Links */}
-          {(listing.website_url || listing.instagram_url) && (
-            <div className="flex items-center gap-4 mb-6">
-              {listing.website_url && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => window.open(listing.website_url!, '_blank')}
-                  className="flex items-center gap-2"
-                >
-                  <Globe size={16} />
-                  Visit Website
-                </Button>
-              )}
-              {listing.instagram_url && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => window.open(listing.instagram_url!, '_blank')}
-                  className="flex items-center gap-2"
-                >
-                  <Instagram size={16} />
-                  Instagram
-                </Button>
-              )}
-            </div>
-          )}
-
-          {listing.is_seasonal && listing.seasonal_start_date && listing.seasonal_end_date && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <div className="flex items-center text-blue-700">
-                <Calendar size={16} className="mr-2" />
-                <span className="font-medium">Seasonal Availability:</span>
-              </div>
-              <p className="text-blue-600 mt-1">
-                {new Date(listing.seasonal_start_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} - {new Date(listing.seasonal_end_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-              </p>
-            </div>
-          )}
-        </div>
+        {/* Header Section */}
+        <ListingHeader listing={listing} />
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Images and Details */}
@@ -315,81 +202,12 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
             )}
 
             {/* Ratings */}
-            <div className="mb-8">
-              <h3 className="text-2xl font-serif font-bold text-forest-green mb-6">Community Ratings</h3>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  {averageRatings.overall > 0 && renderRatingBar('overall experience', averageRatings.overall)}
-                  {renderRatingBar('work & wifi', averageRatings.work)}
-                  {renderRatingBar('community & social', averageRatings.social)}
-                </div>
-                <div>
-                  {renderRatingBar('comfort & living', averageRatings.facilities)}
-                  {renderRatingBar('location & surroundings', averageRatings.surroundings)}
-                  {renderRatingBar('price & value', averageRatings.price)}
-                </div>
-              </div>
-            </div>
+            <RatingBars averageRatings={averageRatings} />
           </div>
 
           {/* Right Column - Booking Card */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-8 card-shadow">
-              <CardContent className="p-6">
-                <div className="text-center mb-6">
-                  <div className="text-3xl font-bold text-forest-green">
-                    Starting from €{listing.discounted_price || listing.original_price}
-                    {listing.discounted_price && (
-                      <span className="text-lg text-gray-500 line-through ml-2">
-                        €{listing.original_price}
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    per {listing.pricing_unit}
-                  </div>
-                  {listing.minimum_stay && (
-                    <div className="text-sm text-gray-600 mt-1">
-                      Minimum stay: {listing.minimum_stay} {listing.minimum_stay_unit}
-                    </div>
-                  )}
-                  {discountAmount > 0 && (
-                    <div className="text-adventure-orange font-semibold mt-2">
-                      Save €{discountAmount}!
-                    </div>
-                  )}
-                </div>
-                
-                <Button 
-                  className="adventure-button w-full mb-4 text-lg py-6 flex items-center justify-center gap-2"
-                  onClick={handleGetCode}
-                >
-                  {listing.discount_code_url ? (
-                    <>
-                      <ExternalLink size={20} />
-                      Get Discount Code
-                    </>
-                  ) : (
-                    <>
-                      <MessageCircle size={20} />
-                      Get Discount Code
-                    </>
-                  )}
-                </Button>
-                
-                <div className="text-sm text-gray-600 text-center bg-gray-50 p-3 rounded-lg">
-                  <p className="font-medium text-gray-700 mb-1">
-                    Receive your discount code directly in your WhatsApp inbox.
-                  </p>
-                  <p className="text-xs">
-                    {listing.discount_code_url 
-                      ? "Click to get your discount code instantly" 
-                      : "Fast response guaranteed within minutes"
-                    }
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <BookingCard listing={listing} />
           </div>
         </div>
 
