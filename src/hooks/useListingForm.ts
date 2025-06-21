@@ -13,11 +13,14 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
   const [country, setCountry] = useState('');
   const [type, setType] = useState<'coliving' | 'coworking' | 'apartment' | 'house'>('coliving');
   const [status, setStatus] = useState<'active' | 'inactive' | 'pending'>('active');
+  const [usp, setUsp] = useState('');
   const [originalPrice, setOriginalPrice] = useState(0);
   const [pricingUnit, setPricingUnit] = useState<'night' | 'month'>('night');
   const [discountedPrice, setDiscountedPrice] = useState<number | null>(null);
   const [discountPercentage, setDiscountPercentage] = useState<number | null>(null);
   const [discountCodeUrl, setDiscountCodeUrl] = useState<string | null>(null);
+  const [discountType, setDiscountType] = useState<'percentage' | 'fixed_amount' | null>(null);
+  const [discountValue, setDiscountValue] = useState<number | null>(null);
   const [minimumStay, setMinimumStay] = useState<number | null>(null);
   const [minimumStayUnit, setMinimumStayUnit] = useState<'nights' | 'weeks' | 'months'>('nights');
   const [capacity, setCapacity] = useState<number | null>(null);
@@ -42,12 +45,6 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
     if (listing) {
       console.log('=== LOADING LISTING DATA ===');
       console.log('Full listing object:', listing);
-      console.log('Information blocks from listing:', {
-        work_wifi_info: listing.work_wifi_info,
-        community_social_info: listing.community_social_info,
-        comfort_living_info: listing.comfort_living_info,
-        location_surroundings_info: listing.location_surroundings_info
-      });
 
       setTitle(listing.title);
       setDescription(listing.description || '');
@@ -55,11 +52,14 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
       setCountry(listing.country);
       setType(listing.type);
       setStatus(listing.status);
+      setUsp(listing.usp || '');
       setOriginalPrice(listing.original_price);
       setPricingUnit(listing.pricing_unit as 'night' | 'month');
       setDiscountedPrice(listing.discounted_price || null);
       setDiscountPercentage(listing.discount_percentage || null);
       setDiscountCodeUrl(listing.discount_code_url || null);
+      setDiscountType(listing.discount_type || null);
+      setDiscountValue(listing.discount_value || null);
       setMinimumStay(listing.minimum_stay || null);
       setMinimumStayUnit(listing.minimum_stay_unit as 'nights' | 'weeks' | 'months' || 'nights');
       setCapacity(listing.capacity || null);
@@ -78,12 +78,6 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
       setComfortLivingInfo(listing.comfort_living_info || '');
       setLocationSurroundingsInfo(listing.location_surroundings_info || '');
       
-      console.log('Form state after loading:', {
-        workWifiInfo: listing.work_wifi_info || '',
-        communitySocialInfo: listing.community_social_info || '',
-        comfortLivingInfo: listing.comfort_living_info || '',
-        locationSurroundingsInfo: listing.location_surroundings_info || ''
-      });
       console.log('=== LISTING DATA LOADED ===');
     }
   }, [listing]);
@@ -95,14 +89,6 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
     console.log('=== FORM SUBMISSION STARTED ===');
     console.log('Current user:', user?.id);
     console.log('Is editing existing listing:', !!listing);
-    console.log('Current form state at submission:', {
-      title,
-      description,
-      workWifiInfo,
-      communitySocialInfo,
-      comfortLivingInfo,
-      locationSurroundingsInfo,
-    });
     
     if (!user?.id) {
       toast({
@@ -122,8 +108,6 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
         location_surroundings_info: locationSurroundingsInfo.trim() || null,
       };
 
-      console.log('Information blocks data prepared:', informationBlocksData);
-
       const listingData = {
         title,
         description: description || null,
@@ -131,11 +115,14 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
         country,
         type,
         status,
+        usp: usp.trim() || null,
         original_price: originalPrice,
         pricing_unit: pricingUnit,
         discounted_price: discountedPrice || null,
         discount_percentage: discountPercentage || null,
         discount_code_url: discountCodeUrl || null,
+        discount_type: discountType || null,
+        discount_value: discountValue || null,
         minimum_stay: minimumStay || null,
         minimum_stay_unit: minimumStayUnit,
         capacity: capacity || null,
@@ -148,7 +135,7 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
         seasonal_end_date: seasonalEndDate || null,
         website_url: websiteUrl || null,
         instagram_url: instagramUrl || null,
-        created_by: user.id, // Always set created_by to current user
+        created_by: user.id,
         ...informationBlocksData
       };
 
@@ -207,13 +194,6 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
 
       if (operationSuccess && savedData) {
         console.log('=== DATABASE OPERATION SUCCESSFUL ===');
-        console.log('Final saved data:', savedData);
-        console.log('Information blocks in saved data:', {
-          work_wifi_info: savedData.work_wifi_info,
-          community_social_info: savedData.community_social_info,
-          comfort_living_info: savedData.comfort_living_info,
-          location_surroundings_info: savedData.location_surroundings_info
-        });
 
         toast({
           title: listing ? 'Listing updated successfully!' : 'Listing created successfully!',
@@ -222,12 +202,11 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
         
         console.log('=== FORM SUBMISSION COMPLETED SUCCESSFULLY ===');
         
-        // Close the form and trigger a refetch
         if (onClose) {
           console.log('Calling onClose to trigger refetch');
           setTimeout(() => {
             onClose();
-          }, 1000); // Small delay to let user see success message
+          }, 1000);
         }
       } else {
         console.error('=== OPERATION FAILED ===');
@@ -264,11 +243,14 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
     country, setCountry,
     type, setType,
     status, setStatus,
+    usp, setUsp,
     originalPrice, setOriginalPrice,
     pricingUnit, setPricingUnit,
     discountedPrice, setDiscountedPrice,
     discountPercentage, setDiscountPercentage,
     discountCodeUrl, setDiscountCodeUrl,
+    discountType, setDiscountType,
+    discountValue, setDiscountValue,
     minimumStay, setMinimumStay,
     minimumStayUnit, setMinimumStayUnit,
     capacity, setCapacity,

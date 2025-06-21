@@ -105,6 +105,8 @@ export type Database = {
           description: string | null
           discount_code_url: string | null
           discount_percentage: number | null
+          discount_type: string | null
+          discount_value: number | null
           discounted_price: number | null
           featured_image: string | null
           id: number
@@ -127,6 +129,7 @@ export type Database = {
           title: string
           type: Database["public"]["Enums"]["listing_type"]
           updated_at: string
+          usp: string | null
           website_url: string | null
           work_wifi_info: string | null
         }
@@ -141,6 +144,8 @@ export type Database = {
           description?: string | null
           discount_code_url?: string | null
           discount_percentage?: number | null
+          discount_type?: string | null
+          discount_value?: number | null
           discounted_price?: number | null
           featured_image?: string | null
           id?: number
@@ -163,6 +168,7 @@ export type Database = {
           title: string
           type?: Database["public"]["Enums"]["listing_type"]
           updated_at?: string
+          usp?: string | null
           website_url?: string | null
           work_wifi_info?: string | null
         }
@@ -177,6 +183,8 @@ export type Database = {
           description?: string | null
           discount_code_url?: string | null
           discount_percentage?: number | null
+          discount_type?: string | null
+          discount_value?: number | null
           discounted_price?: number | null
           featured_image?: string | null
           id?: number
@@ -199,6 +207,7 @@ export type Database = {
           title?: string
           type?: Database["public"]["Enums"]["listing_type"]
           updated_at?: string
+          usp?: string | null
           website_url?: string | null
           work_wifi_info?: string | null
         }

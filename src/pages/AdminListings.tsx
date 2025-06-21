@@ -36,16 +36,6 @@ const AdminListings = () => {
         throw error;
       }
       console.log('Fetched admin listings count:', data?.length);
-      if (data && data.length > 0) {
-        console.log('Sample listing with information blocks:', {
-          id: data[0].id,
-          title: data[0].title,
-          work_wifi_info: data[0].work_wifi_info,
-          community_social_info: data[0].community_social_info,
-          comfort_living_info: data[0].comfort_living_info,
-          location_surroundings_info: data[0].location_surroundings_info
-        });
-      }
       return data as Listing[];
     }
   });
@@ -53,12 +43,6 @@ const AdminListings = () => {
   const handleEdit = (listing: Listing) => {
     console.log('=== EDITING LISTING ===');
     console.log('Editing listing:', listing.id);
-    console.log('Information blocks in listing to edit:', {
-      work_wifi_info: listing.work_wifi_info,
-      community_social_info: listing.community_social_info,
-      comfort_living_info: listing.comfort_living_info,
-      location_surroundings_info: listing.location_surroundings_info
-    });
     setEditingListing(listing);
     setShowForm(true);
   };
@@ -192,6 +176,9 @@ const AdminListings = () => {
                     <div className="flex-1">
                       <CardTitle className="text-xl mb-1">{listing.title}</CardTitle>
                       <p className="text-gray-600">{listing.location}, {listing.country}</p>
+                      {listing.usp && (
+                        <p className="text-sm text-adventure-orange font-medium mt-1">{listing.usp}</p>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-2 mb-2">
@@ -199,9 +186,12 @@ const AdminListings = () => {
                       {listing.status}
                     </Badge>
                     <Badge variant="outline">{listing.type}</Badge>
-                    {listing.discounted_price && listing.discount_percentage && (
+                    {listing.discounted_price && (
                       <Badge variant="destructive">
-                        {listing.discount_percentage}% OFF
+                        {listing.discount_type === 'percentage' 
+                          ? `${listing.discount_value}% OFF`
+                          : `€${listing.discount_value} OFF`
+                        }
                       </Badge>
                     )}
                   </div>

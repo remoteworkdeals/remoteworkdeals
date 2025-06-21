@@ -1,4 +1,3 @@
-
 export interface Listing {
   id: number;
   title: string;
@@ -33,6 +32,9 @@ export interface Listing {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  usp: string | null;
+  discount_type: 'percentage' | 'fixed_amount' | null;
+  discount_value: number | null;
 }
 
 export interface Review {

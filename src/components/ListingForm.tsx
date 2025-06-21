@@ -5,6 +5,7 @@ import { Listing } from '@/types/listing';
 import { useListingForm } from '@/hooks/useListingForm';
 import BasicInformationForm from './forms/BasicInformationForm';
 import PricingForm from './forms/PricingForm';
+import USPForm from './forms/USPForm';
 import StayDetailsForm from './forms/StayDetailsForm';
 import MediaForm from './forms/MediaForm';
 import SeasonalForm from './forms/SeasonalForm';
@@ -26,12 +27,17 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
     type, setType,
     status, setStatus,
     
+    // USP
+    usp, setUsp,
+    
     // Pricing
     originalPrice, setOriginalPrice,
     pricingUnit, setPricingUnit,
     discountedPrice, setDiscountedPrice,
     discountPercentage, setDiscountPercentage,
     discountCodeUrl, setDiscountCodeUrl,
+    discountType, setDiscountType,
+    discountValue, setDiscountValue,
     
     // Stay Details
     minimumStay, setMinimumStay,
@@ -92,6 +98,11 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
           setStatus={setStatus}
         />
 
+        <USPForm
+          usp={usp}
+          setUsp={setUsp}
+        />
+
         <PricingForm
           originalPrice={originalPrice}
           setOriginalPrice={setOriginalPrice}
@@ -103,6 +114,10 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
           setDiscountPercentage={setDiscountPercentage}
           discountCodeUrl={discountCodeUrl}
           setDiscountCodeUrl={setDiscountCodeUrl}
+          discountType={discountType}
+          setDiscountType={setDiscountType}
+          discountValue={discountValue}
+          setDiscountValue={setDiscountValue}
         />
 
         <StayDetailsForm

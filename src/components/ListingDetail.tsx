@@ -18,6 +18,32 @@ interface ListingDetailProps {
   listingId: number;
 }
 
+// Helper function to convert text to bulleted list
+const formatTextAsBullets = (text: string) => {
+  if (!text) return null;
+  
+  // Split by newlines, periods, or bullet points and filter out empty strings
+  const sentences = text
+    .split(/[.\n•]/)
+    .map(sentence => sentence.trim())
+    .filter(sentence => sentence.length > 0);
+  
+  if (sentences.length <= 1) {
+    return <p className="text-gray-600 leading-relaxed">{text}</p>;
+  }
+  
+  return (
+    <ul className="text-gray-600 leading-relaxed space-y-2">
+      {sentences.map((sentence, index) => (
+        <li key={index} className="flex items-start">
+          <div className="w-2 h-2 bg-adventure-orange rounded-full mr-3 mt-2 flex-shrink-0" />
+          <span>{sentence}</span>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
 /**
  * Main listing detail page component
  * Displays comprehensive listing information including images, details, ratings, and reviews
@@ -159,10 +185,12 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
                     <span>{listing.rooms} bedrooms</span>
                   </div>
                 )}
-                <div className="flex items-center">
-                  <Wifi size={20} className="mr-2 text-adventure-orange" />
-                  <span>High-speed WiFi</span>
-                </div>
+                {listing.usp && (
+                  <div className="flex items-center">
+                    <Wifi size={20} className="mr-2 text-adventure-orange" />
+                    <span>{listing.usp}</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -179,11 +207,11 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
                   block.content && (
                     <Card key={index} className="border-l-4 border-l-adventure-orange">
                       <CardContent className="p-6">
-                        <div className="flex items-center mb-3">
+                        <div className="flex items-center mb-4">
                           {block.icon}
                           <h4 className="text-lg font-semibold text-forest-green ml-3">{block.title}</h4>
                         </div>
-                        <p className="text-gray-600 leading-relaxed">{block.content}</p>
+                        {formatTextAsBullets(block.content)}
                       </CardContent>
                     </Card>
                   )
