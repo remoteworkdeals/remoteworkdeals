@@ -7,10 +7,39 @@ import CommunitySection from '@/components/CommunitySection';
 import Testimonials from '@/components/Testimonials';
 import PartnersSection from '@/components/PartnersSection';
 import Footer from '@/components/Footer';
+import SEOHead from '@/components/SEOHead';
 
 const Index = () => {
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "RemoteWork.Deals",
+    "url": "https://remotework.deals",
+    "description": "Discover exclusive deals on coliving spaces worldwide. Perfect for digital nomads, remote workers, and location-independent professionals.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://remotework.deals/blog?search={search_term_string}",
+      "query-input": "required name=search_term_string"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "RemoteWork.Deals",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://remotework.deals/logo.png"
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen">
+      <SEOHead
+        title="RemoteWork.Deals - Find the Best Coliving Spaces & Remote Work Deals"
+        description="Discover exclusive deals on coliving spaces worldwide. Perfect for digital nomads, remote workers, and location-independent professionals."
+        keywords={['coliving deals', 'remote work', 'digital nomad', 'workation', 'co-living spaces', 'remote work housing', 'nomad accommodation']}
+        structuredData={structuredData}
+      />
+      
       <Navigation />
       <Hero />
       <HowItWorks />

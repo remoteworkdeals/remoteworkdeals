@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Clock, User, Calendar, Share2 } from 'lucide-react';
 import { useBlogPost } from '@/hooks/useBlogPosts';
-import { Helmet } from 'react-helmet-async';
+import SEOHead from '@/components/SEOHead';
 
 const BlogPost = () => {
   const { slug } = useParams();
@@ -59,46 +59,49 @@ const BlogPost = () => {
     }
   };
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": blogPost.title,
+    "description": blogPost.excerpt,
+    "image": blogPost.featured_image,
+    "author": {
+      "@type": "Person",
+      "name": blogPost.author
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "RemoteWork.Deals",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://remotework.deals/logo.png"
+      }
+    },
+    "datePublished": blogPost.created_at,
+    "dateModified": blogPost.updated_at,
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://remotework.deals/blog/${blogPost.slug}`
+    },
+    "articleSection": blogPost.category,
+    "keywords": blogPost.category,
+    "wordCount": blogPost.content.split(' ').length
+  };
+
   return (
     <div className="min-h-screen">
-      <Helmet>
-        <title>{blogPost.title} | Nomad Blog</title>
-        <meta name="description" content={blogPost.excerpt || blogPost.content.substring(0, 160)} />
-        <meta property="og:title" content={blogPost.title} />
-        <meta property="og:description" content={blogPost.excerpt || blogPost.content.substring(0, 160)} />
-        <meta property="og:type" content="article" />
-        {blogPost.featured_image && <meta property="og:image" content={blogPost.featured_image} />}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={blogPost.title} />
-        <meta name="twitter:description" content={blogPost.excerpt || blogPost.content.substring(0, 160)} />
-        {blogPost.featured_image && <meta name="twitter:image" content={blogPost.featured_image} />}
-        <link rel="canonical" href={`${window.location.origin}/blog/${blogPost.slug}`} />
-        
-        {/* Enhanced Structured Data */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "BlogPosting",
-            "headline": blogPost.title,
-            "description": blogPost.excerpt,
-            "image": blogPost.featured_image,
-            "author": {
-              "@type": "Person",
-              "name": blogPost.author
-            },
-            "publisher": {
-              "@type": "Organization",
-              "name": "NomadCo"
-            },
-            "datePublished": blogPost.created_at,
-            "dateModified": blogPost.updated_at,
-            "mainEntityOfPage": {
-              "@type": "WebPage",
-              "@id": `${window.location.origin}/blog/${blogPost.slug}`
-            }
-          })}
-        </script>
-      </Helmet>
+      <SEOHead
+        title={`${blogPost.title} | RemoteWork.Deals Blog`}
+        description={blogPost.excerpt || blogPost.content.substring(0, 160)}
+        keywords={[blogPost.category.toLowerCase(), 'remote work', 'digital nomad', 'coliving']}
+        type="article"
+        author={blogPost.author}
+        publishedTime={blogPost.created_at}
+        modifiedTime={blogPost.updated_at}
+        image={blogPost.featured_image}
+        canonicalUrl={`https://remotework.deals/blog/${blogPost.slug}`}
+        structuredData={structuredData}
+      />
 
       <Navigation />
       

@@ -1,7 +1,5 @@
-
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import { useBlogPosts } from '@/hooks/useBlogPosts';
@@ -11,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, User, MapPin, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import SEOHead from '@/components/SEOHead';
 
 const Blog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -71,12 +70,68 @@ const Blog = () => {
   const hasResults = filteredBlogPosts.length > 0 || filteredListings.length > 0;
   const isSearching = Boolean(searchQuery);
 
+  // SEO data based on search or category
+  const getSEOData = () => {
+    if (isSearching) {
+      return {
+        title: `Search: ${searchQuery} - RemoteWork.Deals Blog`,
+        description: `Search results for "${searchQuery}" - Find blog posts and coliving listings about remote work and digital nomad lifestyle.`,
+        keywords: ['blog search', 'remote work', searchQuery, 'digital nomad', 'coliving']
+      };
+    }
+    
+    if (selectedCategory !== 'All') {
+      return {
+        title: `${selectedCategory} - Remote Work Blog | RemoteWork.Deals`,
+        description: `Discover ${selectedCategory.toLowerCase()} articles about remote work, digital nomad lifestyle, and coliving spaces.`,
+        keywords: [selectedCategory.toLowerCase(), 'remote work blog', 'digital nomad', 'coliving guides']
+      };
+    }
+    
+    return {
+      title: 'Remote Work Blog - Digital Nomad Guides & Coliving Tips | RemoteWork.Deals',
+      description: 'Discover the latest insights on remote work, coliving spaces, and digital nomad lifestyle. Expert guides, reviews, and tips for location-independent professionals.',
+      keywords: ['remote work blog', 'digital nomad guides', 'coliving tips', 'remote work lifestyle', 'nomad community', 'workation guides']
+    };
+  };
+
+  const seoData = getSEOData();
+  
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "RemoteWork.Deals Blog",
+    "description": "Expert insights on remote work, digital nomad lifestyle, and coliving spaces",
+    "url": "https://remotework.deals/blog",
+    "publisher": {
+      "@type": "Organization",
+      "name": "RemoteWork.Deals",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://remotework.deals/logo.png"
+      }
+    },
+    "blogPost": filteredBlogPosts.slice(0, 10).map(post => ({
+      "@type": "BlogPosting",
+      "headline": post.title,
+      "description": post.excerpt,
+      "url": `https://remotework.deals/blog/${post.slug}`,
+      "datePublished": post.created_at,
+      "dateModified": post.updated_at,
+      "author": {
+        "@type": "Person",
+        "name": post.author
+      },
+      "image": post.featured_image
+    }))
+  };
+
   return (
     <>
-      <Helmet>
-        <title>{isSearching ? `Search: ${searchQuery}` : 'Blog'} - RemoteWork.Deals</title>
-        <meta name="description" content={isSearching ? `Search results for "${searchQuery}"` : "Discover the latest insights on remote work, coliving spaces, and digital nomad lifestyle."} />
-      </Helmet>
+      <SEOHead
+        {...seoData}
+        structuredData={structuredData}
+      />
 
       <div className="min-h-screen bg-white">
         <Navigation />
