@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +11,7 @@ import NewListingPricingForm from '@/components/admin/NewListingPricingForm';
 import NewListingMediaForm from '@/components/admin/NewListingMediaForm';
 import NewListingDetailsForm from '@/components/admin/NewListingDetailsForm';
 import NewListingContactForm from '@/components/admin/NewListingContactForm';
+import SeasonalForm from '@/components/forms/SeasonalForm';
 
 const AdminAddListing = () => {
   const navigate = useNavigate();
@@ -50,11 +50,16 @@ const AdminAddListing = () => {
   const [images, setImages] = useState<string[]>([]);
   const [amenities, setAmenities] = useState<string[]>([]);
   
+  // Seasonal
+  const [isSeasonal, setIsSeasonal] = useState(false);
+  const [seasonalStartDate, setSeasonalStartDate] = useState<string | null>(null);
+  const [seasonalEndDate, setSeasonalEndDate] = useState<string | null>(null);
+  
   // Contact
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [instagramUrl, setInstagramUrl] = useState('');
   const [discountCodeUrl, setDiscountCodeUrl] = useState('');
-  
+
   // Calculate discounted price
   const calculateDiscountedPrice = () => {
     if (discountValue <= 0) return originalPrice;
@@ -116,6 +121,9 @@ const AdminAddListing = () => {
         featured_image: featuredImage || null,
         images: images.length > 0 ? images : null,
         amenities: amenities.length > 0 ? amenities : null,
+        is_seasonal: isSeasonal,
+        seasonal_start_date: seasonalStartDate,
+        seasonal_end_date: seasonalEndDate,
         website_url: websiteUrl.trim() || null,
         instagram_url: instagramUrl.trim() || null,
         discount_code_url: discountCodeUrl.trim() || null,
@@ -211,6 +219,15 @@ const AdminAddListing = () => {
           setComfortLivingInfo={setComfortLivingInfo}
           locationSurroundingsInfo={locationSurroundingsInfo}
           setLocationSurroundingsInfo={setLocationSurroundingsInfo}
+        />
+
+        <SeasonalForm
+          isSeasonal={isSeasonal}
+          setIsSeasonal={setIsSeasonal}
+          seasonalStartDate={seasonalStartDate}
+          setSeasonalStartDate={setSeasonalStartDate}
+          seasonalEndDate={seasonalEndDate}
+          setSeasonalEndDate={setSeasonalEndDate}
         />
 
         <NewListingMediaForm
