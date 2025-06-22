@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,9 +12,10 @@ import ListingForm from '@/components/ListingForm';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const AdminListings = () => {
-  const [showForm, setShowForm] = useState(false);
+  const navigate = useNavigate();
   const [editingListing, setEditingListing] = useState<Listing | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
@@ -43,7 +45,6 @@ const AdminListings = () => {
     console.log('=== EDITING LISTING ===');
     console.log('Editing listing:', listing.id);
     setEditingListing(listing);
-    setShowForm(true);
   };
 
   const handleDelete = async (id: number) => {
@@ -62,7 +63,6 @@ const AdminListings = () => {
   const handleFormClose = async () => {
     console.log('=== FORM CLOSING ===');
     console.log('Form is being closed, invalidating cache and refetching');
-    setShowForm(false);
     setEditingListing(null);
     
     await handleRefresh();
@@ -97,17 +97,16 @@ const AdminListings = () => {
   };
 
   const handleAddNewListing = () => {
-    console.log('=== ADDING NEW LISTING ===');
-    console.log('Setting up new listing form');
-    setEditingListing(null);
-    setShowForm(true);
+    console.log('=== NAVIGATING TO ADD NEW LISTING ===');
+    navigate('/admin/listings/new');
   };
 
   if (isLoading) {
     return <div className="p-8">Loading...</div>;
   }
 
-  if (showForm) {
+  // Show edit form if editing a listing
+  if (editingListing) {
     return (
       <ErrorBoundary
         fallback={
@@ -117,7 +116,7 @@ const AdminListings = () => {
               <p className="text-red-600 mb-4">
                 There was an error loading the listing form. Please try again.
               </p>
-              <Button onClick={() => setShowForm(false)} variant="outline">
+              <Button onClick={() => setEditingListing(null)} variant="outline">
                 Back to Listings
               </Button>
             </div>
@@ -275,7 +274,7 @@ const AdminListings = () => {
       {listings?.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500 mb-4">No listings yet</p>
-          <Button onClick={() => setShowForm(true)} className="adventure-button">
+          <Button onClick={handleAddNewListing} className="adventure-button">
             <Plus className="mr-2 h-4 w-4" />
             Create your first listing
           </Button>
