@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { MapPin, Users, Wifi, Heart, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -115,6 +114,13 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
       icon: <MapPin className="w-6 h-6 text-adventure-orange" />
     }
   ];
+
+  // Handle review submission from ReviewForm
+  const handleReviewSubmitted = (updatedReviews: any[], updatedListing?: any) => {
+    // The useListingData hook will automatically refresh the data
+    // when submitReview is called, so we don't need to do anything here
+    console.log('Review submitted successfully', { updatedReviews, updatedListing });
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -252,7 +258,11 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
         {/* Reviews Section */}
         <div className="mt-16 space-y-8">
           <ReviewsSection reviews={reviews} />
-          <ReviewForm onSubmit={submitReview} />
+          <ReviewForm 
+            listingId={listingId}
+            listingTitle={listing.title}
+            onReviewSubmitted={handleReviewSubmitted}
+          />
         </div>
 
         {/* Community Promotion */}

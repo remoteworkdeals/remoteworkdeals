@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { StarRating } from './listing/StarRating';
+import { InteractiveStarRating } from './listing/InteractiveStarRating';
 import { submitListingReview } from '@/services/listingService';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -201,7 +201,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Overall Experience *
                 </label>
-                <StarRating 
+                <InteractiveStarRating 
                   rating={overall} 
                   onRatingChange={setOverall}
                   size="lg"
@@ -212,7 +212,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Social & Community *
                 </label>
-                <StarRating 
+                <InteractiveStarRating 
                   rating={social} 
                   onRatingChange={setSocial}
                   size="lg"
@@ -230,7 +230,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Work & WiFi *
                 </label>
-                <StarRating 
+                <InteractiveStarRating 
                   rating={work} 
                   onRatingChange={setWork}
                   size="lg"
@@ -248,7 +248,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Location & Surroundings *
                 </label>
-                <StarRating 
+                <InteractiveStarRating 
                   rating={surroundings} 
                   onRatingChange={setSurroundings}
                   size="lg"
@@ -266,7 +266,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Facilities & Comfort *
                 </label>
-                <StarRating 
+                <InteractiveStarRating 
                   rating={facilities} 
                   onRatingChange={setFacilities}
                   size="lg"
@@ -284,7 +284,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Price & Value *
                 </label>
-                <StarRating 
+                <InteractiveStarRating 
                   rating={price} 
                   onRatingChange={setPrice}
                   size="lg"
