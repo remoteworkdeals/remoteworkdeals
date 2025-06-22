@@ -40,7 +40,7 @@ const PricingForm = ({
 }: PricingFormProps) => {
   // Auto-calculate discounted price based on discount type and value
   useEffect(() => {
-    if (originalPrice && discountType && discountValue) {
+    if (originalPrice && discountType && discountValue && discountValue > 0) {
       let calculatedPrice: number;
       
       if (discountType === 'percentage') {
@@ -52,10 +52,25 @@ const PricingForm = ({
       // Ensure price doesn't go below 0
       calculatedPrice = Math.max(0, Math.round(calculatedPrice));
       setDiscountedPrice(calculatedPrice);
-    } else if (!discountValue) {
+    } else if (!discountValue || discountValue <= 0) {
       setDiscountedPrice(null);
     }
   }, [originalPrice, discountType, discountValue, setDiscountedPrice]);
+
+  const handleOriginalPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setOriginalPrice(value ? Number(value) : 0);
+  };
+
+  const handleDiscountValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setDiscountValue(value ? Number(value) : null);
+  };
+
+  const handleDiscountedPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setDiscountedPrice(value ? Number(value) : null);
+  };
 
   return (
     <Card>
@@ -65,12 +80,13 @@ const PricingForm = ({
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label htmlFor="originalPrice">Original Price</Label>
+            <Label htmlFor="originalPrice">Original Price *</Label>
             <Input
               id="originalPrice"
               type="number"
-              value={String(originalPrice || 0)}
-              onChange={(e) => setOriginalPrice(Number(e.target.value) || 0)}
+              value={originalPrice || ''}
+              onChange={handleOriginalPriceChange}
+              placeholder="0"
               required
             />
           </div>
@@ -93,7 +109,14 @@ const PricingForm = ({
             <Label htmlFor="discountType">Discount Type</Label>
             <Select 
               value={discountType || ''} 
-              onValueChange={(value) => setDiscountType(value === '' ? null : value as 'percentage' | 'fixed_amount')}
+              onValueChange={(value) => {
+                const newType = value === '' ? null : value as 'percentage' | 'fixed_amount';
+                setDiscountType(newType);
+                if (!newType) {
+                  setDiscountValue(null);
+                  setDiscountedPrice(null);
+                }
+              }}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select discount type" />
@@ -115,9 +138,11 @@ const PricingForm = ({
                 <Input
                   id="discountValue"
                   type="number"
-                  value={discountValue !== null ? String(discountValue) : ''}
-                  onChange={(e) => setDiscountValue(e.target.value ? Number(e.target.value) : null)}
+                  value={discountValue !== null ? discountValue : ''}
+                  onChange={handleDiscountValueChange}
                   placeholder={discountType === 'percentage' ? 'e.g., 20' : 'e.g., 100'}
+                  min="0"
+                  max={discountType === 'percentage' ? "100" : undefined}
                 />
               </div>
               <div>
@@ -125,9 +150,10 @@ const PricingForm = ({
                 <Input
                   id="discountedPrice"
                   type="number"
-                  value={discountedPrice !== null ? String(discountedPrice) : ''}
-                  onChange={(e) => setDiscountedPrice(e.target.value ? Number(e.target.value) : null)}
+                  value={discountedPrice !== null ? discountedPrice : ''}
+                  onChange={handleDiscountedPriceChange}
                   className="bg-gray-50"
+                  placeholder="0"
                 />
                 <p className="text-xs text-gray-500 mt-1">Auto-calculated, but can be manually overridden</p>
               </div>
@@ -135,12 +161,14 @@ const PricingForm = ({
           )}
         </div>
 
-        {/* Legacy fields for backward compatibility */}
+        {/* Legacy field for backward compatibility - hidden but maintained */}
         <div className="hidden">
           <Input
             type="number"
-            value={discountPercentage !== null ? String(discountPercentage) : ''}
+            value={discountPercentage !== null ? discountPercentage : ''}
             onChange={(e) => setDiscountPercentage(e.target.value ? Number(e.target.value) : null)}
+            tabIndex={-1}
+            aria-hidden="true"
           />
         </div>
 
@@ -151,7 +179,11 @@ const PricingForm = ({
             type="url"
             value={discountCodeUrl || ''}
             onChange={(e) => setDiscountCodeUrl(e.target.value || null)}
+            placeholder="https://booking-site.com/discount-link"
           />
+          <p className="text-xs text-gray-500 mt-1">
+            Leave empty to use WhatsApp contact instead
+          </p>
         </div>
       </CardContent>
     </Card>

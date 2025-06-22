@@ -62,7 +62,7 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
       setDiscountPercentage(listing.discount_percentage || null);
       setDiscountCodeUrl(listing.discount_code_url || null);
       setDiscountType((listing.discount_type as 'percentage' | 'fixed_amount') || null);
-      setDiscountValue(listing.discount_value || null);
+      setDiscountValue(listing.discount_value ? Number(listing.discount_value) : null);
       setMinimumStay(listing.minimum_stay || null);
       setMinimumStayUnit((listing.minimum_stay_unit as 'nights' | 'weeks' | 'months') || 'nights');
       setCapacity(listing.capacity || null);
@@ -82,6 +82,13 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
       setLocationSurroundingsInfo(listing.location_surroundings_info || '');
     } else {
       console.log('Initializing new listing form');
+      // Set reasonable defaults for new listings
+      setOriginalPrice(0);
+      setPricingUnit('night');
+      setDiscountType(null);
+      setDiscountValue(null);
+      setDiscountedPrice(null);
+      setDiscountPercentage(null);
     }
   }, [listing]);
 
@@ -110,17 +117,17 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
         type: type || 'coliving',
         status: status || 'active',
         usp: usp?.trim() || null,
-        original_price: originalPrice || 0,
+        original_price: Math.max(0, originalPrice || 0),
         pricing_unit: pricingUnit || 'night',
-        discounted_price: discountedPrice,
-        discount_percentage: discountPercentage,
+        discounted_price: discountedPrice && discountedPrice > 0 ? discountedPrice : null,
+        discount_percentage: discountPercentage && discountPercentage > 0 ? discountPercentage : null,
         discount_code_url: discountCodeUrl?.trim() || null,
-        discount_type: discountType,
-        discount_value: discountValue,
-        minimum_stay: minimumStay,
+        discount_type: discountType || null,
+        discount_value: discountValue && discountValue > 0 ? discountValue : null,
+        minimum_stay: minimumStay && minimumStay > 0 ? minimumStay : null,
         minimum_stay_unit: minimumStayUnit || 'nights',
-        capacity: capacity,
-        rooms: rooms,
+        capacity: capacity && capacity > 0 ? capacity : null,
+        rooms: rooms && rooms > 0 ? rooms : null,
         amenities: amenities.length > 0 ? amenities : null,
         images: images.length > 0 ? images : null,
         featured_image: featuredImage?.trim() || null,
