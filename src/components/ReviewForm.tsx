@@ -1,14 +1,15 @@
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-
-interface ReviewFormProps {
-  onSubmit: (reviewData: ReviewSubmissionData) => Promise<boolean>;
-}
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { StarRating } from './listing/StarRating';
+import { submitListingReview } from '@/services/listingService';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export interface ReviewSubmissionData {
   name: string;
@@ -19,169 +20,292 @@ export interface ReviewSubmissionData {
   surroundings: number;
   facilities: number;
   price: number;
-  socialNotes: string;
-  workNotes: string;
-  surroundingsNotes: string;
-  facilitiesNotes: string;
-  priceNotes: string;
+  socialNotes?: string;
+  workNotes?: string;
+  surroundingsNotes?: string;
+  facilitiesNotes?: string;
+  priceNotes?: string;
 }
 
-/**
- * Mobile-optimized review form component
- * Allows users to submit detailed reviews with category ratings
- */
-const ReviewForm = ({ onSubmit }: ReviewFormProps) => {
-  const [reviewData, setReviewData] = useState<ReviewSubmissionData>({
-    name: '',
-    review: '',
-    overall: 5,
-    social: 5,
-    work: 5,
-    surroundings: 5,
-    facilities: 5,
-    price: 5,
-    socialNotes: '',
-    workNotes: '',
-    surroundingsNotes: '',
-    facilitiesNotes: '',
-    priceNotes: ''
-  });
+interface ReviewFormProps {
+  listingId: number;
+  listingTitle: string;
+  onReviewSubmitted: (updatedReviews: any[], updatedListing?: any) => void;
+}
+
+const ReviewForm: React.FC<ReviewFormProps> = ({ 
+  listingId, 
+  listingTitle, 
+  onReviewSubmitted 
+}) => {
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [name, setName] = useState('');
+  const [review, setReview] = useState('');
+  const [overall, setOverall] = useState(0);
+  const [social, setSocial] = useState(0);
+  const [work, setWork] = useState(0);
+  const [surroundings, setSurroundings] = useState(0);
+  const [facilities, setFacilities] = useState(0);
+  const [price, setPrice] = useState(0);
+  const [socialNotes, setSocialNotes] = useState('');
+  const [workNotes, setWorkNotes] = useState('');
+  const [surroundingsNotes, setSurroundingsNotes] = useState('');
+  const [facilitiesNotes, setFacilitiesNotes] = useState('');
+  const [priceNotes, setPriceNotes] = useState('');
+
+  // If user is not authenticated, show login prompt
+  if (!user) {
+    return (
+      <Card className="w-full max-w-2xl mx-auto">
+        <CardHeader>
+          <CardTitle className="text-xl font-serif">Write a Review</CardTitle>
+        </CardHeader>
+        <CardContent className="text-center py-8">
+          <p className="text-gray-600 mb-4">
+            You need to be logged in to write a review for {listingTitle}.
+          </p>
+          <Button 
+            onClick={() => navigate('/auth')} 
+            className="adventure-button"
+          >
+            Sign In to Write Review
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await onSubmit(reviewData);
     
-    if (success) {
-      setReviewData({
-        name: '',
-        review: '',
-        overall: 5,
-        social: 5,
-        work: 5,
-        surroundings: 5,
-        facilities: 5,
-        price: 5,
-        socialNotes: '',
-        workNotes: '',
-        surroundingsNotes: '',
-        facilitiesNotes: '',
-        priceNotes: ''
+    if (!overall || !social || !work || !surroundings || !facilities || !price) {
+      toast({
+        title: 'Missing ratings',
+        description: 'Please provide ratings for all categories.',
+        variant: 'destructive',
       });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const reviewData: ReviewSubmissionData = {
+      name: name.trim() || 'Anonymous nomad',
+      review: review.trim(),
+      overall,
+      social,
+      work,
+      surroundings,
+      facilities,
+      price,
+      socialNotes: socialNotes.trim() || undefined,
+      workNotes: workNotes.trim() || undefined,
+      surroundingsNotes: surroundingsNotes.trim() || undefined,
+      facilitiesNotes: facilitiesNotes.trim() || undefined,
+      priceNotes: priceNotes.trim() || undefined,
+    };
+
+    try {
+      const result = await submitListingReview(listingId, reviewData);
+      
+      if (result.success) {
+        toast({
+          title: 'Review submitted successfully!',
+          description: 'Thank you for sharing your experience.',
+        });
+        
+        // Reset form
+        setName('');
+        setReview('');
+        setOverall(0);
+        setSocial(0);
+        setWork(0);
+        setSurroundings(0);
+        setFacilities(0);
+        setPrice(0);
+        setSocialNotes('');
+        setWorkNotes('');
+        setSurroundingsNotes('');
+        setFacilitiesNotes('');
+        setPriceNotes('');
+        
+        // Notify parent component
+        onReviewSubmitted(result.updatedReviews, result.updatedListing);
+      } else {
+        toast({
+          title: 'Failed to submit review',
+          description: result.error || 'Please try again.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      toast({
+        title: 'Error submitting review',
+        description: 'An unexpected error occurred. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const categories = [
-    { key: 'work', label: 'Work & WiFi', description: 'Internet quality and work environment' },
-    { key: 'social', label: 'Community & Social', description: 'Social atmosphere and community' },
-    { key: 'facilities', label: 'Comfort & Living', description: 'Living comfort and facilities' },
-    { key: 'surroundings', label: 'Location & Surroundings', description: 'Location and neighborhood' },
-    { key: 'price', label: 'Price & Value', description: 'Value for money' }
-  ];
-
   return (
-    <Card>
+    <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
-        <CardTitle className="text-xl sm:text-2xl font-serif text-forest-green">Leave a Review</CardTitle>
+        <CardTitle className="text-xl font-serif">Share Your Experience</CardTitle>
+        <p className="text-gray-600">Help other digital nomads by reviewing {listingTitle}</p>
+        <Badge variant="outline" className="w-fit">
+          Signed in as: {user.email}
+        </Badge>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Personal Info - Mobile optimized */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            <div>
-              <Label htmlFor="name" className="text-sm sm:text-base">Your Name (optional)</Label>
-              <Input
-                id="name"
-                value={reviewData.name}
-                onChange={(e) => setReviewData({...reviewData, name: e.target.value})}
-                placeholder="Anonymous nomad"
-                className="mt-1 h-11 sm:h-12"
-              />
-            </div>
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+              Your Name (optional)
+            </label>
+            <Input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="How should we display your name?"
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="review" className="block text-sm font-medium text-gray-700 mb-2">
+              Your Review
+            </label>
+            <Textarea
+              id="review"
+              value={review}
+              onChange={(e) => setReview(e.target.value)}
+              placeholder="Share your experience staying at this coliving space..."
+              rows={4}
+              className="w-full"
+            />
+          </div>
+
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Rate Your Experience</h3>
             
-            <div className="sm:col-span-1">
-              <Label className="text-sm sm:text-base">Overall Experience</Label>
-              <Textarea
-                value={reviewData.review}
-                onChange={(e) => setReviewData({...reviewData, review: e.target.value})}
-                placeholder="Share your overall experience with fellow nomads..."
-                className="mt-1 min-h-[80px] sm:min-h-[100px]"
-              />
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Overall Experience *
+                </label>
+                <StarRating 
+                  rating={overall} 
+                  onRatingChange={setOverall}
+                  size="lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Social & Community *
+                </label>
+                <StarRating 
+                  rating={social} 
+                  onRatingChange={setSocial}
+                  size="lg"
+                />
+                <Input
+                  type="text"
+                  value={socialNotes}
+                  onChange={(e) => setSocialNotes(e.target.value)}
+                  placeholder="Quick note about the community..."
+                  className="mt-2 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Work & WiFi *
+                </label>
+                <StarRating 
+                  rating={work} 
+                  onRatingChange={setWork}
+                  size="lg"
+                />
+                <Input
+                  type="text"
+                  value={workNotes}
+                  onChange={(e) => setWorkNotes(e.target.value)}
+                  placeholder="Quick note about work setup..."
+                  className="mt-2 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Location & Surroundings *
+                </label>
+                <StarRating 
+                  rating={surroundings} 
+                  onRatingChange={setSurroundings}
+                  size="lg"
+                />
+                <Input
+                  type="text"
+                  value={surroundingsNotes}
+                  onChange={(e) => setSurroundingsNotes(e.target.value)}
+                  placeholder="Quick note about the location..."
+                  className="mt-2 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Facilities & Comfort *
+                </label>
+                <StarRating 
+                  rating={facilities} 
+                  onRatingChange={setFacilities}
+                  size="lg"
+                />
+                <Input
+                  type="text"
+                  value={facilitiesNotes}
+                  onChange={(e) => setFacilitiesNotes(e.target.value)}
+                  placeholder="Quick note about facilities..."
+                  className="mt-2 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Price & Value *
+                </label>
+                <StarRating 
+                  rating={price} 
+                  onRatingChange={setPrice}
+                  size="lg"
+                />
+                <Input
+                  type="text"
+                  value={priceNotes}
+                  onChange={(e) => setPriceNotes(e.target.value)}
+                  placeholder="Quick note about value for money..."
+                  className="mt-2 text-sm"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Overall Experience Rating - Mandatory */}
-          <div className="border rounded-lg p-4 sm:p-6 bg-blue-50">
-            <Label className="text-base sm:text-lg font-semibold mb-4 block text-blue-900">
-              Overall Experience Rating (Required) *
-            </Label>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-              <Label className="text-sm font-medium">Rate your overall experience:</Label>
-              <select
-                value={reviewData.overall}
-                onChange={(e) => setReviewData({
-                  ...reviewData,
-                  overall: parseInt(e.target.value)
-                })}
-                className="p-3 sm:p-2 border rounded-md bg-white text-base sm:text-sm w-full sm:w-auto"
-                required
-              >
-                {[1,2,3,4,5].map(num => (
-                  <option key={num} value={num}>{num} star{num > 1 ? 's' : ''}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-          
-          {/* Category Ratings - Mobile optimized */}
-          <div>
-            <Label className="text-base sm:text-lg font-semibold mb-4 block">Rate each category (1-5 stars)</Label>
-            <div className="space-y-4 sm:space-y-6">
-              {categories.map((category) => (
-                <div key={category.key} className="border rounded-lg p-4 sm:p-6 bg-gray-50">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                    <div>
-                      <Label className="text-sm sm:text-base font-medium mb-2 block">
-                        {category.label}
-                      </Label>
-                      <p className="text-xs sm:text-sm text-gray-600 mb-3">
-                        {category.description}
-                      </p>
-                      <select
-                        value={reviewData[category.key as keyof ReviewSubmissionData] as number}
-                        onChange={(e) => setReviewData({
-                          ...reviewData,
-                          [category.key]: parseInt(e.target.value)
-                        })}
-                        className="w-full p-3 sm:p-2 border rounded-md text-base sm:text-sm"
-                      >
-                        {[1,2,3,4,5].map(num => (
-                          <option key={num} value={num}>{num} star{num > 1 ? 's' : ''}</option>
-                        ))}
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <Label className="text-sm sm:text-base font-medium mb-2 block">
-                        Additional Notes (optional)
-                      </Label>
-                      <Textarea
-                        value={reviewData[`${category.key}Notes` as keyof ReviewSubmissionData] as string}
-                        onChange={(e) => setReviewData({
-                          ...reviewData,
-                          [`${category.key}Notes`]: e.target.value
-                        })}
-                        placeholder={`Any specific feedback about ${category.label.toLowerCase()}...`}
-                        className="h-16 sm:h-20 text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          
-          <Button type="submit" className="adventure-button w-full sm:w-auto py-3 px-8 text-base">
-            Submit Review
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="adventure-button w-full"
+          >
+            {isSubmitting ? 'Submitting Review...' : 'Submit Review'}
           </Button>
         </form>
       </CardContent>

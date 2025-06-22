@@ -4,17 +4,6 @@ import { Listing, Review } from '@/types/listing';
 import { ReviewSubmissionData } from '@/components/ReviewForm';
 
 /**
- * Generates a valid UUID for anonymous users
- */
-const generateAnonymousUUID = (): string => {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0;
-    const v = c == 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-};
-
-/**
  * Transforms raw listing data to match the Listing type
  */
 const transformListingData = (rawData: any): Listing => {
@@ -171,7 +160,7 @@ export const fetchListingWithReviews = async (listingId: number) => {
 };
 
 /**
- * Submits a new review for a listing
+ * Submits a new review for a listing - now requires authentication
  */
 export const submitListingReview = async (
   listingId: number, 
@@ -181,6 +170,19 @@ export const submitListingReview = async (
     console.log('=== REVIEW SUBMISSION DEBUG ===');
     console.log('Attempting to submit review:', reviewData);
     console.log('Target listing ID:', listingId);
+    
+    // Check if user is authenticated
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError || !user) {
+      console.error('User not authenticated:', userError);
+      return { 
+        success: false, 
+        error: 'You must be logged in to submit a review. Please sign in and try again.' 
+      };
+    }
+
+    console.log('User authenticated:', user.id);
     
     // Verify the listing exists
     const { data: listingCheck, error: listingCheckError } = await supabase
@@ -199,12 +201,24 @@ export const submitListingReview = async (
     
     console.log('Listing verified:', listingCheck);
     
-    const anonymousUserId = generateAnonymousUUID();
-    console.log('Generated anonymous user ID:', anonymousUserId);
+    // Check if user already has a profile (required for foreign key)
+    const { data: profileCheck, error: profileError } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .single();
+    
+    if (profileError || !profileCheck) {
+      console.error('User profile not found:', profileError);
+      return { 
+        success: false, 
+        error: 'User profile not found. Please refresh and try again.' 
+      };
+    }
 
     const reviewPayload = {
       listing_id: listingId,
-      user_id: anonymousUserId,
+      user_id: user.id,
       reviewer_name: reviewData.name || 'Anonymous nomad',
       review_text: reviewData.review,
       overall_rating: reviewData.overall,
