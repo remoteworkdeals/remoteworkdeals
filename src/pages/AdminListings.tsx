@@ -99,17 +99,42 @@ const AdminListings = () => {
     }
   };
 
+  const handleAddNewListing = () => {
+    console.log('=== ADDING NEW LISTING ===');
+    console.log('Setting up new listing form');
+    setEditingListing(null);
+    setShowForm(true);
+  };
+
   if (isLoading) {
     return <div className="p-8">Loading...</div>;
   }
 
   if (showForm) {
-    return (
-      <ListingForm 
-        listing={editingListing} 
-        onClose={handleFormClose}
-      />
-    );
+    // Add error boundary around ListingForm
+    try {
+      return (
+        <ListingForm 
+          listing={editingListing} 
+          onClose={handleFormClose}
+        />
+      );
+    } catch (error) {
+      console.error('ListingForm render error:', error);
+      return (
+        <div className="max-w-4xl mx-auto p-8">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-red-800 mb-2">Error Loading Form</h2>
+            <p className="text-red-600 mb-4">
+              There was an error loading the listing form. Please try again.
+            </p>
+            <Button onClick={() => setShowForm(false)} variant="outline">
+              Back to Listings
+            </Button>
+          </div>
+        </div>
+      );
+    }
   }
 
   return (
@@ -151,7 +176,7 @@ const AdminListings = () => {
             <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
-          <Button onClick={() => setShowForm(true)} className="adventure-button">
+          <Button onClick={handleAddNewListing} className="adventure-button">
             <Plus className="mr-2 h-4 w-4" />
             Add New Listing
           </Button>

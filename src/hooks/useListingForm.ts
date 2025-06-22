@@ -6,7 +6,10 @@ import { Listing } from '@/types/listing';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const useListingForm = (listing?: Listing | null, onClose?: () => void) => {
-  // Initialize all state with safe default values
+  const { toast } = useToast();
+  const { user } = useAuth();
+  
+  // Initialize all state with guaranteed non-null defaults
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -40,83 +43,42 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
   const [locationSurroundingsInfo, setLocationSurroundingsInfo] = useState('');
   const [featured, setFeatured] = useState(false);
 
-  const { toast } = useToast();
-  const { user } = useAuth();
-
+  // Load listing data if editing
   useEffect(() => {
     if (listing) {
-      console.log('=== LOADING LISTING DATA ===');
-      console.log('Full listing object:', listing);
-
-      // Use nullish coalescing to ensure safe fallbacks
-      setTitle(listing.title ?? '');
-      setDescription(listing.description ?? '');
-      setLocation(listing.location ?? '');
-      setCountry(listing.country ?? '');
-      setType(listing.type ?? 'coliving');
-      setStatus(listing.status ?? 'active');
-      setUsp(listing.usp ?? '');
-      setOriginalPrice(listing.original_price ?? 0);
-      setPricingUnit((listing.pricing_unit as 'night' | 'month') ?? 'night');
-      setDiscountedPrice(listing.discounted_price ?? null);
-      setDiscountPercentage(listing.discount_percentage ?? null);
-      setDiscountCodeUrl(listing.discount_code_url ?? null);
-      setDiscountType(listing.discount_type ?? null);
-      setDiscountValue(listing.discount_value ?? null);
-      setMinimumStay(listing.minimum_stay ?? null);
-      setMinimumStayUnit((listing.minimum_stay_unit as 'nights' | 'weeks' | 'months') ?? 'nights');
-      setCapacity(listing.capacity ?? null);
-      setRooms(listing.rooms ?? null);
-      setAmenities(listing.amenities ?? []);
-      setImages(listing.images ?? []);
-      setFeaturedImage(listing.featured_image ?? null);
-      setIsSeasonal(listing.is_seasonal ?? false);
-      setSeasonalStartDate(listing.seasonal_start_date ?? null);
-      setSeasonalEndDate(listing.seasonal_end_date ?? null);
-      setWebsiteUrl(listing.website_url ?? null);
-      setInstagramUrl(listing.instagram_url ?? null);
-      setFeatured(listing.featured ?? false);
+      console.log('Loading listing data for edit:', listing.id);
       
-      setWorkWifiInfo(listing.work_wifi_info ?? '');
-      setCommunitySocialInfo(listing.community_social_info ?? '');
-      setComfortLivingInfo(listing.comfort_living_info ?? '');
-      setLocationSurroundingsInfo(listing.location_surroundings_info ?? '');
-      
-      console.log('=== LISTING DATA LOADED ===');
-    } else {
-      // Reset to defaults for new listing
-      console.log('=== INITIALIZING NEW LISTING FORM ===');
-      setTitle('');
-      setDescription('');
-      setLocation('');
-      setCountry('');
-      setType('coliving');
-      setStatus('active');
-      setUsp('');
-      setOriginalPrice(0);
-      setPricingUnit('night');
-      setDiscountedPrice(null);
-      setDiscountPercentage(null);
-      setDiscountCodeUrl(null);
-      setDiscountType(null);
-      setDiscountValue(null);
-      setMinimumStay(null);
-      setMinimumStayUnit('nights');
-      setCapacity(null);
-      setRooms(null);
-      setAmenities([]);
-      setImages([]);
-      setFeaturedImage(null);
-      setIsSeasonal(false);
-      setSeasonalStartDate(null);
-      setSeasonalEndDate(null);
-      setWebsiteUrl(null);
-      setInstagramUrl(null);
-      setFeatured(false);
-      setWorkWifiInfo('');
-      setCommunitySocialInfo('');
-      setComfortLivingInfo('');
-      setLocationSurroundingsInfo('');
+      setTitle(listing.title || '');
+      setDescription(listing.description || '');
+      setLocation(listing.location || '');
+      setCountry(listing.country || '');
+      setType(listing.type || 'coliving');
+      setStatus(listing.status || 'active');
+      setUsp(listing.usp || '');
+      setOriginalPrice(listing.original_price || 0);
+      setPricingUnit((listing.pricing_unit as 'night' | 'month') || 'night');
+      setDiscountedPrice(listing.discounted_price);
+      setDiscountPercentage(listing.discount_percentage);
+      setDiscountCodeUrl(listing.discount_code_url);
+      setDiscountType(listing.discount_type as 'percentage' | 'fixed_amount' | null);
+      setDiscountValue(listing.discount_value);
+      setMinimumStay(listing.minimum_stay);
+      setMinimumStayUnit((listing.minimum_stay_unit as 'nights' | 'weeks' | 'months') || 'nights');
+      setCapacity(listing.capacity);
+      setRooms(listing.rooms);
+      setAmenities(listing.amenities || []);
+      setImages(listing.images || []);
+      setFeaturedImage(listing.featured_image);
+      setIsSeasonal(listing.is_seasonal || false);
+      setSeasonalStartDate(listing.seasonal_start_date);
+      setSeasonalEndDate(listing.seasonal_end_date);
+      setWebsiteUrl(listing.website_url);
+      setInstagramUrl(listing.instagram_url);
+      setFeatured(listing.featured || false);
+      setWorkWifiInfo(listing.work_wifi_info || '');
+      setCommunitySocialInfo(listing.community_social_info || '');
+      setComfortLivingInfo(listing.comfort_living_info || '');
+      setLocationSurroundingsInfo(listing.location_surroundings_info || '');
     }
   }, [listing]);
 
@@ -124,9 +86,7 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
     e.preventDefault();
     setIsSubmitting(true);
     
-    console.log('=== FORM SUBMISSION STARTED ===');
-    console.log('Current user:', user?.id);
-    console.log('Is editing existing listing:', !!listing);
+    console.log('Form submission started');
     
     if (!user?.id) {
       toast({
@@ -139,13 +99,6 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
     }
     
     try {
-      const informationBlocksData = {
-        work_wifi_info: workWifiInfo?.trim() || null,
-        community_social_info: communitySocialInfo?.trim() || null,
-        comfort_living_info: comfortLivingInfo?.trim() || null,
-        location_surroundings_info: locationSurroundingsInfo?.trim() || null,
-      };
-
       const listingData = {
         title: title || '',
         description: description?.trim() || null,
@@ -165,8 +118,8 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
         minimum_stay_unit: minimumStayUnit || 'nights',
         capacity: capacity,
         rooms: rooms,
-        amenities: amenities && amenities.length > 0 ? amenities : null,
-        images: images && images.length > 0 ? images : null,
+        amenities: amenities.length > 0 ? amenities : null,
+        images: images.length > 0 ? images : null,
         featured_image: featuredImage?.trim() || null,
         is_seasonal: isSeasonal || false,
         seasonal_start_date: seasonalStartDate,
@@ -175,93 +128,58 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
         instagram_url: instagramUrl?.trim() || null,
         featured: featured || false,
         created_by: user.id,
-        ...informationBlocksData
+        work_wifi_info: workWifiInfo?.trim() || null,
+        community_social_info: communitySocialInfo?.trim() || null,
+        comfort_living_info: comfortLivingInfo?.trim() || null,
+        location_surroundings_info: locationSurroundingsInfo?.trim() || null,
       };
 
-      console.log('Complete data being sent to database:', listingData);
+      console.log('Saving listing data:', listingData);
 
       let result;
-      let operationSuccess = false;
-      let savedData = null;
       
       if (listing) {
-        console.log('=== UPDATING EXISTING LISTING ===');
-        console.log('Updating listing with ID:', listing.id);
-        
+        console.log('Updating existing listing:', listing.id);
         result = await supabase
           .from('listings')
           .update(listingData)
           .eq('id', listing.id)
           .select('*');
-          
-        console.log('Update result:', result);
-        
-        if (!result.error && result.data && result.data.length > 0) {
-          operationSuccess = true;
-          savedData = result.data[0];
-          console.log('Update successful, returned data:', savedData);
-        } else if (result.error) {
-          console.error('Update failed with error:', result.error);
-          throw result.error;
-        } else {
-          console.error('Update failed: No data returned');
-          throw new Error('Update operation did not affect any records. Please check your permissions or try refreshing the page.');
-        }
-        
       } else {
-        console.log('=== CREATING NEW LISTING ===');
-        
+        console.log('Creating new listing');
         result = await supabase
           .from('listings')
           .insert(listingData)
           .select('*');
-          
-        console.log('Insert result:', result);
-        
-        if (!result.error && result.data && result.data.length > 0) {
-          operationSuccess = true;
-          savedData = result.data[0];
-          console.log('Insert successful, returned data:', savedData);
-        } else if (result.error) {
-          console.error('Insert failed with error:', result.error);
-          throw result.error;
-        } else {
-          console.error('Insert failed: No data returned');
-          throw new Error('Insert operation failed to return the created record.');
-        }
       }
 
-      if (operationSuccess && savedData) {
-        console.log('=== DATABASE OPERATION SUCCESSFUL ===');
+      if (result.error) {
+        console.error('Database error:', result.error);
+        throw result.error;
+      }
 
-        toast({
-          title: listing ? 'Listing updated successfully!' : 'Listing created successfully!',
-          description: 'All information has been saved. Changes are now live.',
-        });
-        
-        console.log('=== FORM SUBMISSION COMPLETED SUCCESSFULLY ===');
-        
-        if (onClose) {
-          console.log('Calling onClose to trigger refetch');
-          setTimeout(() => {
-            onClose();
-          }, 1000);
-        }
-      } else {
-        console.error('=== OPERATION FAILED ===');
-        throw new Error('Database operation failed - no confirmation of success');
+      if (!result.data || result.data.length === 0) {
+        throw new Error('No data returned from database operation');
+      }
+
+      console.log('Operation successful:', result.data[0]);
+
+      toast({
+        title: listing ? 'Listing updated successfully!' : 'Listing created successfully!',
+        description: 'All information has been saved.',
+      });
+      
+      if (onClose) {
+        setTimeout(() => {
+          onClose();
+        }, 1000);
       }
     } catch (error) {
-      console.error('=== FORM SUBMISSION ERROR ===');
-      console.error('Error details:', error);
+      console.error('Form submission error:', error);
       
       let errorMessage = 'Failed to save listing. Please try again.';
       if (error instanceof Error) {
-        if (error.message.includes('permission') || error.message.includes('policy')) {
-          errorMessage = 'Permission denied. Please make sure you have the right permissions to edit this listing.';
-        } else {
-          errorMessage = error.message;
-        }
+        errorMessage = error.message;
       }
       
       toast({
@@ -274,6 +192,7 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
     }
   };
 
+  // Always return a valid object with all required properties
   return {
     // Form state
     title, setTitle,
