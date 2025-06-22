@@ -8,6 +8,8 @@ interface NewListingContactFormProps {
   setWebsiteUrl: (value: string) => void;
   instagramUrl: string;
   setInstagramUrl: (value: string) => void;
+  discountCodeUrl: string;
+  setDiscountCodeUrl: (value: string) => void;
 }
 
 const NewListingContactForm = ({
@@ -15,6 +17,8 @@ const NewListingContactForm = ({
   setWebsiteUrl,
   instagramUrl,
   setInstagramUrl,
+  discountCodeUrl,
+  setDiscountCodeUrl,
 }: NewListingContactFormProps) => {
   return (
     <Card>
@@ -42,6 +46,20 @@ const NewListingContactForm = ({
             onChange={(e) => setInstagramUrl(e.target.value)}
             placeholder="https://instagram.com/username"
           />
+        </div>
+
+        <div>
+          <Label htmlFor="discountCodeUrl">Discount Code URL</Label>
+          <Input
+            id="discountCodeUrl"
+            type="url"
+            value={discountCodeUrl}
+            onChange={(e) => setDiscountCodeUrl(e.target.value)}
+            placeholder="https://booking-site.com/discount-link"
+          />
+          <p className="text-sm text-gray-600 mt-1">
+            This URL will be used for the "Get Discount Code" button on your listing page. If left empty, visitors will be directed to WhatsApp instead.
+          </p>
         </div>
       </CardContent>
     </Card>

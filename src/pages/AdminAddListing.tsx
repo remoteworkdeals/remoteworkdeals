@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -52,6 +53,7 @@ const AdminAddListing = () => {
   // Contact
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [instagramUrl, setInstagramUrl] = useState('');
+  const [discountCodeUrl, setDiscountCodeUrl] = useState('');
   
   // Calculate discounted price
   const calculateDiscountedPrice = () => {
@@ -116,11 +118,12 @@ const AdminAddListing = () => {
         amenities: amenities.length > 0 ? amenities : null,
         website_url: websiteUrl.trim() || null,
         instagram_url: instagramUrl.trim() || null,
+        discount_code_url: discountCodeUrl.trim() || null,
         featured: false,
         created_by: user.id,
       };
 
-      console.log('Creating new listing:', listingData);
+      console.log('Creating new listing with data:', listingData);
 
       const { data, error } = await supabase
         .from('listings')
@@ -225,6 +228,8 @@ const AdminAddListing = () => {
           setWebsiteUrl={setWebsiteUrl}
           instagramUrl={instagramUrl}
           setInstagramUrl={setInstagramUrl}
+          discountCodeUrl={discountCodeUrl}
+          setDiscountCodeUrl={setDiscountCodeUrl}
         />
 
         <div className="flex justify-end">
