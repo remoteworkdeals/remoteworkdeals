@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Edit, Trash2, Eye, LogOut, Home, RefreshCw } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Listing } from '@/types/listing';
 import { useDeleteListing } from '@/hooks/useListings';
 import ListingForm from '@/components/ListingForm';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -65,18 +65,15 @@ const AdminListings = () => {
     setShowForm(false);
     setEditingListing(null);
     
-    // Force a fresh fetch of data
     await handleRefresh();
   };
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
-      // Invalidate and refetch all listing-related queries
       await queryClient.invalidateQueries({ queryKey: ['admin-listings'] });
       await queryClient.invalidateQueries({ queryKey: ['listings'] });
       
-      // Force refetch with fresh data
       console.log('Forcing refetch after refresh');
       await refetch();
       
@@ -111,30 +108,28 @@ const AdminListings = () => {
   }
 
   if (showForm) {
-    // Add error boundary around ListingForm
-    try {
-      return (
+    return (
+      <ErrorBoundary
+        fallback={
+          <div className="max-w-4xl mx-auto p-8">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+              <h2 className="text-lg font-semibold text-red-800 mb-2">Error Loading Form</h2>
+              <p className="text-red-600 mb-4">
+                There was an error loading the listing form. Please try again.
+              </p>
+              <Button onClick={() => setShowForm(false)} variant="outline">
+                Back to Listings
+              </Button>
+            </div>
+          </div>
+        }
+      >
         <ListingForm 
           listing={editingListing} 
           onClose={handleFormClose}
         />
-      );
-    } catch (error) {
-      console.error('ListingForm render error:', error);
-      return (
-        <div className="max-w-4xl mx-auto p-8">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-red-800 mb-2">Error Loading Form</h2>
-            <p className="text-red-600 mb-4">
-              There was an error loading the listing form. Please try again.
-            </p>
-            <Button onClick={() => setShowForm(false)} variant="outline">
-              Back to Listings
-            </Button>
-          </div>
-        </div>
-      );
-    }
+      </ErrorBoundary>
+    );
   }
 
   return (

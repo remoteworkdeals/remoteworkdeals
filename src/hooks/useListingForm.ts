@@ -6,10 +6,11 @@ import { Listing } from '@/types/listing';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const useListingForm = (listing?: Listing | null, onClose?: () => void) => {
+  console.log('useListingForm initializing with listing:', listing?.id || 'new');
+  
   const { toast } = useToast();
   const { user } = useAuth();
   
-  // Initialize all state with guaranteed non-null defaults
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -57,28 +58,30 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
       setUsp(listing.usp || '');
       setOriginalPrice(listing.original_price || 0);
       setPricingUnit((listing.pricing_unit as 'night' | 'month') || 'night');
-      setDiscountedPrice(listing.discounted_price);
-      setDiscountPercentage(listing.discount_percentage);
-      setDiscountCodeUrl(listing.discount_code_url);
-      setDiscountType(listing.discount_type as 'percentage' | 'fixed_amount' | null);
-      setDiscountValue(listing.discount_value);
-      setMinimumStay(listing.minimum_stay);
+      setDiscountedPrice(listing.discounted_price || null);
+      setDiscountPercentage(listing.discount_percentage || null);
+      setDiscountCodeUrl(listing.discount_code_url || null);
+      setDiscountType((listing.discount_type as 'percentage' | 'fixed_amount') || null);
+      setDiscountValue(listing.discount_value || null);
+      setMinimumStay(listing.minimum_stay || null);
       setMinimumStayUnit((listing.minimum_stay_unit as 'nights' | 'weeks' | 'months') || 'nights');
-      setCapacity(listing.capacity);
-      setRooms(listing.rooms);
-      setAmenities(listing.amenities || []);
-      setImages(listing.images || []);
-      setFeaturedImage(listing.featured_image);
+      setCapacity(listing.capacity || null);
+      setRooms(listing.rooms || null);
+      setAmenities(Array.isArray(listing.amenities) ? listing.amenities : []);
+      setImages(Array.isArray(listing.images) ? listing.images : []);
+      setFeaturedImage(listing.featured_image || null);
       setIsSeasonal(listing.is_seasonal || false);
-      setSeasonalStartDate(listing.seasonal_start_date);
-      setSeasonalEndDate(listing.seasonal_end_date);
-      setWebsiteUrl(listing.website_url);
-      setInstagramUrl(listing.instagram_url);
+      setSeasonalStartDate(listing.seasonal_start_date || null);
+      setSeasonalEndDate(listing.seasonal_end_date || null);
+      setWebsiteUrl(listing.website_url || null);
+      setInstagramUrl(listing.instagram_url || null);
       setFeatured(listing.featured || false);
       setWorkWifiInfo(listing.work_wifi_info || '');
       setCommunitySocialInfo(listing.community_social_info || '');
       setComfortLivingInfo(listing.comfort_living_info || '');
       setLocationSurroundingsInfo(listing.location_surroundings_info || '');
+    } else {
+      console.log('Initializing new listing form');
     }
   }, [listing]);
 
@@ -192,9 +195,9 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
     }
   };
 
-  // Always return a valid object with all required properties
+  console.log('useListingForm returning data, all state initialized');
+  
   return {
-    // Form state
     title, setTitle,
     description, setDescription,
     location, setLocation,
@@ -226,8 +229,6 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
     comfortLivingInfo, setComfortLivingInfo,
     locationSurroundingsInfo, setLocationSurroundingsInfo,
     featured, setFeatured,
-    
-    // Form actions
     isSubmitting,
     handleSubmit,
   };
