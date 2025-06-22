@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { X, Plus } from 'lucide-react';
+import ImageUpload from '@/components/ImageUpload';
 
 interface NewListingMediaFormProps {
   featuredImage: string;
@@ -14,6 +15,7 @@ interface NewListingMediaFormProps {
   setImages: (value: string[]) => void;
   amenities: string[];
   setAmenities: (value: string[]) => void;
+  listingTitle?: string;
 }
 
 const NewListingMediaForm = ({
@@ -23,14 +25,25 @@ const NewListingMediaForm = ({
   setImages,
   amenities,
   setAmenities,
+  listingTitle = '',
 }: NewListingMediaFormProps) => {
-  const [newImageUrl, setNewImageUrl] = useState('');
   const [newAmenity, setNewAmenity] = useState('');
 
-  const addImage = () => {
-    if (newImageUrl.trim() && !images.includes(newImageUrl.trim())) {
-      setImages([...images, newImageUrl.trim()]);
-      setNewImageUrl('');
+  const generateAltText = (imageType: 'featured' | 'additional', index?: number) => {
+    const baseTitle = listingTitle || 'Coliving space';
+    if (imageType === 'featured') {
+      return `${baseTitle} - Featured image`;
+    }
+    return `${baseTitle} - Interior view ${index ? index + 1 : ''}`;
+  };
+
+  const handleFeaturedImageUpload = (url: string) => {
+    setFeaturedImage(url);
+  };
+
+  const handleAdditionalImageUpload = (url: string) => {
+    if (url && !images.includes(url)) {
+      setImages([...images, url]);
     }
   };
 
@@ -55,66 +68,65 @@ const NewListingMediaForm = ({
         <CardHeader>
           <CardTitle>Images</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div>
-            <Label htmlFor="featuredImage">Featured Image URL</Label>
-            <Input
-              id="featuredImage"
-              value={featuredImage}
-              onChange={(e) => setFeaturedImage(e.target.value)}
-              placeholder="https://example.com/image.jpg"
+            <Label>Featured Image</Label>
+            <p className="text-sm text-gray-600 mb-2">
+              This will be the main image displayed for your listing
+            </p>
+            <ImageUpload
+              onImageUploaded={handleFeaturedImageUpload}
+              currentImage={featuredImage}
+              label=""
+              className="w-full"
             />
             {featuredImage && (
-              <div className="mt-2">
-                <img
-                  src={featuredImage}
-                  alt="Featured preview"
-                  className="w-32 h-24 object-cover rounded-lg"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Alt text: {generateAltText('featured')}
+              </p>
             )}
           </div>
 
           <div>
             <Label>Additional Images</Label>
-            <div className="flex gap-2 mt-2">
-              <Input
-                value={newImageUrl}
-                onChange={(e) => setNewImageUrl(e.target.value)}
-                placeholder="https://example.com/image.jpg"
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addImage())}
-              />
-              <Button type="button" onClick={addImage} variant="outline">
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
+            <p className="text-sm text-gray-600 mb-2">
+              Add more photos to showcase different areas of your space
+            </p>
+            <ImageUpload
+              onImageUploaded={handleAdditionalImageUpload}
+              label="Add Another Image"
+              className="w-full"
+            />
             
             {images.length > 0 && (
-              <div className="grid grid-cols-3 gap-4 mt-4">
-                {images.map((image, index) => (
-                  <div key={index} className="relative">
-                    <img
-                      src={image}
-                      alt={`Additional ${index + 1}`}
-                      className="w-full h-24 object-cover rounded-lg"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      className="absolute top-1 right-1 h-6 w-6 p-0"
-                      onClick={() => removeImage(index)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ))}
+              <div className="mt-4">
+                <h4 className="text-sm font-medium mb-2">Uploaded Images ({images.length})</h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {images.map((image, index) => (
+                    <div key={index} className="relative group">
+                      <div className="aspect-video rounded-lg bg-gray-100 overflow-hidden">
+                        <img
+                          src={image}
+                          alt={generateAltText('additional', index)}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeImage(index)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                      <p className="text-xs text-gray-500 mt-1 truncate">
+                        {generateAltText('additional', index)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
