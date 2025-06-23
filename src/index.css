@@ -124,6 +124,12 @@
     overflow: hidden;
   }
 
+  /* Cookie banner specific styles */
+  .cookie-banner-backdrop {
+    backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.95);
+  }
+
   /* Mobile-specific spacing */
   @media (max-width: 640px) {
     .container {
@@ -145,6 +151,15 @@
     textarea {
       min-height: 44px;
       @apply text-base; /* Prevents zoom on iOS */
+    }
+
+    /* Cookie banner mobile adjustments */
+    .cookie-banner-mobile {
+      @apply p-3;
+    }
+
+    .cookie-banner-mobile .card-content {
+      @apply p-4;
     }
   }
 }
