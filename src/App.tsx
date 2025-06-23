@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +7,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import CookieConsentBanner from '@/components/CookieConsentBanner';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 import Index from "./pages/Index";
 import ColivingDeals from "./pages/ColivingDeals";
 import ListingPage from "./pages/ListingPage";
@@ -29,6 +29,7 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
+          <GoogleAnalytics />
           <Toaster />
           <Sonner />
           <BrowserRouter>
