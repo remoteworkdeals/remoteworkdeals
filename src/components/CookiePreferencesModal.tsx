@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { X, Shield, BarChart3, Target, Cookie } from 'lucide-react';
+import { X, Shield, BarChart3, Target } from 'lucide-react';
 import { useCookieConsent, CookiePreferences } from '@/hooks/useCookieConsent';
 
 interface CookiePreferencesModalProps {
@@ -13,8 +13,7 @@ interface CookiePreferencesModalProps {
 }
 
 /**
- * Detailed cookie preferences modal for GDPR compliance
- * Allows users to control individual cookie categories
+ * Minimal cookie preferences modal
  */
 const CookiePreferencesModal = ({ isOpen, onClose }: CookiePreferencesModalProps) => {
   const { preferences, updatePreferences, acceptAll, acceptEssential } = useCookieConsent();
@@ -34,115 +33,80 @@ const CookiePreferencesModal = ({ isOpen, onClose }: CookiePreferencesModalProps
   const cookieCategories = [
     {
       id: 'essential',
-      title: 'Essential Cookies',
-      description: 'These cookies are necessary for the website to function and cannot be switched off. They are usually only set in response to actions made by you.',
-      icon: <Shield className="w-5 h-5" />,
+      title: 'Essential',
+      description: 'Required for basic website functionality',
+      icon: <Shield className="w-4 h-4" />,
       required: true,
-      examples: 'Session management, security, form data'
     },
     {
       id: 'analytics',
-      title: 'Analytics Cookies',
-      description: 'These cookies help us understand how visitors interact with our website by collecting and reporting information anonymously.',
-      icon: <BarChart3 className="w-5 h-5" />,
+      title: 'Analytics',
+      description: 'Help us understand how visitors use our website',
+      icon: <BarChart3 className="w-4 h-4" />,
       required: false,
-      examples: 'Google Analytics, page views, user behavior'
     },
     {
       id: 'marketing',
-      title: 'Marketing Cookies',
-      description: 'These cookies are used to track visitors across websites to display relevant advertisements and improve marketing effectiveness.',
-      icon: <Target className="w-5 h-5" />,
+      title: 'Marketing',
+      description: 'Used for advertising and social media features',
+      icon: <Target className="w-4 h-4" />,
       required: false,
-      examples: 'Ad targeting, social media integration, conversion tracking'
     }
   ];
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <CardHeader className="border-b">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md max-h-[80vh] overflow-y-auto">
+        <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Cookie className="w-6 h-6 text-adventure-orange" />
-              <CardTitle className="text-xl text-forest-green">Cookie Preferences</CardTitle>
-            </div>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X size={20} />
+            <CardTitle className="text-lg text-gray-900">Cookie Settings</CardTitle>
+            <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
+              <X size={16} />
             </Button>
           </div>
         </CardHeader>
         
-        <CardContent className="p-6 space-y-6">
-          <div className="text-sm text-gray-600">
-            <p className="mb-4">
-              We respect your privacy and give you control over your data. Choose which cookies you'd like to allow. 
-              You can change these settings at any time.
-            </p>
-          </div>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-gray-600">
+            Choose which cookies you'd like to allow.
+          </p>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {cookieCategories.map((category) => (
-              <Card key={category.id} className="border-l-4 border-l-adventure-orange">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="text-adventure-orange">{category.icon}</div>
-                        <h4 className="font-semibold text-forest-green">{category.title}</h4>
-                        {category.required && (
-                          <Badge variant="secondary" className="text-xs">Required</Badge>
-                        )}
-                      </div>
-                      
-                      <p className="text-sm text-gray-600 mb-2">{category.description}</p>
-                      
-                      <p className="text-xs text-gray-500">
-                        <strong>Examples:</strong> {category.examples}
-                      </p>
+              <div key={category.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-start gap-3 flex-1">
+                  <div className="text-gray-600 mt-0.5">{category.icon}</div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium text-sm text-gray-900">{category.title}</h4>
+                      {category.required && (
+                        <Badge variant="secondary" className="text-xs">Required</Badge>
+                      )}
                     </div>
-                    
-                    <Switch
-                      checked={localPreferences[category.id as keyof CookiePreferences]}
-                      onCheckedChange={(checked) => 
-                        setLocalPreferences(prev => ({ 
-                          ...prev, 
-                          [category.id]: checked 
-                        }))
-                      }
-                      disabled={category.required}
-                    />
+                    <p className="text-xs text-gray-600">{category.description}</p>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+                
+                <Switch
+                  checked={localPreferences[category.id as keyof CookiePreferences]}
+                  onCheckedChange={(checked) => 
+                    setLocalPreferences(prev => ({ 
+                      ...prev, 
+                      [category.id]: checked 
+                    }))
+                  }
+                  disabled={category.required}
+                />
+              </div>
             ))}
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
-            <Button onClick={handleSave} className="adventure-button flex-1">
-              Save Preferences
+          <div className="flex gap-2 pt-2">
+            <Button onClick={handleSave} className="flex-1 bg-adventure-orange hover:bg-adventure-orange/90 text-white">
+              Save
             </Button>
-            
-            <Button 
-              onClick={() => {
-                acceptAll();
-                onClose();
-              }}
-              variant="outline" 
-              className="border-forest-green text-forest-green hover:bg-forest-green hover:text-white"
-            >
+            <Button onClick={() => { acceptAll(); onClose(); }} variant="outline" className="flex-1">
               Accept All
-            </Button>
-            
-            <Button 
-              onClick={() => {
-                acceptEssential();
-                onClose();
-              }}
-              variant="ghost" 
-              className="text-forest-green hover:text-adventure-orange"
-            >
-              Essential Only
             </Button>
           </div>
         </CardContent>
