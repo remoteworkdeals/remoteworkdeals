@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import CookieConsentBanner from '@/components/CookieConsentBanner';
+import CookieConsentScript from '@/components/CookieConsentScript';
 import Index from "./pages/Index";
 import ColivingDeals from "./pages/ColivingDeals";
 import ListingPage from "./pages/ListingPage";
@@ -60,7 +60,7 @@ const App = () => (
               } />
               <Route path="*" element={<NotFound />} />
             </Routes>
-            <CookieConsentBanner />
+            <CookieConsentScript />
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
