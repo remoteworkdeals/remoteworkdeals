@@ -3,12 +3,14 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { RefreshCw, ExternalLink, CheckCircle, AlertCircle, Copy } from 'lucide-react';
-import { generateComprehensiveSitemap, updatePublicSitemap } from '@/utils/sitemapService';
+import { RefreshCw, ExternalLink, CheckCircle, AlertCircle, Copy, Download, FileText } from 'lucide-react';
+import { generateComprehensiveSitemap, updatePublicSitemap, copySitemapToClipboard } from '@/utils/sitemapService';
 import { useToast } from '@/hooks/use-toast';
 
 const SitemapManagement = () => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isCopying, setIsCopying] = useState(false);
   const [lastGenerated, setLastGenerated] = useState<string | null>(null);
   const [sitemapStats, setSitemapStats] = useState<{
     totalUrls: number;
@@ -62,25 +64,53 @@ const SitemapManagement = () => {
     }
   };
 
-  const handleUpdatePublicSitemap = async () => {
+  const handleDownloadSitemap = async () => {
+    setIsUpdating(true);
     try {
       const result = await updatePublicSitemap();
       
       if (result.success) {
         toast({
-          title: "Sitemap Updated",
-          description: "Public sitemap has been updated successfully",
+          title: "Sitemap Downloaded",
+          description: "Please upload the downloaded sitemap.xml file to your public folder",
         });
       } else {
-        throw new Error(result.error || 'Failed to update public sitemap');
+        throw new Error(result.error || 'Failed to download sitemap');
       }
     } catch (error) {
-      console.error('Error updating public sitemap:', error);
+      console.error('Error downloading sitemap:', error);
       toast({
-        title: "Error Updating Sitemap",
+        title: "Error Downloading Sitemap",
         description: error instanceof Error ? error.message : "Unknown error occurred",
         variant: "destructive",
       });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleCopySitemap = async () => {
+    setIsCopying(true);
+    try {
+      const result = await copySitemapToClipboard();
+      
+      if (result.success) {
+        toast({
+          title: "Sitemap Copied",
+          description: "Sitemap XML copied to clipboard",
+        });
+      } else {
+        throw new Error(result.error || 'Failed to copy sitemap');
+      }
+    } catch (error) {
+      console.error('Error copying sitemap:', error);
+      toast({
+        title: "Error Copying Sitemap",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCopying(false);
     }
   };
 
@@ -139,26 +169,42 @@ const SitemapManagement = () => {
                 </Button>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={handleGenerateSitemap}
-                disabled={isGenerating}
-                className="flex items-center gap-2"
-              >
-                <RefreshCw className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
-                Generate Sitemap
-              </Button>
-              {generatedSitemap && (
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={handleGenerateSitemap}
+              disabled={isGenerating}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
+              {isGenerating ? 'Generating...' : 'Generate Sitemap'}
+            </Button>
+            
+            {generatedSitemap && (
+              <>
                 <Button
-                  onClick={handleUpdatePublicSitemap}
+                  onClick={handleDownloadSitemap}
+                  disabled={isUpdating}
                   variant="default"
                   className="flex items-center gap-2"
                 >
-                  <CheckCircle className="h-4 w-4" />
-                  Update Public Sitemap
+                  <Download className={`h-4 w-4 ${isUpdating ? 'animate-spin' : ''}`} />
+                  {isUpdating ? 'Downloading...' : 'Download XML File'}
                 </Button>
-              )}
-            </div>
+                
+                <Button
+                  onClick={handleCopySitemap}
+                  disabled={isCopying}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <Copy className={`h-4 w-4 ${isCopying ? 'animate-spin' : ''}`} />
+                  {isCopying ? 'Copying...' : 'Copy to Clipboard'}
+                </Button>
+              </>
+            )}
           </div>
 
           {lastGenerated && (
@@ -192,7 +238,7 @@ const SitemapManagement = () => {
           {generatedSitemap && (
             <div className="mt-4">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium">Generated Sitemap XML</h4>
+                <h4 className="font-medium">Generated Sitemap XML Preview</h4>
                 <Button
                   variant="outline"
                   size="sm"
@@ -204,7 +250,7 @@ const SitemapManagement = () => {
                 </Button>
               </div>
               <div className="bg-gray-900 text-green-400 p-4 rounded-lg max-h-64 overflow-y-auto text-xs font-mono">
-                <pre>{generatedSitemap}</pre>
+                <pre>{generatedSitemap.substring(0, 2000)}...</pre>
               </div>
             </div>
           )}
@@ -213,12 +259,13 @@ const SitemapManagement = () => {
             <div className="flex items-start gap-2">
               <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
               <div>
-                <h4 className="font-medium text-blue-800 mb-1">SEO Tips</h4>
+                <h4 className="font-medium text-blue-800 mb-1">Setup Instructions</h4>
                 <ul className="text-sm text-blue-700 space-y-1">
-                  <li>• Submit your sitemap to Google Search Console</li>
-                  <li>• Regenerate the sitemap whenever you add new content</li>
-                  <li>• Check the live sitemap URL to ensure it's accessible</li>
-                  <li>• Monitor Google Search Console for indexing issues</li>
+                  <li>• Generate the sitemap with the button above</li>
+                  <li>• Download the XML file and upload it to your public folder</li>
+                  <li>• Or copy the XML and manually create/update public/sitemap.xml</li>
+                  <li>• Submit the sitemap URL to Google Search Console</li>
+                  <li>• Regenerate whenever you add new content</li>
                 </ul>
               </div>
             </div>

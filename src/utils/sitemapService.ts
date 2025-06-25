@@ -124,19 +124,56 @@ ${allPages.map(page => `  <url>
 
 export const updatePublicSitemap = async (): Promise<{ success: boolean; error?: string }> => {
   try {
+    console.log('Generating and updating public sitemap...');
+    
     const result = await generateComprehensiveSitemap();
     
     if (!result.success || !result.sitemap) {
       return { success: false, error: result.error || 'Failed to generate sitemap' };
     }
 
-    // In a production environment, you would write this to your server's public folder
-    // For now, we'll log it and return success
-    console.log('Generated sitemap XML:', result.sitemap);
+    // Create a downloadable blob for the user to manually place in public folder
+    // Since we can't directly write to public folder in browser environment
+    const blob = new Blob([result.sitemap], { type: 'application/xml' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create a temporary download link
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'sitemap.xml';
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    console.log('Sitemap file generated and downloaded. Please place it in your public folder.');
     
     return { success: true };
   } catch (error) {
     console.error('Error updating public sitemap:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    };
+  }
+};
+
+// New function to generate and copy sitemap to clipboard
+export const copySitemapToClipboard = async (): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const result = await generateComprehensiveSitemap();
+    
+    if (!result.success || !result.sitemap) {
+      return { success: false, error: result.error || 'Failed to generate sitemap' };
+    }
+
+    await navigator.clipboard.writeText(result.sitemap);
+    console.log('Sitemap XML copied to clipboard');
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Error copying sitemap to clipboard:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Unknown error occurred'
