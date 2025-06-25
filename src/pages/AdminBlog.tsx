@@ -12,6 +12,7 @@ import AdminManagement from '@/components/AdminManagement';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import SitemapManagement from '@/components/SitemapManagement';
 
 const AdminBlog = () => {
   const [showForm, setShowForm] = useState(false);
@@ -118,8 +119,9 @@ const AdminBlog = () => {
       </div>
 
       <Tabs defaultValue="posts" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="posts">Blog Posts</TabsTrigger>
+          <TabsTrigger value="sitemap">Sitemap</TabsTrigger>
           <TabsTrigger value="admins">Admin Management</TabsTrigger>
         </TabsList>
         
@@ -187,6 +189,14 @@ const AdminBlog = () => {
               </Button>
             </div>
           )}
+        </TabsContent>
+        
+        <TabsContent value="sitemap" className="space-y-6">
+          <div className="flex items-center gap-2 mb-6">
+            <Settings className="h-5 w-5" />
+            <h2 className="text-xl font-semibold">Sitemap Management</h2>
+          </div>
+          <SitemapManagement />
         </TabsContent>
         
         <TabsContent value="admins" className="space-y-6">

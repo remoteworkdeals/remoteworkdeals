@@ -2,12 +2,13 @@
 const fs = require('fs');
 const path = require('path');
 
-// This would normally fetch from your database
-// For now, we'll create a simple version that can be enhanced
+// This script generates a comprehensive sitemap including dynamic content
+// For static generation, we'll create a basic version that can be enhanced
 const generateStaticSitemap = () => {
   const baseUrl = 'https://remotework.deals';
   const currentDate = new Date().toISOString().split('T')[0];
   
+  // Static pages - these are always available
   const staticPages = [
     { url: '/', priority: '1.0', changefreq: 'daily', lastmod: currentDate },
     { url: '/blog', priority: '0.9', changefreq: 'daily', lastmod: currentDate },
@@ -25,12 +26,14 @@ ${staticPages.map(page => `  <url>
     <changefreq>${page.changefreq}</changefreq>
     <priority>${page.priority}</priority>
   </url>`).join('\n')}
+  <!-- Dynamic content (listings and blog posts) will be added via admin dashboard -->
+  <!-- Use the Sitemap Management tool in the admin panel to generate a complete sitemap -->
 </urlset>`;
 
   return xmlContent;
 };
 
-// Generate and write the sitemap
+// Generate and write the basic sitemap
 const sitemapContent = generateStaticSitemap();
 const publicDir = path.join(__dirname, '..', 'public');
 const sitemapPath = path.join(publicDir, 'sitemap.xml');
@@ -42,4 +45,5 @@ if (!fs.existsSync(publicDir)) {
 
 // Write the sitemap file
 fs.writeFileSync(sitemapPath, sitemapContent, 'utf8');
-console.log('Sitemap generated successfully at:', sitemapPath);
+console.log('Basic sitemap generated successfully at:', sitemapPath);
+console.log('Note: Use the admin dashboard Sitemap Management tool to generate a complete sitemap with dynamic content.');

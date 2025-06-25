@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +12,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import SitemapManagement from '@/components/SitemapManagement';
 
 const AdminListings = () => {
   const navigate = useNavigate();
@@ -158,6 +158,10 @@ const AdminListings = () => {
         </div>
       </div>
 
+      <div className="mb-6">
+        <SitemapManagement />
+      </div>
+
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Coliving Listings ({listings?.length || 0})</h2>
         <div className="flex gap-2">
@@ -279,7 +283,7 @@ const AdminListings = () => {
             Create your first listing
           </Button>
         </div>
-      )}
+      </div>
     </div>
   );
 };
