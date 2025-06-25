@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Trash2, Eye, LogOut, Settings, Home, Building } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, LogOut, Home, Building, LayoutDashboard } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { BlogPost, useDeleteBlogPost } from '@/hooks/useBlogPosts';
@@ -12,7 +12,6 @@ import AdminManagement from '@/components/AdminManagement';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import SitemapManagement from '@/components/SitemapManagement';
 
 const AdminBlog = () => {
   const [showForm, setShowForm] = useState(false);
@@ -103,6 +102,10 @@ const AdminBlog = () => {
           )}
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={() => navigate('/admin')}>
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            Dashboard
+          </Button>
           <Button variant="outline" onClick={() => navigate('/admin/listings')}>
             <Building className="mr-2 h-4 w-4" />
             Manage Listings
@@ -119,9 +122,8 @@ const AdminBlog = () => {
       </div>
 
       <Tabs defaultValue="posts" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="posts">Blog Posts</TabsTrigger>
-          <TabsTrigger value="sitemap">Sitemap</TabsTrigger>
           <TabsTrigger value="admins">Admin Management</TabsTrigger>
         </TabsList>
         
@@ -189,14 +191,6 @@ const AdminBlog = () => {
               </Button>
             </div>
           )}
-        </TabsContent>
-        
-        <TabsContent value="sitemap" className="space-y-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Settings className="h-5 w-5" />
-            <h2 className="text-xl font-semibold">Sitemap Management</h2>
-          </div>
-          <SitemapManagement />
         </TabsContent>
         
         <TabsContent value="admins" className="space-y-6">

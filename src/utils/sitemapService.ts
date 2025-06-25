@@ -9,7 +9,6 @@ export interface SitemapUrl {
   lastmod: string;
 }
 
-// Use the database type directly instead of our interface to avoid type conflicts
 interface DatabaseListing {
   id: number;
   title: string;
@@ -31,9 +30,9 @@ export const generateComprehensiveSitemap = async (): Promise<{ success: boolean
     const baseUrl = 'https://remotework.deals';
     const currentDate = new Date().toISOString().split('T')[0];
     
-    // Static pages with high priority
+    // Static pages with proper priorities and changefreq
     const staticPages: SitemapUrl[] = [
-      { url: '/', priority: '1.0', changefreq: 'daily', lastmod: currentDate },
+      { url: '', priority: '1.0', changefreq: 'daily', lastmod: currentDate },
       { url: '/coliving-deals', priority: '0.9', changefreq: 'daily', lastmod: currentDate },
       { url: '/blog', priority: '0.9', changefreq: 'daily', lastmod: currentDate },
       { url: '/exclusive-deals', priority: '0.8', changefreq: 'weekly', lastmod: currentDate },
@@ -41,7 +40,7 @@ export const generateComprehensiveSitemap = async (): Promise<{ success: boolean
       { url: '/become-partner', priority: '0.8', changefreq: 'monthly', lastmod: currentDate },
     ];
 
-    // Fetch all active listings - only get the fields we need
+    // Fetch all active listings
     console.log('Fetching listings for sitemap...');
     const { data: listings, error: listingsError } = await supabase
       .from('listings')
@@ -69,7 +68,7 @@ export const generateComprehensiveSitemap = async (): Promise<{ success: boolean
       };
     });
 
-    // Fetch all published blog posts - only get the fields we need
+    // Fetch all published blog posts
     console.log('Fetching blog posts for sitemap...');
     const { data: blogPosts, error: blogError } = await supabase
       .from('blog_posts')
@@ -101,9 +100,14 @@ export const generateComprehensiveSitemap = async (): Promise<{ success: boolean
     
     console.log(`Generated sitemap with ${allPages.length} URLs`);
 
-    // Generate XML sitemap
+    // Generate proper XML sitemap with correct formatting for Google
     const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:news="http://www.google.com/schemas/sitemap-news/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
 ${allPages.map(page => `  <url>
     <loc>${baseUrl}${page.url}</loc>
     <lastmod>${page.lastmod}</lastmod>
@@ -122,9 +126,9 @@ ${allPages.map(page => `  <url>
   }
 };
 
-export const updatePublicSitemap = async (): Promise<{ success: boolean; error?: string }> => {
+export const downloadSitemap = async (): Promise<{ success: boolean; error?: string }> => {
   try {
-    console.log('Generating and updating public sitemap...');
+    console.log('Generating and downloading sitemap...');
     
     const result = await generateComprehensiveSitemap();
     
@@ -132,8 +136,7 @@ export const updatePublicSitemap = async (): Promise<{ success: boolean; error?:
       return { success: false, error: result.error || 'Failed to generate sitemap' };
     }
 
-    // Create a downloadable blob for the user to manually place in public folder
-    // Since we can't directly write to public folder in browser environment
+    // Create a downloadable blob
     const blob = new Blob([result.sitemap], { type: 'application/xml' });
     const url = URL.createObjectURL(blob);
     
@@ -147,11 +150,11 @@ export const updatePublicSitemap = async (): Promise<{ success: boolean; error?:
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
     
-    console.log('Sitemap file generated and downloaded. Please place it in your public folder.');
+    console.log('Sitemap file downloaded successfully');
     
     return { success: true };
   } catch (error) {
-    console.error('Error updating public sitemap:', error);
+    console.error('Error downloading sitemap:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'Unknown error occurred'
@@ -159,7 +162,6 @@ export const updatePublicSitemap = async (): Promise<{ success: boolean; error?:
   }
 };
 
-// New function to generate and copy sitemap to clipboard
 export const copySitemapToClipboard = async (): Promise<{ success: boolean; error?: string }> => {
   try {
     const result = await generateComprehensiveSitemap();

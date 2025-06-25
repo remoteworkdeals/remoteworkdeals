@@ -2,14 +2,13 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { RefreshCw, ExternalLink, CheckCircle, AlertCircle, Copy, Download, FileText } from 'lucide-react';
-import { generateComprehensiveSitemap, updatePublicSitemap, copySitemapToClipboard } from '@/utils/sitemapService';
+import { RefreshCw, ExternalLink, CheckCircle, AlertCircle, Copy, Download, Globe } from 'lucide-react';
+import { generateComprehensiveSitemap, downloadSitemap, copySitemapToClipboard } from '@/utils/sitemapService';
 import { useToast } from '@/hooks/use-toast';
 
 const SitemapManagement = () => {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
   const [lastGenerated, setLastGenerated] = useState<string | null>(null);
   const [sitemapStats, setSitemapStats] = useState<{
@@ -65,14 +64,14 @@ const SitemapManagement = () => {
   };
 
   const handleDownloadSitemap = async () => {
-    setIsUpdating(true);
+    setIsDownloading(true);
     try {
-      const result = await updatePublicSitemap();
+      const result = await downloadSitemap();
       
       if (result.success) {
         toast({
           title: "Sitemap Downloaded",
-          description: "Please upload the downloaded sitemap.xml file to your public folder",
+          description: "Upload the downloaded sitemap.xml file to your public folder and deploy",
         });
       } else {
         throw new Error(result.error || 'Failed to download sitemap');
@@ -85,7 +84,7 @@ const SitemapManagement = () => {
         variant: "destructive",
       });
     } finally {
-      setIsUpdating(false);
+      setIsDownloading(false);
     }
   };
 
@@ -123,156 +122,124 @@ const SitemapManagement = () => {
     });
   };
 
-  const copyGeneratedXml = () => {
-    if (generatedSitemap) {
-      navigator.clipboard.writeText(generatedSitemap);
-      toast({
-        title: "XML Copied",
-        description: "Generated sitemap XML copied to clipboard",
-      });
-    }
-  };
-
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <RefreshCw className="h-5 w-5" />
-            Sitemap Management
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">
-                Generate and manage your website sitemap for better SEO
-              </p>
-              <div className="flex items-center gap-2 mt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={copySitemapUrl}
-                  className="flex items-center gap-1"
-                >
-                  <Copy className="h-3 w-3" />
-                  Copy Sitemap URL
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => window.open('https://remotework.deals/sitemap.xml', '_blank')}
-                  className="flex items-center gap-1"
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  View Live Sitemap
-                </Button>
-              </div>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Globe className="h-5 w-5" />
+          SEO Sitemap Management
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-gray-600 mb-2">
+              Generate and manage your website sitemap for Google Search Console
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={copySitemapUrl}
+                className="flex items-center gap-1"
+              >
+                <Copy className="h-3 w-3" />
+                Copy Sitemap URL
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open('https://remotework.deals/sitemap.xml', '_blank')}
+                className="flex items-center gap-1"
+              >
+                <ExternalLink className="h-3 w-3" />
+                View Live Sitemap
+              </Button>
             </div>
           </div>
+        </div>
 
-          {/* Action buttons */}
-          <div className="flex flex-wrap gap-2">
-            <Button
-              onClick={handleGenerateSitemap}
-              disabled={isGenerating}
-              className="flex items-center gap-2"
-            >
-              <RefreshCw className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
-              {isGenerating ? 'Generating...' : 'Generate Sitemap'}
-            </Button>
-            
-            {generatedSitemap && (
-              <>
-                <Button
-                  onClick={handleDownloadSitemap}
-                  disabled={isUpdating}
-                  variant="default"
-                  className="flex items-center gap-2"
-                >
-                  <Download className={`h-4 w-4 ${isUpdating ? 'animate-spin' : ''}`} />
-                  {isUpdating ? 'Downloading...' : 'Download XML File'}
-                </Button>
-                
-                <Button
-                  onClick={handleCopySitemap}
-                  disabled={isCopying}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                >
-                  <Copy className={`h-4 w-4 ${isCopying ? 'animate-spin' : ''}`} />
-                  {isCopying ? 'Copying...' : 'Copy to Clipboard'}
-                </Button>
-              </>
-            )}
-          </div>
-
-          {lastGenerated && (
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <CheckCircle className="h-4 w-4 text-green-500" />
-              Last generated: {new Date(lastGenerated).toLocaleString()}
-            </div>
-          )}
-
-          {sitemapStats && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-forest-green">{sitemapStats.totalUrls}</div>
-                <div className="text-sm text-gray-600">Total URLs</div>
-              </div>
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-blue-600">{sitemapStats.staticPages}</div>
-                <div className="text-sm text-gray-600">Static Pages</div>
-              </div>
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-purple-600">{sitemapStats.listings}</div>
-                <div className="text-sm text-gray-600">Listings</div>
-              </div>
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <div className="text-2xl font-bold text-orange-600">{sitemapStats.blogPosts}</div>
-                <div className="text-sm text-gray-600">Blog Posts</div>
-              </div>
-            </div>
-          )}
-
+        {/* Action buttons */}
+        <div className="flex flex-wrap gap-2">
+          <Button
+            onClick={handleGenerateSitemap}
+            disabled={isGenerating}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
+            {isGenerating ? 'Generating...' : 'Generate Sitemap'}
+          </Button>
+          
           {generatedSitemap && (
-            <div className="mt-4">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium">Generated Sitemap XML Preview</h4>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={copyGeneratedXml}
-                  className="flex items-center gap-1"
-                >
-                  <Copy className="h-3 w-3" />
-                  Copy XML
-                </Button>
-              </div>
-              <div className="bg-gray-900 text-green-400 p-4 rounded-lg max-h-64 overflow-y-auto text-xs font-mono">
-                <pre>{generatedSitemap.substring(0, 2000)}...</pre>
-              </div>
-            </div>
+            <>
+              <Button
+                onClick={handleDownloadSitemap}
+                disabled={isDownloading}
+                variant="default"
+                className="flex items-center gap-2"
+              >
+                <Download className={`h-4 w-4 ${isDownloading ? 'animate-spin' : ''}`} />
+                {isDownloading ? 'Downloading...' : 'Download XML'}
+              </Button>
+              
+              <Button
+                onClick={handleCopySitemap}
+                disabled={isCopying}
+                variant="outline"
+                className="flex items-center gap-2"
+              >
+                <Copy className={`h-4 w-4 ${isCopying ? 'animate-spin' : ''}`} />
+                {isCopying ? 'Copying...' : 'Copy XML'}
+              </Button>
+            </>
           )}
+        </div>
 
-          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-start gap-2">
-              <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
-              <div>
-                <h4 className="font-medium text-blue-800 mb-1">Setup Instructions</h4>
-                <ul className="text-sm text-blue-700 space-y-1">
-                  <li>• Generate the sitemap with the button above</li>
-                  <li>• Download the XML file and upload it to your public folder</li>
-                  <li>• Or copy the XML and manually create/update public/sitemap.xml</li>
-                  <li>• Submit the sitemap URL to Google Search Console</li>
-                  <li>• Regenerate whenever you add new content</li>
-                </ul>
-              </div>
+        {lastGenerated && (
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <CheckCircle className="h-4 w-4 text-green-500" />
+            Last generated: {new Date(lastGenerated).toLocaleString()}
+          </div>
+        )}
+
+        {sitemapStats && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center p-3 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-forest-green">{sitemapStats.totalUrls}</div>
+              <div className="text-sm text-gray-600">Total URLs</div>
+            </div>
+            <div className="text-center p-3 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600">{sitemapStats.staticPages}</div>
+              <div className="text-sm text-gray-600">Static Pages</div>
+            </div>
+            <div className="text-center p-3 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-purple-600">{sitemapStats.listings}</div>
+              <div className="text-sm text-gray-600">Listings</div>
+            </div>
+            <div className="text-center p-3 bg-gray-50 rounded-lg">
+              <div className="text-2xl font-bold text-orange-600">{sitemapStats.blogPosts}</div>
+              <div className="text-sm text-gray-600">Blog Posts</div>
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        )}
+
+        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-start gap-2">
+            <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+            <div>
+              <h4 className="font-medium text-blue-800 mb-1">Google Search Console Setup</h4>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>• Click "Generate Sitemap" to create XML with all content</li>
+                <li>• Download the XML file and replace public/sitemap.xml</li>
+                <li>• Deploy your changes to make the sitemap live</li>
+                <li>• Submit https://remotework.deals/sitemap.xml to Google Search Console</li>
+                <li>• Regenerate and redeploy when adding new content</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

@@ -22,10 +22,19 @@ const GoogleAnalytics = () => {
 
   return (
     <Helmet>
+      {/* Google tag (gtag.js) */}
       <script
         async
         src="https://www.googletagmanager.com/gtag/js?id=G-K54T808N7K"
       />
+      <script>
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-K54T808N7K');
+        `}
+      </script>
     </Helmet>
   );
 };
