@@ -13,9 +13,6 @@ const Sitemap = () => {
     // Generate the sitemap XML
     const xmlContent = generateSitemap(blogPosts, listings);
     setSitemapXml(xmlContent);
-
-    // Set the response headers for XML content
-    document.contentType = 'application/xml';
   }, [blogPosts, listings]);
 
   // Return the XML content as plain text
