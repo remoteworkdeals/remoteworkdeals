@@ -1,7 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Listing } from '@/types/listing';
-import { BlogPost } from '@/hooks/useBlogPosts';
 import { generateSlug } from '@/utils/slugUtils';
 
 export interface SitemapUrl {
@@ -9,6 +7,21 @@ export interface SitemapUrl {
   priority: string;
   changefreq: string;
   lastmod: string;
+}
+
+// Use the database type directly instead of our interface to avoid type conflicts
+interface DatabaseListing {
+  id: number;
+  title: string;
+  updated_at: string;
+  status: string;
+}
+
+interface DatabaseBlogPost {
+  id: string;
+  slug: string;
+  updated_at: string;
+  status: string;
 }
 
 export const generateComprehensiveSitemap = async (): Promise<{ success: boolean; sitemap?: string; error?: string }> => {
@@ -28,11 +41,11 @@ export const generateComprehensiveSitemap = async (): Promise<{ success: boolean
       { url: '/become-partner', priority: '0.8', changefreq: 'monthly', lastmod: currentDate },
     ];
 
-    // Fetch all active listings
+    // Fetch all active listings - only get the fields we need
     console.log('Fetching listings for sitemap...');
     const { data: listings, error: listingsError } = await supabase
       .from('listings')
-      .select('*')
+      .select('id, title, updated_at, status')
       .eq('status', 'active')
       .order('updated_at', { ascending: false });
 
@@ -44,7 +57,7 @@ export const generateComprehensiveSitemap = async (): Promise<{ success: boolean
     console.log(`Found ${listings?.length || 0} active listings`);
 
     // Generate listing pages
-    const listingPages: SitemapUrl[] = (listings || []).map((listing: Listing) => {
+    const listingPages: SitemapUrl[] = (listings || []).map((listing: DatabaseListing) => {
       const slug = generateSlug(listing.title);
       const lastmod = listing.updated_at ? listing.updated_at.split('T')[0] : currentDate;
       
@@ -56,11 +69,11 @@ export const generateComprehensiveSitemap = async (): Promise<{ success: boolean
       };
     });
 
-    // Fetch all published blog posts
+    // Fetch all published blog posts - only get the fields we need
     console.log('Fetching blog posts for sitemap...');
     const { data: blogPosts, error: blogError } = await supabase
       .from('blog_posts')
-      .select('*')
+      .select('id, slug, updated_at, status')
       .eq('status', 'published')
       .order('updated_at', { ascending: false });
 
@@ -72,7 +85,7 @@ export const generateComprehensiveSitemap = async (): Promise<{ success: boolean
     console.log(`Found ${blogPosts?.length || 0} published blog posts`);
 
     // Generate blog pages
-    const blogPages: SitemapUrl[] = (blogPosts || []).map((post: BlogPost) => {
+    const blogPages: SitemapUrl[] = (blogPosts || []).map((post: DatabaseBlogPost) => {
       const lastmod = post.updated_at ? post.updated_at.split('T')[0] : currentDate;
       
       return {
