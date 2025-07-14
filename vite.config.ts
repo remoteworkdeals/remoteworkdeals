@@ -9,6 +9,10 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    // Configure static file serving
+    fs: {
+      allow: ['..']
+    }
   },
   plugins: [
     react(),
