@@ -18,8 +18,12 @@ export const useListings = () => {
         console.error('Error fetching listings:', error);
         throw error;
       }
-      console.log('Fetched listings:', data);
-      return data as Listing[];
+      
+      // Randomize the order of listings
+      const shuffledData = data?.sort(() => Math.random() - 0.5) || [];
+      
+      console.log('Fetched listings:', shuffledData);
+      return shuffledData as Listing[];
     }
   });
 

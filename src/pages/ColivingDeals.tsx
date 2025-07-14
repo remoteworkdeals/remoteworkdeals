@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import DateRangePicker from '@/components/DateRangePicker';
 import { MapPin, Users, Wifi, Star, Filter } from 'lucide-react';
 import { useListings } from '@/hooks/useListings';
@@ -24,6 +25,8 @@ const ColivingDeals = () => {
   const [selectedLocation, setSelectedLocation] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
   const [selectedDates, setSelectedDates] = useState<DateRange | undefined>();
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 15;
 
   // Filter listings based on selected criteria
   const filteredListings = useMemo(() => {
@@ -54,6 +57,15 @@ const ColivingDeals = () => {
       return true;
     });
   }, [listings, selectedLocation, selectedType, selectedDates]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredListings.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentListings = filteredListings.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  const resetPage = () => setCurrentPage(1);
 
   // Helper function to get discount badge text
   const getDiscountBadgeText = (listing: any) => {
@@ -145,7 +157,7 @@ const ColivingDeals = () => {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4 flex-1">
-              <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+              <Select value={selectedLocation} onValueChange={(value) => { setSelectedLocation(value); resetPage(); }}>
                 <SelectTrigger className="w-full sm:w-48">
                   <SelectValue placeholder="Location" />
                 </SelectTrigger>
@@ -157,7 +169,7 @@ const ColivingDeals = () => {
                 </SelectContent>
               </Select>
               
-              <Select value={selectedType} onValueChange={setSelectedType}>
+              <Select value={selectedType} onValueChange={(value) => { setSelectedType(value); resetPage(); }}>
                 <SelectTrigger className="w-full sm:w-48">
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
@@ -171,7 +183,7 @@ const ColivingDeals = () => {
 
               <DateRangePicker 
                 value={selectedDates} 
-                onChange={setSelectedDates} 
+                onChange={(dates) => { setSelectedDates(dates); resetPage(); }} 
                 placeholder="Travel Dates" 
                 className="w-full sm:w-56" 
               />
@@ -193,7 +205,7 @@ const ColivingDeals = () => {
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredListings.map((listing, index) => {
+              {currentListings.map((listing, index) => {
                 const displayImage = listing.featured_image || (listing.images && listing.images.length > 0 ? listing.images[0] : null) || "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&q=80";
                 const discountBadgeText = getDiscountBadgeText(listing);
                 const isDiscounted = hasDiscount(listing);
@@ -294,6 +306,57 @@ const ColivingDeals = () => {
                   </Card>
                 );
               })}
+            </div>
+          )}
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-12 flex justify-center">
+              <Pagination>
+                <PaginationContent>
+                  {currentPage > 1 && (
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        href="#" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage(currentPage - 1);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                      />
+                    </PaginationItem>
+                  )}
+                  
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        href="#"
+                        isActive={currentPage === page}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage(page);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                  
+                  {currentPage < totalPages && (
+                    <PaginationItem>
+                      <PaginationNext 
+                        href="#" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCurrentPage(currentPage + 1);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                      />
+                    </PaginationItem>
+                  )}
+                </PaginationContent>
+              </Pagination>
             </div>
           )}
         </div>
