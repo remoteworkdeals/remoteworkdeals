@@ -12,6 +12,7 @@ import NewListingMediaForm from '@/components/admin/NewListingMediaForm';
 import NewListingDetailsForm from '@/components/admin/NewListingDetailsForm';
 import NewListingContactForm from '@/components/admin/NewListingContactForm';
 import SeasonalForm from '@/components/forms/SeasonalForm';
+import SuitabilityForm from '@/components/forms/SuitabilityForm';
 
 const AdminAddListing = () => {
   const navigate = useNavigate();
@@ -59,6 +60,10 @@ const AdminAddListing = () => {
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [instagramUrl, setInstagramUrl] = useState('');
   const [discountCodeUrl, setDiscountCodeUrl] = useState('');
+  
+  // Suitability
+  const [bestFor, setBestFor] = useState<string[]>([]);
+  const [notSuitableFor, setNotSuitableFor] = useState<string[]>([]);
 
   // Calculate discounted price
   const calculateDiscountedPrice = () => {
@@ -127,6 +132,8 @@ const AdminAddListing = () => {
         website_url: websiteUrl.trim() || null,
         instagram_url: instagramUrl.trim() || null,
         discount_code_url: discountCodeUrl.trim() || null,
+        best_for: bestFor.length > 0 ? bestFor : null,
+        not_suitable_for: notSuitableFor.length > 0 ? notSuitableFor : null,
         featured: false,
         created_by: user.id,
       };
@@ -247,6 +254,13 @@ const AdminAddListing = () => {
           setInstagramUrl={setInstagramUrl}
           discountCodeUrl={discountCodeUrl}
           setDiscountCodeUrl={setDiscountCodeUrl}
+        />
+
+        <SuitabilityForm
+          bestFor={bestFor}
+          setBestFor={setBestFor}
+          notSuitableFor={notSuitableFor}
+          setNotSuitableFor={setNotSuitableFor}
         />
 
         <div className="flex justify-end">
