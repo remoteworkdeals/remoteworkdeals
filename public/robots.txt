@@ -1,6 +1,7 @@
 
 User-agent: *
 Allow: /
+Allow: /sitemap.xml
 
 # Sitemap
 Sitemap: https://remotework.deals/sitemap.xml
