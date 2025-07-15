@@ -101,6 +101,7 @@ export type Database = {
       listings: {
         Row: {
           amenities: string[] | null
+          best_for: string[] | null
           capacity: number | null
           comfort_living_info: string | null
           community_social_info: string | null
@@ -123,6 +124,7 @@ export type Database = {
           location_surroundings_info: string | null
           minimum_stay: number | null
           minimum_stay_unit: string | null
+          not_suitable_for: string[] | null
           original_price: number
           price_value_info: string | null
           pricing_unit: string | null
@@ -141,6 +143,7 @@ export type Database = {
         }
         Insert: {
           amenities?: string[] | null
+          best_for?: string[] | null
           capacity?: number | null
           comfort_living_info?: string | null
           community_social_info?: string | null
@@ -163,6 +166,7 @@ export type Database = {
           location_surroundings_info?: string | null
           minimum_stay?: number | null
           minimum_stay_unit?: string | null
+          not_suitable_for?: string[] | null
           original_price: number
           price_value_info?: string | null
           pricing_unit?: string | null
@@ -181,6 +185,7 @@ export type Database = {
         }
         Update: {
           amenities?: string[] | null
+          best_for?: string[] | null
           capacity?: number | null
           comfort_living_info?: string | null
           community_social_info?: string | null
@@ -203,6 +208,7 @@ export type Database = {
           location_surroundings_info?: string | null
           minimum_stay?: number | null
           minimum_stay_unit?: string | null
+          not_suitable_for?: string[] | null
           original_price?: number
           price_value_info?: string | null
           pricing_unit?: string | null

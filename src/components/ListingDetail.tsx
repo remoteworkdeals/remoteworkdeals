@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { MapPin, Users, Wifi, Heart, ArrowLeft } from 'lucide-react';
+import { MapPin, Users, Wifi, Heart, ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,6 +11,7 @@ import CommunityPromotion from './CommunityPromotion';
 import { ListingHeader } from './listing/ListingHeader';
 import { BookingCard } from './listing/BookingCard';
 import { RatingBars } from './listing/RatingBars';
+import { ImageCarousel } from './ui/image-carousel';
 
 interface ListingDetailProps {
   listingId: number;
@@ -49,7 +49,6 @@ const formatTextAsBullets = (text: string) => {
  */
 const ListingDetail = ({ listingId }: ListingDetailProps) => {
   const navigate = useNavigate();
-  const [selectedImage, setSelectedImage] = useState(0);
 
   const { listing, reviews, loading, error, averageRatings, submitReview } = useListingData(listingId);
 
@@ -148,28 +147,7 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
             {/* Image Gallery */}
             {images.length > 0 && (
               <div className="mb-8">
-                <div className="mb-4">
-                  <img
-                    src={images[selectedImage]}
-                    alt={listing.title}
-                    className="w-full h-96 object-cover rounded-xl"
-                  />
-                </div>
-                {images.length > 1 && (
-                  <div className="grid grid-cols-4 gap-2 max-h-32 overflow-y-auto">
-                    {images.map((image, index) => (
-                      <img
-                        key={index}
-                        src={image}
-                        alt={`${listing.title} ${index + 1}`}
-                        className={`h-20 object-cover rounded-lg cursor-pointer transition-all ${
-                          selectedImage === index ? 'ring-2 ring-adventure-orange' : 'opacity-70 hover:opacity-100'
-                        }`}
-                        onClick={() => setSelectedImage(index)}
-                      />
-                    ))}
-                  </div>
-                )}
+                <ImageCarousel images={images} title={listing.title} />
               </div>
             )}
 
@@ -224,6 +202,51 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
                 ))}
               </div>
             </div>
+
+            {/* Suitability Sections */}
+            {((listing.best_for && listing.best_for.length > 0) || (listing.not_suitable_for && listing.not_suitable_for.length > 0)) && (
+              <div className="mb-8 grid md:grid-cols-2 gap-6">
+                {/* Best For Section */}
+                {listing.best_for && listing.best_for.length > 0 && (
+                  <Card className="border-l-4 border-l-green-500">
+                    <CardContent className="p-6">
+                      <div className="flex items-center mb-4">
+                        <CheckCircle className="w-6 h-6 text-green-500" />
+                        <h4 className="text-lg font-semibold text-forest-green ml-3">This coliving is best for:</h4>
+                      </div>
+                      <ul className="space-y-2">
+                        {listing.best_for.map((item, index) => (
+                          <li key={index} className="flex items-start">
+                            <div className="w-2 h-2 bg-green-500 rounded-full mr-3 mt-2 flex-shrink-0" />
+                            <span className="text-gray-600">{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Not Suitable For Section */}
+                {listing.not_suitable_for && listing.not_suitable_for.length > 0 && (
+                  <Card className="border-l-4 border-l-red-500">
+                    <CardContent className="p-6">
+                      <div className="flex items-center mb-4">
+                        <XCircle className="w-6 h-6 text-red-500" />
+                        <h4 className="text-lg font-semibold text-forest-green ml-3">This coliving is not for you if:</h4>
+                      </div>
+                      <ul className="space-y-2">
+                        {listing.not_suitable_for.map((item, index) => (
+                          <li key={index} className="flex items-start">
+                            <div className="w-2 h-2 bg-red-500 rounded-full mr-3 mt-2 flex-shrink-0" />
+                            <span className="text-gray-600">{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
 
             {/* Amenities */}
             {amenities.length > 0 && (

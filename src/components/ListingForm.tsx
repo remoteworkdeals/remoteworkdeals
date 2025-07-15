@@ -13,6 +13,7 @@ import SeasonalForm from './forms/SeasonalForm';
 import ContactForm from './forms/ContactForm';
 import FeaturedForm from './forms/FeaturedForm';
 import InformationBlocksForm from './InformationBlocksForm';
+import SuitabilityForm from './forms/SuitabilityForm';
 
 interface ListingFormProps {
   listing?: Listing | null;
@@ -158,6 +159,15 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
               setInstagramUrl={formData.setInstagramUrl}
               discountCodeUrl={formData.discountCodeUrl}
               setDiscountCodeUrl={formData.setDiscountCodeUrl}
+            />
+          </ErrorBoundary>
+
+          <ErrorBoundary fallback={<div className="p-4 bg-yellow-50 rounded">Error in Suitability form</div>}>
+            <SuitabilityForm
+              bestFor={formData.bestFor || []}
+              setBestFor={formData.setBestFor}
+              notSuitableFor={formData.notSuitableFor || []}
+              setNotSuitableFor={formData.setNotSuitableFor}
             />
           </ErrorBoundary>
 

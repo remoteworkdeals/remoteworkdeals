@@ -43,6 +43,8 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
   const [comfortLivingInfo, setComfortLivingInfo] = useState('');
   const [locationSurroundingsInfo, setLocationSurroundingsInfo] = useState('');
   const [featured, setFeatured] = useState(false);
+  const [bestFor, setBestFor] = useState<string[]>([]);
+  const [notSuitableFor, setNotSuitableFor] = useState<string[]>([]);
 
   // Load listing data if editing
   useEffect(() => {
@@ -80,6 +82,8 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
       setCommunitySocialInfo(listing.community_social_info || '');
       setComfortLivingInfo(listing.comfort_living_info || '');
       setLocationSurroundingsInfo(listing.location_surroundings_info || '');
+      setBestFor(Array.isArray(listing.best_for) ? listing.best_for : []);
+      setNotSuitableFor(Array.isArray(listing.not_suitable_for) ? listing.not_suitable_for : []);
     } else {
       console.log('Initializing new listing form');
       // Set reasonable defaults for new listings
@@ -142,6 +146,8 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
         community_social_info: communitySocialInfo?.trim() || null,
         comfort_living_info: comfortLivingInfo?.trim() || null,
         location_surroundings_info: locationSurroundingsInfo?.trim() || null,
+        best_for: bestFor.length > 0 ? bestFor : null,
+        not_suitable_for: notSuitableFor.length > 0 ? notSuitableFor : null,
       };
 
       console.log('Saving listing data:', listingData);
@@ -236,6 +242,8 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
     comfortLivingInfo, setComfortLivingInfo,
     locationSurroundingsInfo, setLocationSurroundingsInfo,
     featured, setFeatured,
+    bestFor, setBestFor,
+    notSuitableFor, setNotSuitableFor,
     isSubmitting,
     handleSubmit,
   };

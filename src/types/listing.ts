@@ -36,6 +36,8 @@ export interface Listing {
   discount_type: 'percentage' | 'fixed_amount' | null;
   discount_value: number | null;
   featured: boolean;
+  best_for: string[] | null;
+  not_suitable_for: string[] | null;
 }
 
 export interface Review {
