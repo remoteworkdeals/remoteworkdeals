@@ -22,7 +22,7 @@ import AdminBlog from "./pages/AdminBlog";
 import AdminListings from "./pages/AdminListings";
 import AdminAddListing from "./pages/AdminAddListing";
 import Auth from "./pages/Auth";
-
+import SitemapXML from "./pages/SitemapXML";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +47,7 @@ const App = () => (
               <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/become-partner" element={<BecomePartner />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/sitemap.xml" element={<SitemapXML />} />
               <Route path="/admin" element={
                 <ProtectedRoute>
                   <AdminDashboard />
