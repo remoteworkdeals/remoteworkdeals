@@ -14,8 +14,6 @@ interface PricingFormProps {
   setDiscountedPrice: (value: number | null) => void;
   discountPercentage: number | null;
   setDiscountPercentage: (value: number | null) => void;
-  discountCodeUrl: string | null;
-  setDiscountCodeUrl: (value: string | null) => void;
   discountType: 'percentage' | 'fixed_amount' | null;
   setDiscountType: (value: 'percentage' | 'fixed_amount' | null) => void;
   discountValue: number | null;
@@ -31,8 +29,6 @@ const PricingForm = ({
   setDiscountedPrice,
   discountPercentage,
   setDiscountPercentage,
-  discountCodeUrl,
-  setDiscountCodeUrl,
   discountType,
   setDiscountType,
   discountValue,
@@ -172,19 +168,6 @@ const PricingForm = ({
           />
         </div>
 
-        <div>
-          <Label htmlFor="discountCodeUrl">Discount Code URL (optional)</Label>
-          <Input
-            id="discountCodeUrl"
-            type="url"
-            value={discountCodeUrl || ''}
-            onChange={(e) => setDiscountCodeUrl(e.target.value || null)}
-            placeholder="https://booking-site.com/discount-link"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            Leave empty to use WhatsApp contact instead
-          </p>
-        </div>
       </CardContent>
     </Card>
   );

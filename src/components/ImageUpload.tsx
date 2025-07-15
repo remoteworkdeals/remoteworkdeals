@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,11 @@ const ImageUpload = ({ onImageUploaded, currentImage, label = "Upload Image", cl
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(currentImage || null);
   const { toast } = useToast();
+
+  // Update preview when currentImage prop changes (for editing existing listings)
+  useEffect(() => {
+    setPreview(currentImage || null);
+  }, [currentImage]);
 
   const uploadImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {

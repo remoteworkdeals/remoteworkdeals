@@ -88,8 +88,6 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
               setDiscountedPrice={formData.setDiscountedPrice}
               discountPercentage={formData.discountPercentage}
               setDiscountPercentage={formData.setDiscountPercentage}
-              discountCodeUrl={formData.discountCodeUrl}
-              setDiscountCodeUrl={formData.setDiscountCodeUrl}
               discountType={formData.discountType}
               setDiscountType={formData.setDiscountType}
               discountValue={formData.discountValue}
