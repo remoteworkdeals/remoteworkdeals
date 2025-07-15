@@ -13,7 +13,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import SitemapManagement from '@/components/SitemapManagement';
+
 
 const AdminListings = () => {
   const navigate = useNavigate();
@@ -160,7 +160,7 @@ const AdminListings = () => {
       </div>
 
       <div className="mb-6">
-        <SitemapManagement />
+        
       </div>
 
       <div className="flex justify-between items-center mb-6">

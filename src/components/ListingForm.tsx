@@ -158,6 +158,8 @@ const ListingForm = ({ listing, onClose }: ListingFormProps) => {
               setWebsiteUrl={formData.setWebsiteUrl}
               instagramUrl={formData.instagramUrl}
               setInstagramUrl={formData.setInstagramUrl}
+              discountCodeUrl={formData.discountCodeUrl}
+              setDiscountCodeUrl={formData.setDiscountCodeUrl}
             />
           </ErrorBoundary>
 

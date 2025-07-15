@@ -7,7 +7,7 @@ import { Building, FileText, LogOut, Home, Users, Settings } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import SitemapManagement from '@/components/SitemapManagement';
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -144,8 +144,6 @@ const AdminDashboard = () => {
         </Card>
       </div>
 
-      {/* Sitemap Management */}
-      <SitemapManagement />
     </div>
   );
 };

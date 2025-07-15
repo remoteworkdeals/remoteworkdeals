@@ -251,7 +251,7 @@ const ColivingDeals = () => {
                       
                       <div className="flex items-center text-gray-600 mb-4">
                         <MapPin size={16} className="mr-1" />
-                        <span>{listing.location}</span>
+                        <span>{listing.location}, {listing.country}</span>
                       </div>
 
                       {listing.is_seasonal && listing.seasonal_start_date && listing.seasonal_end_date && (

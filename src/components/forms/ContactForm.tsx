@@ -8,6 +8,8 @@ interface ContactFormProps {
   setWebsiteUrl: (value: string | null) => void;
   instagramUrl: string | null;
   setInstagramUrl: (value: string | null) => void;
+  discountCodeUrl: string | null;
+  setDiscountCodeUrl: (value: string | null) => void;
 }
 
 const ContactForm = ({
@@ -15,6 +17,8 @@ const ContactForm = ({
   setWebsiteUrl,
   instagramUrl,
   setInstagramUrl,
+  discountCodeUrl,
+  setDiscountCodeUrl,
 }: ContactFormProps) => {
   return (
     <Card>
@@ -38,6 +42,15 @@ const ContactForm = ({
             type="url"
             value={instagramUrl || ''}
             onChange={(e) => setInstagramUrl(e.target.value)}
+          />
+        </div>
+        <div>
+          <Label htmlFor="discountCodeUrl">Discount Code URL (optional)</Label>
+          <Input
+            id="discountCodeUrl"
+            type="url"
+            value={discountCodeUrl || ''}
+            onChange={(e) => setDiscountCodeUrl(e.target.value)}
           />
         </div>
       </CardContent>
