@@ -226,6 +226,13 @@ const AdminAddListing = () => {
           setComfortLivingInfo={setComfortLivingInfo}
           locationSurroundingsInfo={locationSurroundingsInfo}
           setLocationSurroundingsInfo={setLocationSurroundingsInfo}
+         />
+
+        <SuitabilityForm
+          bestFor={bestFor}
+          setBestFor={setBestFor}
+          notSuitableFor={notSuitableFor}
+          setNotSuitableFor={setNotSuitableFor}
         />
 
         <SeasonalForm
@@ -254,13 +261,6 @@ const AdminAddListing = () => {
           setInstagramUrl={setInstagramUrl}
           discountCodeUrl={discountCodeUrl}
           setDiscountCodeUrl={setDiscountCodeUrl}
-        />
-
-        <SuitabilityForm
-          bestFor={bestFor}
-          setBestFor={setBestFor}
-          notSuitableFor={notSuitableFor}
-          setNotSuitableFor={setNotSuitableFor}
         />
 
         <div className="flex justify-end">
