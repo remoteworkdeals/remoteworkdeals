@@ -183,6 +183,54 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
               <BookingCard listing={listing} />
             </div>
 
+            {/* Suitability Sections */}
+            {((listing.best_for && listing.best_for.length > 0) || (listing.not_suitable_for && listing.not_suitable_for.length > 0)) && (
+              <div className="mb-12">
+                <h3 className="text-2xl font-serif font-bold text-forest-green mb-8 text-center">For who is this coliving?</h3>
+                <div className="grid md:grid-cols-2 gap-8">
+                  {/* Best For Section */}
+                  {listing.best_for && listing.best_for.length > 0 && (
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center mb-6">
+                        <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mr-4">
+                          <CheckCircle className="w-6 h-6 text-white" />
+                        </div>
+                        <h4 className="text-xl font-semibold text-green-800">Perfect for you if you are:</h4>
+                      </div>
+                      <ul className="space-y-3">
+                        {listing.best_for.map((item, index) => (
+                          <li key={index} className="flex items-start">
+                            <div className="w-2 h-2 bg-green-500 rounded-full mr-4 mt-3 flex-shrink-0" />
+                            <span className="text-green-700 font-medium leading-relaxed">{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Not Suitable For Section */}
+                  {listing.not_suitable_for && listing.not_suitable_for.length > 0 && (
+                    <div className="bg-gradient-to-br from-red-50 to-rose-50 border-2 border-red-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-center mb-6">
+                        <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center mr-4">
+                          <XCircle className="w-6 h-6 text-white" />
+                        </div>
+                        <h4 className="text-xl font-semibold text-red-800">Not ideal if you:</h4>
+                      </div>
+                      <ul className="space-y-3">
+                        {listing.not_suitable_for.map((item, index) => (
+                          <li key={index} className="flex items-start">
+                            <div className="w-2 h-2 bg-red-500 rounded-full mr-4 mt-3 flex-shrink-0" />
+                            <span className="text-red-700 font-medium leading-relaxed">{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Information Blocks */}
             <div className="mb-8">
               <h3 className="text-2xl font-serif font-bold text-forest-green mb-6">What to expect</h3>
@@ -203,50 +251,6 @@ const ListingDetail = ({ listingId }: ListingDetailProps) => {
               </div>
             </div>
 
-            {/* Suitability Sections */}
-            {((listing.best_for && listing.best_for.length > 0) || (listing.not_suitable_for && listing.not_suitable_for.length > 0)) && (
-              <div className="mb-8 grid md:grid-cols-2 gap-6">
-                {/* Best For Section */}
-                {listing.best_for && listing.best_for.length > 0 && (
-                  <Card className="border-l-4 border-l-green-500">
-                    <CardContent className="p-6">
-                      <div className="flex items-center mb-4">
-                        <CheckCircle className="w-6 h-6 text-green-500" />
-                        <h4 className="text-lg font-semibold text-forest-green ml-3">This coliving is best for:</h4>
-                      </div>
-                      <ul className="space-y-2">
-                        {listing.best_for.map((item, index) => (
-                          <li key={index} className="flex items-start">
-                            <div className="w-2 h-2 bg-green-500 rounded-full mr-3 mt-2 flex-shrink-0" />
-                            <span className="text-gray-600">{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Not Suitable For Section */}
-                {listing.not_suitable_for && listing.not_suitable_for.length > 0 && (
-                  <Card className="border-l-4 border-l-red-500">
-                    <CardContent className="p-6">
-                      <div className="flex items-center mb-4">
-                        <XCircle className="w-6 h-6 text-red-500" />
-                        <h4 className="text-lg font-semibold text-forest-green ml-3">This coliving is not for you if:</h4>
-                      </div>
-                      <ul className="space-y-2">
-                        {listing.not_suitable_for.map((item, index) => (
-                          <li key={index} className="flex items-start">
-                            <div className="w-2 h-2 bg-red-500 rounded-full mr-3 mt-2 flex-shrink-0" />
-                            <span className="text-gray-600">{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            )}
 
             {/* Amenities */}
             {amenities.length > 0 && (
