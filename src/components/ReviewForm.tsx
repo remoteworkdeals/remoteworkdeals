@@ -9,7 +9,6 @@ import { InteractiveStarRating } from './listing/InteractiveStarRating';
 import { submitListingReview } from '@/services/listingService';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 export interface ReviewSubmissionData {
   name: string;
@@ -40,7 +39,6 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 }) => {
   const { toast } = useToast();
   const { user } = useAuth();
-  const navigate = useNavigate();
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState('');
@@ -56,28 +54,6 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   const [surroundingsNotes, setSurroundingsNotes] = useState('');
   const [facilitiesNotes, setFacilitiesNotes] = useState('');
   const [priceNotes, setPriceNotes] = useState('');
-
-  // If user is not authenticated, show login prompt
-  if (!user) {
-    return (
-      <Card className="w-full max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle className="text-xl font-serif">Write a Review</CardTitle>
-        </CardHeader>
-        <CardContent className="text-center py-8">
-          <p className="text-gray-600 mb-4">
-            You need to be logged in to write a review for {listingTitle}.
-          </p>
-          <Button 
-            onClick={() => navigate('/auth')} 
-            className="adventure-button"
-          >
-            Sign In to Write Review
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,9 +135,11 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       <CardHeader>
         <CardTitle className="text-xl font-serif">Share Your Experience</CardTitle>
         <p className="text-gray-600">Help other digital nomads by reviewing {listingTitle}</p>
-        <Badge variant="outline" className="w-fit">
-          Signed in as: {user.email}
-        </Badge>
+        {user && (
+          <Badge variant="outline" className="w-fit">
+            Signed in as: {user.email}
+          </Badge>
+        )}
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
