@@ -1,9 +1,7 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { X, Plus } from 'lucide-react';
 
 interface SuitabilityFormProps {
   bestFor: string[];
@@ -18,26 +16,6 @@ const SuitabilityForm = ({
   notSuitableFor,
   setNotSuitableFor,
 }: SuitabilityFormProps) => {
-  const addBestFor = (value: string) => {
-    if (value.trim() && !bestFor.includes(value.trim())) {
-      setBestFor([...bestFor, value.trim()]);
-    }
-  };
-
-  const removeBestFor = (index: number) => {
-    setBestFor(bestFor.filter((_, i) => i !== index));
-  };
-
-  const addNotSuitableFor = (value: string) => {
-    if (value.trim() && !notSuitableFor.includes(value.trim())) {
-      setNotSuitableFor([...notSuitableFor, value.trim()]);
-    }
-  };
-
-  const removeNotSuitableFor = (index: number) => {
-    setNotSuitableFor(notSuitableFor.filter((_, i) => i !== index));
-  };
-
   const handleBestForTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const lines = e.target.value.split('\n').filter(line => line.trim() !== '');
     setBestFor(lines.map(line => line.trim()));
@@ -49,15 +27,15 @@ const SuitabilityForm = ({
   };
 
   return (
-    <Card>
+    <Card className="border-2 border-blue-200 bg-blue-50/50">
       <CardHeader>
-        <CardTitle>For who is this coliving?</CardTitle>
-        <p className="text-sm text-gray-600">
-          Add information about who this coliving is perfect for and who it's not suitable for. Each line will become a bullet point.
+        <CardTitle className="text-2xl text-blue-800">For who is this coliving?</CardTitle>
+        <p className="text-sm text-blue-600">
+          Add information about who this coliving is perfect for and who it's not suitable for. Each line will become a bullet point on the listing page.
         </p>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Best For Section */}
+        {/* Perfect For Section */}
         <div>
           <Label className="text-base font-medium text-green-700 mb-3 block">Perfect for you if you are:</Label>
           <Textarea
