@@ -1,7 +1,8 @@
+
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { X, Plus } from 'lucide-react';
 
 interface SuitabilityFormProps {
@@ -37,87 +38,79 @@ const SuitabilityForm = ({
     setNotSuitableFor(notSuitableFor.filter((_, i) => i !== index));
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>, callback: (value: string) => void) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const input = e.target as HTMLInputElement;
-      callback(input.value);
-      input.value = '';
-    }
+  const handleBestForTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const lines = e.target.value.split('\n').filter(line => line.trim() !== '');
+    setBestFor(lines.map(line => line.trim()));
+  };
+
+  const handleNotSuitableForTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const lines = e.target.value.split('\n').filter(line => line.trim() !== '');
+    setNotSuitableFor(lines.map(line => line.trim()));
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Suitability Information</CardTitle>
+        <CardTitle>For who is this coliving?</CardTitle>
+        <p className="text-sm text-gray-600">
+          Add information about who this coliving is perfect for and who it's not suitable for. Each line will become a bullet point.
+        </p>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Best For Section */}
         <div>
-          <Label className="text-base font-medium">This coliving is best for:</Label>
-          <p className="text-sm text-gray-600 mb-3">
-            Add characteristics or types of people who would love this place. Press Enter to add each item.
-          </p>
-          
-          <Input
-            placeholder="e.g., Digital nomads, Remote workers, Solo travelers..."
-            onKeyPress={(e) => handleKeyPress(e, addBestFor)}
-            className="mb-3"
+          <Label className="text-base font-medium text-green-700 mb-3 block">Perfect for you if you are:</Label>
+          <Textarea
+            placeholder="Enter each point on a new line:&#10;Digital nomads&#10;Remote workers&#10;Creative freelancers&#10;Social people who enjoy community"
+            value={bestFor.join('\n')}
+            onChange={handleBestForTextareaChange}
+            className="min-h-[120px] border-green-200 focus:border-green-400"
+            rows={6}
           />
           
-          <div className="flex flex-wrap gap-2">
-            {bestFor.map((item, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-2 bg-adventure-orange/10 text-adventure-orange px-3 py-1 rounded-full text-sm"
-              >
-                <span>{item}</span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0 hover:bg-adventure-orange/20"
-                  onClick={() => removeBestFor(index)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
+          {bestFor.length > 0 && (
+            <div className="mt-4">
+              <p className="text-sm text-gray-600 mb-2">Preview:</p>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <ul className="space-y-2">
+                  {bestFor.map((item, index) => (
+                    <li key={index} className="flex items-start">
+                      <div className="w-2 h-2 bg-green-500 rounded-full mr-3 mt-2 flex-shrink-0" />
+                      <span className="text-green-700 font-medium">{item}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Not Suitable For Section */}
         <div>
-          <Label className="text-base font-medium">This coliving is not for you if:</Label>
-          <p className="text-sm text-gray-600 mb-3">
-            Add situations or preferences where this place might not be suitable. Press Enter to add each item.
-          </p>
-          
-          <Input
-            placeholder="e.g., You need complete silence, You prefer luxury accommodations..."
-            onKeyPress={(e) => handleKeyPress(e, addNotSuitableFor)}
-            className="mb-3"
+          <Label className="text-base font-medium text-red-700 mb-3 block">Not ideal if you:</Label>
+          <Textarea
+            placeholder="Enter each point on a new line:&#10;Heavy partiers&#10;People seeking complete isolation&#10;Those uncomfortable with shared spaces&#10;Light sleepers who need absolute quiet"
+            value={notSuitableFor.join('\n')}
+            onChange={handleNotSuitableForTextareaChange}
+            className="min-h-[120px] border-red-200 focus:border-red-400"
+            rows={6}
           />
           
-          <div className="flex flex-wrap gap-2">
-            {notSuitableFor.map((item, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-2 bg-red-50 text-red-600 px-3 py-1 rounded-full text-sm"
-              >
-                <span>{item}</span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0 hover:bg-red-100"
-                  onClick={() => removeNotSuitableFor(index)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
+          {notSuitableFor.length > 0 && (
+            <div className="mt-4">
+              <p className="text-sm text-gray-600 mb-2">Preview:</p>
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <ul className="space-y-2">
+                  {notSuitableFor.map((item, index) => (
+                    <li key={index} className="flex items-start">
+                      <div className="w-2 h-2 bg-red-500 rounded-full mr-3 mt-2 flex-shrink-0" />
+                      <span className="text-red-700 font-medium">{item}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

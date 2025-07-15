@@ -93,6 +93,8 @@ export const useListingForm = (listing?: Listing | null, onClose?: () => void) =
       setDiscountValue(null);
       setDiscountedPrice(null);
       setDiscountPercentage(null);
+      setBestFor([]);
+      setNotSuitableFor([]);
     }
   }, [listing]);
 
