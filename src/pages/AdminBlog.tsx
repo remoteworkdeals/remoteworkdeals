@@ -1,207 +1,160 @@
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Edit, Trash2, Eye, LogOut, Home, Building, LayoutDashboard, Settings } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { BlogPost, useDeleteBlogPost } from '@/hooks/useBlogPosts';
-import BlogPostForm from '@/components/BlogPostForm';
-import AdminManagement from '@/components/AdminManagement';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
+import Navigation from '@/components/Navigation';
+import Footer from '@/components/Footer';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import BlogPostForm from '@/components/BlogPostForm';
+import { useBlogPosts } from '@/hooks/useBlogPosts';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Edit, Trash2, Eye, FileText, Sitemap } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import SitemapManager from '@/components/SitemapManager';
 
 const AdminBlog = () => {
-  const [showForm, setShowForm] = useState(false);
-  const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
-  const { toast } = useToast();
-  const { user, userRole, signOut } = useAuth();
-  const navigate = useNavigate();
-  const deleteMutation = useDeleteBlogPost();
+  const { user, loading } = useAuth();
+  const { data: blogPosts = [], isLoading: blogLoading, refetch } = useBlogPosts();
+  const [selectedPost, setSelectedPost] = useState<any>(null);
 
-  const { data: posts, isLoading, refetch } = useQuery({
-    queryKey: ['admin-blog-posts'],
-    queryFn: async () => {
-      console.log('Fetching all blog posts for admin...');
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error('Error fetching admin blog posts:', error);
-        throw error;
-      }
-      console.log('Fetched admin blog posts:', data);
-      return data as BlogPost[];
-    }
-  });
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
-  const handleEdit = (post: BlogPost) => {
-    setEditingPost(post);
-    setShowForm(true);
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  const handleEditPost = (post: any) => {
+    setSelectedPost(post);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this blog post?')) {
-      try {
-        await deleteMutation.mutateAsync(id);
-        toast({ title: 'Blog post deleted successfully' });
-        refetch();
-      } catch (error) {
-        console.error('Error deleting blog post:', error);
-        toast({ title: 'Error deleting blog post', variant: 'destructive' });
-      }
-    }
-  };
-
-  const handleFormClose = () => {
-    setShowForm(false);
-    setEditingPost(null);
+  const handleFormSuccess = () => {
+    setSelectedPost(null);
     refetch();
   };
 
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      toast({ title: 'Logged out successfully' });
-    } catch (error) {
-      console.error('Error logging out:', error);
-      toast({ title: 'Error logging out', variant: 'destructive' });
-    }
-  };
-
-  if (isLoading) {
-    return <div className="p-8">Loading...</div>;
-  }
-
-  if (showForm) {
-    return (
-      <BlogPostForm 
-        post={editingPost} 
-        onClose={handleFormClose}
-      />
-    );
-  }
-
   return (
-    <div className="max-w-6xl mx-auto p-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Blog Administration</h1>
-          <p className="text-gray-600 mt-2">Manage your SEO-optimized blog posts and administrators</p>
-          {user && (
-            <div className="flex items-center gap-2 mt-2">
-              <p className="text-sm text-gray-500">
-                Logged in as: {user.email}
-              </p>
-              <Badge variant="default">{userRole}</Badge>
-            </div>
-          )}
+    <div className="min-h-screen">
+      <Navigation />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-8">
+          <h1 className="text-3xl font-serif font-bold text-forest-green">Blog Management</h1>
+          <p className="text-gray-600 mt-2">Create, edit, and manage your blog posts and SEO settings</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate('/admin')}>
-            <LayoutDashboard className="mr-2 h-4 w-4" />
-            Dashboard
-          </Button>
-          <Button variant="outline" onClick={() => navigate('/admin/listings')}>
-            <Building className="mr-2 h-4 w-4" />
-            Manage Listings
-          </Button>
-          <Button variant="outline" onClick={() => window.open('/', '_blank')}>
-            <Home className="mr-2 h-4 w-4" />
-            View Website
-          </Button>
-          <Button onClick={handleLogout} variant="outline">
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </Button>
-        </div>
-      </div>
 
-      <Tabs defaultValue="posts" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="posts">Blog Posts</TabsTrigger>
-          <TabsTrigger value="admins">Admin Management</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="posts" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Blog Posts</h2>
-            <Button onClick={() => setShowForm(true)} className="adventure-button">
-              <Plus className="mr-2 h-4 w-4" />
-              New Post
-            </Button>
-          </div>
+        <Tabs defaultValue="posts" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="posts" className="flex items-center gap-2">
+              <FileText size={18} />
+              Blog Posts
+            </TabsTrigger>
+            <TabsTrigger value="create" className="flex items-center gap-2">
+              <Edit size={18} />
+              {selectedPost ? 'Edit Post' : 'Create Post'}
+            </TabsTrigger>
+            <TabsTrigger value="sitemap" className="flex items-center gap-2">
+              <Sitemap size={18} />
+              SEO & Sitemap
+            </TabsTrigger>
+          </TabsList>
 
-          <div className="grid gap-6">
-            {posts?.map((post) => (
-              <Card key={post.id}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <CardTitle className="text-xl mb-2">{post.title}</CardTitle>
-                      <div className="flex gap-2 mb-2">
-                        <Badge variant={post.status === 'published' ? 'default' : 'secondary'}>
-                          {post.status}
-                        </Badge>
-                        <Badge variant="outline">{post.category}</Badge>
-                        {post.featured && <Badge variant="destructive">Featured</Badge>}
-                      </div>
-                      <p className="text-sm text-gray-600">
-                        By {post.author} • {new Date(post.created_at).toLocaleDateString()} • {post.read_time || 'No read time'}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(post)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="destructive" 
-                        size="sm" 
-                        onClick={() => handleDelete(post.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+          <TabsContent value="posts" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>All Blog Posts</CardTitle>
+                <CardDescription>
+                  Manage your published and draft blog posts
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {blogLoading ? (
+                  <div className="text-center py-8">Loading blog posts...</div>
+                ) : blogPosts.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-600 mb-4">No blog posts yet.</p>
+                    <p className="text-sm text-gray-500">Start by creating your first blog post!</p>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">{post.excerpt || 'No excerpt available'}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                ) : (
+                  <div className="space-y-4">
+                    {blogPosts.map((post) => (
+                      <div key={post.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h3 className="font-semibold text-lg">{post.title}</h3>
+                              <Badge variant={post.status === 'published' ? 'default' : 'secondary'}>
+                                {post.status}
+                              </Badge>
+                              {post.featured && (
+                                <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                                  Featured
+                                </Badge>
+                              )}
+                            </div>
+                            {post.excerpt && (
+                              <p className="text-gray-600 text-sm mb-2 line-clamp-2">{post.excerpt}</p>
+                            )}
+                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                              <span>By {post.author}</span>
+                              <span>•</span>
+                              <span>{post.category}</span>
+                              <span>•</span>
+                              <span>{new Date(post.created_at).toLocaleDateString()}</span>
+                              {post.read_time && (
+                                <>
+                                  <span>•</span>
+                                  <span>{post.read_time}</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 ml-4">
+                            {post.status === 'published' && (
+                              <Button variant="ghost" size="sm" asChild>
+                                <Link to={`/blog/${post.slug}`} target="_blank">
+                                  <Eye size={16} />
+                                </Link>
+                              </Button>
+                            )}
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleEditPost(post)}
+                            >
+                              <Edit size={16} />
+                            </Button>
+                            <Button variant="ghost" size="sm">
+                              <Trash2 size={16} />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-          {posts?.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-gray-500 mb-4">No blog posts yet</p>
-              <Button onClick={() => setShowForm(true)} className="adventure-button">
-                <Plus className="mr-2 h-4 w-4" />
-                Create your first post
-              </Button>
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="admins" className="space-y-6">
-          <div className="flex items-center gap-2 mb-6">
-            <Settings className="h-5 w-5" />
-            <h2 className="text-xl font-semibold">Administrator Management</h2>
-          </div>
-          <AdminManagement />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="create" className="mt-6">
+            <BlogPostForm 
+              blogPost={selectedPost}
+              onSuccess={handleFormSuccess}
+              onCancel={() => setSelectedPost(null)}
+            />
+          </TabsContent>
+
+          <TabsContent value="sitemap" className="mt-6">
+            <SitemapManager />
+          </TabsContent>
+        </Tabs>
+      </div>
+      
+      <Footer />
     </div>
   );
 };
