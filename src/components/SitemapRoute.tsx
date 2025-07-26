@@ -47,23 +47,10 @@ const SitemapRoute = () => {
 
   useEffect(() => {
     if (!loading && sitemapContent) {
-      // Set the correct content type for XML
-      const blob = new Blob([sitemapContent], { type: 'application/xml' });
-      const url = window.URL.createObjectURL(blob);
-      
       // Replace the current page content with the XML
       document.open();
       document.write(sitemapContent);
       document.close();
-      
-      // Set the correct content type header if possible
-      if (document.contentType !== 'application/xml') {
-        try {
-          document.contentType = 'application/xml';
-        } catch (e) {
-          // Ignore if we can't set content type
-        }
-      }
     }
   }, [sitemapContent, loading]);
 
