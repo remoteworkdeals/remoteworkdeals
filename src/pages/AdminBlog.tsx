@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -9,9 +10,8 @@ import BlogPostForm from '@/components/BlogPostForm';
 import { useBlogPosts } from '@/hooks/useBlogPosts';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, Eye, FileText, Globe } from 'lucide-react';
+import { Edit, Trash2, Eye, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import SitemapManager from '@/components/SitemapManager';
 
 const AdminBlog = () => {
   const { user, loading } = useAuth();
@@ -42,11 +42,11 @@ const AdminBlog = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="mb-8">
           <h1 className="text-3xl font-serif font-bold text-forest-green">Blog Management</h1>
-          <p className="text-gray-600 mt-2">Create, edit, and manage your blog posts and SEO settings</p>
+          <p className="text-gray-600 mt-2">Create, edit, and manage your blog posts</p>
         </div>
 
         <Tabs defaultValue="posts" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="posts" className="flex items-center gap-2">
               <FileText size={18} />
               Blog Posts
@@ -54,10 +54,6 @@ const AdminBlog = () => {
             <TabsTrigger value="create" className="flex items-center gap-2">
               <Edit size={18} />
               {selectedPost ? 'Edit Post' : 'Create Post'}
-            </TabsTrigger>
-            <TabsTrigger value="sitemap" className="flex items-center gap-2">
-              <Globe size={18} />
-              SEO & Sitemap
             </TabsTrigger>
           </TabsList>
 
@@ -144,10 +140,6 @@ const AdminBlog = () => {
               post={selectedPost}
               onClose={handleFormSuccess}
             />
-          </TabsContent>
-
-          <TabsContent value="sitemap" className="mt-6">
-            <SitemapManager />
           </TabsContent>
         </Tabs>
       </div>

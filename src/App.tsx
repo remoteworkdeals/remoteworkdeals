@@ -9,7 +9,6 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import CookieConsentBanner from '@/components/CookieConsentBanner';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
-import SitemapRoute from '@/components/SitemapRoute';
 import Index from "./pages/Index";
 import ColivingDeals from "./pages/ColivingDeals";
 import ListingPage from "./pages/ListingPage";
@@ -47,9 +46,6 @@ const App = () => (
               <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/become-partner" element={<BecomePartner />} />
               <Route path="/auth" element={<Auth />} />
-              
-              {/* Sitemap route for fallback */}
-              <Route path="/sitemap.xml" element={<SitemapRoute />} />
               
               <Route path="/admin" element={
                 <ProtectedRoute>
