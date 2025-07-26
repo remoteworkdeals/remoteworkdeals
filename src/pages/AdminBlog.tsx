@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -10,7 +9,7 @@ import BlogPostForm from '@/components/BlogPostForm';
 import { useBlogPosts } from '@/hooks/useBlogPosts';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, Eye, FileText, Sitemap } from 'lucide-react';
+import { Edit, Trash2, Eye, FileText, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import SitemapManager from '@/components/SitemapManager';
 
@@ -57,7 +56,7 @@ const AdminBlog = () => {
               {selectedPost ? 'Edit Post' : 'Create Post'}
             </TabsTrigger>
             <TabsTrigger value="sitemap" className="flex items-center gap-2">
-              <Sitemap size={18} />
+              <Globe size={18} />
               SEO & Sitemap
             </TabsTrigger>
           </TabsList>
@@ -142,9 +141,8 @@ const AdminBlog = () => {
 
           <TabsContent value="create" className="mt-6">
             <BlogPostForm 
-              blogPost={selectedPost}
-              onSuccess={handleFormSuccess}
-              onCancel={() => setSelectedPost(null)}
+              post={selectedPost}
+              onClose={handleFormSuccess}
             />
           </TabsContent>
 
