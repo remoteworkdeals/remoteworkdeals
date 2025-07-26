@@ -1,4 +1,5 @@
 
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -9,9 +10,9 @@ const sitemapPlugin = () => {
   return {
     name: 'sitemap-plugin',
     closeBundle: {
-      order: 'post',
-      handler(opts) {
-        const outDir = opts?.dir || 'dist';
+      order: 'post' as const,
+      handler() {
+        const outDir = 'dist'; // Use default Vite output directory
         
         // Generate sitemap content
         const baseUrl = 'https://remotework.deals';
@@ -164,3 +165,4 @@ export default defineConfig(({ mode }) => ({
     },
   },
 }));
+
